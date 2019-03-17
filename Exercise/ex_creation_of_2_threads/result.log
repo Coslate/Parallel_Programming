@@ -1,0 +1,46 @@
+if [ ! -d ./exec_output/ ]; \
+then \
+	mkdir ./exec_output/ ; \
+fi
+rm -rf ./exec_output/ex_creation_of_2_threads.o
+rm -rf ./exec_output/ex_creation_of_2_threads_main.o
+rm -rf ./tags
+g++ -g -Wall -O3 -std=c++11 -pthread  -I ./include -c ex_creation_of_2_threads.cpp -o ./exec_output/ex_creation_of_2_threads.o
+/usr/bin/ctags -R ./*
+/usr/bin/ctags -a ./include/*
+g++ -g -Wall -O3 -std=c++11 -pthread  -I ./include ./exec_output/ex_creation_of_2_threads.o ex_creation_of_2_threads_main.cpp -o ./exec_output/ex_creation_of_2_threads_main.o
+./exec_output/ex_creation_of_2_threads_main.o
+> Create a new thread to print x 10times.
+> Create a new thread to print o 20times.
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+o
+> Make sure the first thread has finished.
+o
+o
+o
+o
+o
+o
+o
+o
+o
+> Make sure the second thread has finished.

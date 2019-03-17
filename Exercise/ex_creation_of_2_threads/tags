@@ -1,0 +1,30 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+CC	./Makefile	/^CC = g++$/;"	m
+CFLAGS	./Makefile	/^CFLAGS = -g -Wall -O3 -std=c++11 -pthread$/;"	m
+COMPILE_FLAGS	./Makefile	/^COMPILE_FLAGS = -c$/;"	m
+CTAGS_FILES	./Makefile	/^CTAGS_FILES = .\/include$/;"	m
+CTAGS_FLAGS	./Makefile	/^CTAGS_FLAGS = $(foreach d, $(CTAGS_FILES),-a $d\/*)$/;"	m
+CTAGS_UTIL	./Makefile	/^CTAGS_UTIL = \/usr\/bin\/$/;"	m
+CharPrint	./ex_creation_of_2_threads.cpp	/^void *CreationOf2Threads::CharPrint(void *parameters){$/;"	f	class:CreationOf2Threads
+CharPrintParms	./include/ex_creation_of_2_threads.h	/^        CharPrintParms():character(""), count(0){};$/;"	f	struct:CreationOf2Threads::CharPrintParms
+CharPrintParms	./include/ex_creation_of_2_threads.h	/^        CharPrintParms(std::string a, int b):character(a), count(b){};$/;"	f	struct:CreationOf2Threads::CharPrintParms
+CharPrintParms	./include/ex_creation_of_2_threads.h	/^    struct CharPrintParms {$/;"	s	namespace:CreationOf2Threads
+CreationOf2Threads	./include/ex_creation_of_2_threads.h	/^namespace CreationOf2Threads{$/;"	n
+INCLUDE_FILES	./Makefile	/^INCLUDE_FILES = .\/include$/;"	m
+INCLUDE_FLAGS	./Makefile	/^INCLUDE_FLAGS = $(foreach d, $(INCLUDE_FILES), -I $d)$/;"	m
+MAIN_OBJECT_EXEC	./Makefile	/^MAIN_OBJECT_EXEC = $(MAIN_OBJECT_NAME).o$/;"	m
+MAIN_OBJECT_EXEC_MAIN	./Makefile	/^MAIN_OBJECT_EXEC_MAIN = $(MAIN_OBJECT_NAME_MAIN).o$/;"	m
+MAIN_OBJECT_EXEC_OUTPUT	./Makefile	/^MAIN_OBJECT_EXEC_OUTPUT = .\/exec_output\/$/;"	m
+MAIN_OBJECT_NAME	./Makefile	/^MAIN_OBJECT_NAME = ex_creation_of_2_threads$/;"	m
+MAIN_OBJECT_NAME_MAIN	./Makefile	/^MAIN_OBJECT_NAME_MAIN = ex_creation_of_2_threads_main$/;"	m
+MAIN_OBJECT_SOURCE	./Makefile	/^MAIN_OBJECT_SOURCE = $(MAIN_OBJECT_NAME).cpp$/;"	m
+MAIN_OBJECT_SOURCE_MAIN	./Makefile	/^MAIN_OBJECT_SOURCE_MAIN = $(MAIN_OBJECT_NAME_MAIN).cpp$/;"	m
+_EX_CREATION_OF_2_THREADS_H_	./include/ex_creation_of_2_threads.h	2;"	d
+character	./include/ex_creation_of_2_threads.h	/^        std::string character;$/;"	m	struct:CreationOf2Threads::CharPrintParms
+count	./include/ex_creation_of_2_threads.h	/^        int         count;$/;"	m	struct:CreationOf2Threads::CharPrintParms
+main	./ex_creation_of_2_threads_main.cpp	/^int main(){$/;"	f
