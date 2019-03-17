@@ -5,9 +5,10 @@ namespace CreationOf2Threads{
     struct CharPrintParms {
         std::string character;
         int         count;
+        bool        ret_const;
 
-        CharPrintParms(std::string a, int b):character(a), count(b){};
-        CharPrintParms():character(""), count(0){};
+        CharPrintParms(std::string a, int b, bool c):character(a), count(b), ret_const(c){};
+        CharPrintParms():character(""), count(0), ret_const(true){};
     };
 
     void *CharPrint(void *parameters=0);

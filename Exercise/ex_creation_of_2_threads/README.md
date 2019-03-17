@@ -1,1 +1,1 @@
-# MST_Kruskal
+# Exercise - 'Creation of 2 Threads'
