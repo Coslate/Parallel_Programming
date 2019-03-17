@@ -22,13 +22,17 @@ int main(){
     pthread_create(&thread2_id, NULL, &CreationOf2Threads::CharPrint, &thread2_args);
 
     pthread_join(thread1_id, &ret_value);
-    std::cout<<"> return of first thread = "<<*((int *)&ret_value)<<std::endl;
+    std::cout<<"> ret_value               = "<<ret_value<<std::endl;
+//    std::cout<<"> ret_value value         = "<<*(int *)ret_value<<std::endl;
+    std::cout<<"> ret_value address       = "<<&ret_value<<std::endl;
+    std::cout<<"> ret_value address value = "<<*(int *)&ret_value<<std::endl;
     std::cout<<"> Make sure the first thread has finished."<<std::endl;
 
     pthread_join(thread2_id, &ret_value2);
-    std::cout<<"> return of second thread addr  = "<<&ret_value2<<std::endl;
-    std::cout<<"> return of second thread value = "<<ret_value2<<std::endl;
-    std::cout<<"> return of second thread = "<<*(int*)ret_value2<<std::endl;
+    std::cout<<"> ret_value2               = "<<ret_value2<<std::endl;
+    std::cout<<"> ret_value2 value         = "<<*(int *)ret_value2<<std::endl;
+    std::cout<<"> ret_value2 address       = "<<&ret_value2<<std::endl;
+    std::cout<<"> ret_value2 address value = "<<*(int *)&ret_value2<<std::endl;
     std::cout<<"> Make sure the second thread has finished."<<std::endl;
 
 

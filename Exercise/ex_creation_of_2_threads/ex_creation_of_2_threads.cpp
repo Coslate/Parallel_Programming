@@ -14,9 +14,13 @@ void *CreationOf2Threads::CharPrint(void *parameters){
     for(int i=0;i<p->count;++i){
         std::cout<<p->character<<std::endl;
     }
+    void *addr_42 = (void *) 42;
+    std::cout<<"addr_42               = "<<addr_42<<std::endl;
+    std::cout<<"addr_42 address       = "<<&addr_42<<std::endl;
+    std::cout<<"addr_42 address value = "<<*(int *)&addr_42<<std::endl;
 
     if(p->ret_const == true){
-        return (void *) 42;
+        return addr_42;
     }else{
         return (void *) count_5;
     }
