@@ -70,7 +70,7 @@ Be sure to upload your zipped source codes, which includes no folder, to e-Campu
 ****
 References
 ------
-*[https://computing.llnl.gov/tutorials/pthreads/#PthreadsAPI](https://computing.llnl.gov/tutorials/pthreads/#PthreadsAPI)
-*[http://www.yolinux.com/TUTORIALS/LinuxTutorialPosixThreads.html](http://www.yolinux.com/TUTORIALS/LinuxTutorialPosixThreads.html)
+* [https://computing.llnl.gov/tutorials/pthreads/#PthreadsAPI](https://computing.llnl.gov/tutorials/pthreads/#PthreadsAPI)
+* [http://www.yolinux.com/TUTORIALS/LinuxTutorialPosixThreads.html](http://www.yolinux.com/TUTORIALS/LinuxTutorialPosixThreads.html)
 
 
