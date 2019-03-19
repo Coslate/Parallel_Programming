@@ -35,3 +35,42 @@ pi_estimate = 4* number_in_circle /(( double ) number_of_tosses ) ;
 ```
 
 This is called a “Monte Carlo” method, since it uses randomness (the dart tosses). Write a Pthreads program that uses a Monte Carlo method to estimate π. The main thread should read in the total number of tosses and print the estimate. You may want to use long long ints for the number of hits in the circle and the number of tosses, since both may have to be very large to get a reasonable estimate of π.
+
+****
+Requirement
+------
+* Your submitted solution contains only one source file, named pi.c (in C) or pi.cpp (in
+C++).
+* Your program takes two command-line arguments, which indicate the number of CPU
+cores and the number of tosses.
+* Your program should be scalable.
+
+****
+Grading Policies
+------
+* Correctness (70%): Your parallelized program should output an acceptable π value (e.g.,3.14XXXX with at least 10 million tosses). In addition, your program should run fasterthan the original (serial) program.
+* Scalability (15%): We will test your program on 2 or 4 (or higher) CPU cores with corresponding environments. Your program is expected to be scalarable.
+* Performance (15%): You will be ranked with other classmates by the program execution time. The score will be based on the rank; that is, the best time performance will get all 15%.
+
+****
+Evaluation Platform
+------
+Your program should be able to run on UNIX-like OS platforms. We will test your program on the workstations dedicated for this course. You can access these workstations by ssh with the following information.
+
+| IP | Port | User Name | Password |
+| :------- |:-------------:|:-------------:| :--------|
+| 140.113.215.195     | 37106-37019   | pp[student ID] | [Provided by TA] |
+
+****
+Submission
+------
+Be sure to upload your zipped source codes, which includes no folder, to e-Campus system by the due date and name your file as “HW1 xxxxxxx.zip”, where xxxxxxx is your student ID.
+***Due Date: 23:59, April 1, Monday, 2019***
+
+****
+References
+------
+*[https://computing.llnl.gov/tutorials/pthreads/#PthreadsAPI](https://computing.llnl.gov/tutorials/pthreads/#PthreadsAPI)
+*[http://www.yolinux.com/TUTORIALS/LinuxTutorialPosixThreads.html](http://www.yolinux.com/TUTORIALS/LinuxTutorialPosixThreads.html)
+
+
