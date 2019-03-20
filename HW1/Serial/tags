@@ -17,8 +17,8 @@ MAIN_OBJECT_EXEC_OUTPUT	./Makefile	/^MAIN_OBJECT_EXEC_OUTPUT = .\/$/;"	m
 MAIN_OBJECT_NAME_MAIN	./Makefile	/^MAIN_OBJECT_NAME_MAIN = pi$/;"	m
 MAIN_OBJECT_SOURCE_MAIN	./Makefile	/^MAIN_OBJECT_SOURCE_MAIN = $(MAIN_OBJECT_NAME_MAIN).cpp$/;"	m
 MAIN_TESTING_FOLDER	./Makefile	/^MAIN_TESTING_FOLDER     = .\/Testing\/$/;"	m
-PrintHelp	./Testing/pi.cpp	/^void PrintHelp(){$/;"	f
-PrintHelp	./pi.cpp	/^void PrintHelp(){$/;"	f
+PrintHelp	./Testing/pi.cpp	/^inline void PrintHelp(){$/;"	f
+PrintHelp	./pi.cpp	/^inline void PrintHelp(){$/;"	f
 ThreadFunction	./Testing/pi.cpp	/^void *ThreadFunction(void *rank){$/;"	f
 ThreadFunction	./pi.cpp	/^void *ThreadFunction(void *rank){$/;"	f
 each_thread_work_load	./Testing/pi.cpp	/^long long int each_thread_work_load = 0;$/;"	v

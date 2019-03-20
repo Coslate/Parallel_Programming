@@ -16,15 +16,12 @@ int thread_num                      = 0;
 const int range_from  = -1;
 const int range_to    = 1;
 
-
-void PrintHelp(){
+inline void PrintHelp(){
     std::cerr<<"Error: This pi.o takes two input arguments."<<std::endl;
     std::cerr<<"       Please use as the format: ./pi.o [arg1] [arg1]"<<std::endl;
     std::cerr<<"       [arg1]: The number of cores that you want to run this program on."<<std::endl;
     std::cerr<<"       [arg2]: The number of tosses that you want to make for the estimation."<<std::endl;
 }
-
-
 
 void *ThreadFunction(void *rank){
     long int thread_id = (long int) rank;
@@ -42,8 +39,9 @@ void *ThreadFunction(void *rank){
 //        float y = range_from + static_cast<float>(rand())/static_cast<float>(RAND_MAX)*static_cast<float>(range_to-range_from);
 //        float x = (float)distr(generator);
 //        float y = (float)distr(generator);
-        float distance = sqrt(x*x+y*y);
+//        float distance = sqrt(x*x+y*y);
 //        float distance = 0;        
+        float distance = x*x+y*y;
 
         if(distance <= 1){
             ++number_in_circles;
@@ -71,7 +69,6 @@ int main(int argc, char *argv[]){
     ThreadFunction((void *)thread_num);
     pi_esimate = 4*((float)number_in_circles)/(float)(number_of_tosses);
 
-    std::cout.precision(7);
-    std::cout<<pi_esimate<<std::fixed<<std::endl;
+    std::cout<<std::fixed<<pi_esimate<<std::endl;
     return EXIT_SUCCESS;
 }
