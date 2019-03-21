@@ -14,9 +14,6 @@ long long int number_of_tosses      = 0;
 int thread_num                      = 0;
 pthread_mutex_t mutex;
 
-const int range_from  = -1;
-const int range_to    = 1;
-
 inline void PrintHelp(){
     std::cerr<<"Error: This pi.o takes two input arguments."<<std::endl;
     std::cerr<<"       Please use as the format: ./pi.o [arg1] [arg1]"<<std::endl;
@@ -32,12 +29,12 @@ void *ThreadFunction(void *rank){
     long long int my_local_sum          = 0;
 
     for(long long int i=my_start;i<my_end;++i){
-        float x = range_from + (float)(rand())/(float)(RAND_MAX)*(float)(range_to-range_from);
-        float y = range_from + (float)(rand())/(float)(RAND_MAX)*(float)(range_to-range_from);
+        float x = -1 + (float)(rand())/(float)(RAND_MAX)*2.f;
+        float y = -1 + (float)(rand())/(float)(RAND_MAX)*2.f;
         float distance = x*x+y*y;
 
         if(distance <= 1){
-            ++my_local_sum;
+            my_local_sum++;
         }
     }
 
