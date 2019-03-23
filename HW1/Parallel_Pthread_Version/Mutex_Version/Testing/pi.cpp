@@ -7,12 +7,14 @@
 #include <iomanip>
 #include <ctime>
 #include <pthread.h>
+#include <stdint.h>
 
 //Shared Variables
 long long int number_in_circles     = 0;
 long long int number_of_tosses      = 0;
-int thread_num                      = 0;
+unsigned  int thread_num            = 0;
 pthread_mutex_t mutex;
+long long int each_thread_work_load = 0;
 
 inline void PrintHelp(){
     std::cerr<<"Error: This pi.o takes two input arguments."<<std::endl;
@@ -22,19 +24,17 @@ inline void PrintHelp(){
 }
 
 void *ThreadFunction(void *rank){
-    long int thread_id                  = (long int) rank;
-    long long int each_thread_work_load = number_of_tosses/thread_num;
-    long long int my_start              = thread_id*each_thread_work_load;
-    long long int my_end                = (thread_id+1)*each_thread_work_load;
-    long long int my_local_sum          = 0;
+    long int thread_id          = (long int) rank;
+    long long int my_local_sum  = 0;
+    unsigned int thread_seed    = (unsigned int) thread_id;
 
-    for(long long int i=my_start;i<my_end;++i){
-        float x = -1 + (float)(rand())/(float)(RAND_MAX)*2.f;
-        float y = -1 + (float)(rand())/(float)(RAND_MAX)*2.f;
+    for(long long int i=0;i<each_thread_work_load;++i){
+        float x = -1 + (float)(rand_r(&thread_seed))/(float)(RAND_MAX)*2.f;
+        float y = -1 + (float)(rand_r(&thread_seed))/(float)(RAND_MAX)*2.f;
         float distance = x*x+y*y;
 
         if(distance <= 1){
-            my_local_sum++;
+            ++my_local_sum;
         }
     }
 
@@ -51,19 +51,21 @@ int main(int argc, char *argv[]){
     }
 
     float pi_esimate      = 0;
-    unsigned seed         = (unsigned)time(NULL);//get time sequence
-    srand(seed);//use current time as seed
+    long int seed_t       = time(NULL);
 
     thread_num                = std::stoi(argv[1]);
     number_of_tosses          = std::stoll(argv[2]);
-    pthread_t *thread_handles = new pthread_t [thread_num];
+    each_thread_work_load     = number_of_tosses/thread_num;
+    pthread_t *thread_handles = new pthread_t [thread_num-1];
     pthread_mutex_init(&mutex, NULL);
 
-    for(int thread_id=0;thread_id<thread_num;++thread_id){
-        pthread_create(&thread_handles[thread_id], NULL, ThreadFunction, (void *)thread_id);
+    for(unsigned int thread_id=0;thread_id<thread_num-1;++thread_id){
+        pthread_create(&thread_handles[thread_id], NULL, ThreadFunction, (void *)(seed_t+thread_id));
     }
 
-    for(int thread_id=0;thread_id<thread_num;++thread_id){
+    ThreadFunction((void *)(seed_t+thread_num));
+
+    for(unsigned int thread_id=0;thread_id<thread_num-1;++thread_id){
         pthread_join(thread_handles[thread_id], NULL);
     }
 

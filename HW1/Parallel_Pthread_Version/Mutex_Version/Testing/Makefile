@@ -10,6 +10,7 @@ test:
 	@time taskset -c 0 ./pi 1 100000000
 	@time taskset -c 0,1 ./pi 2 100000000
 	@time taskset -c 0,1,2,3 ./pi 4 100000000
+	@time taskset -c 0,1,2,3,4,5,6,7 ./pi 8 100000000
 
 test_self:
 	@time taskset -c 0 ./pi 1 10000000
