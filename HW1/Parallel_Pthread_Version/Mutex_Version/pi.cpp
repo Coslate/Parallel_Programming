@@ -27,6 +27,7 @@ void *ThreadFunction(void *rank){
     long long int my_start              = thread_id*each_thread_work_load;
     long long int my_end                = (thread_id+1)*each_thread_work_load;
     long long int my_local_sum          = 0;
+    
 
     for(long long int i=my_start;i<my_end;++i){
         float x = -1 + (float)(rand())/(float)(RAND_MAX)*2.f;
