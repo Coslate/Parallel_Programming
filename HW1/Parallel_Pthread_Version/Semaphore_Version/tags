@@ -1,0 +1,35 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+CC	./Makefile	/^CC = g++$/;"	m
+CFLAGS	./Makefile	/^CFLAGS = -g -Wall -O2 -std=c++11 -pthread -s$/;"	m
+COMPILE_FLAGS	./Makefile	/^COMPILE_FLAGS = -c$/;"	m
+CTAGS_FILES	./Makefile	/^CTAGS_FILES = .\/include$/;"	m
+CTAGS_FLAGS	./Makefile	/^CTAGS_FLAGS = $(foreach d, $(CTAGS_FILES),-a $d\/*)$/;"	m
+CTAGS_UTIL	./Makefile	/^CTAGS_UTIL = \/usr\/bin\/$/;"	m
+INCLUDE_FILES	./Makefile	/^INCLUDE_FILES = .\/include$/;"	m
+INCLUDE_FLAGS	./Makefile	/^INCLUDE_FLAGS = $(foreach d, $(INCLUDE_FILES), -I $d)$/;"	m
+MAIN_OBJECT_EXEC_MAIN	./Makefile	/^MAIN_OBJECT_EXEC_MAIN = $(MAIN_OBJECT_NAME_MAIN).o$/;"	m
+MAIN_OBJECT_EXEC_OUTPUT	./Makefile	/^MAIN_OBJECT_EXEC_OUTPUT = .\/$/;"	m
+MAIN_OBJECT_NAME_MAIN	./Makefile	/^MAIN_OBJECT_NAME_MAIN = pi$/;"	m
+MAIN_OBJECT_SOURCE_MAIN	./Makefile	/^MAIN_OBJECT_SOURCE_MAIN = $(MAIN_OBJECT_NAME_MAIN).cpp$/;"	m
+MAIN_TESTING_FOLDER	./Makefile	/^MAIN_TESTING_FOLDER     = .\/Testing\/$/;"	m
+PrintHelp	./Testing/pi.cpp	/^inline void PrintHelp(){$/;"	f
+PrintHelp	./pi.cpp	/^inline void PrintHelp(){$/;"	f
+ThreadFunction	./Testing/pi.cpp	/^void *ThreadFunction(void *rank){$/;"	f
+ThreadFunction	./pi.cpp	/^void *ThreadFunction(void *rank){$/;"	f
+each_thread_work_load	./Testing/pi.cpp	/^long long int each_thread_work_load = 0;$/;"	v
+each_thread_work_load	./pi.cpp	/^long long int each_thread_work_load = 0;$/;"	v
+main	./Testing/pi.cpp	/^int main(int argc, char *argv[]){$/;"	f
+main	./pi.cpp	/^int main(int argc, char *argv[]){$/;"	f
+number_in_circles	./Testing/pi.cpp	/^long long int number_in_circles     = 0;$/;"	v
+number_in_circles	./pi.cpp	/^long long int number_in_circles     = 0;$/;"	v
+number_of_tosses	./Testing/pi.cpp	/^long long int number_of_tosses      = 0;$/;"	v
+number_of_tosses	./pi.cpp	/^long long int number_of_tosses      = 0;$/;"	v
+semaphore	./Testing/pi.cpp	/^sem_t         semaphore; $/;"	v
+semaphore	./pi.cpp	/^sem_t         semaphore; $/;"	v
+thread_num	./Testing/pi.cpp	/^unsigned  int thread_num            = 0;$/;"	v
+thread_num	./pi.cpp	/^unsigned  int thread_num            = 0;$/;"	v
