@@ -17,25 +17,27 @@ MAIN_OBJECT_EXEC_OUTPUT	./Makefile	/^MAIN_OBJECT_EXEC_OUTPUT = .\/$/;"	m
 MAIN_OBJECT_NAME_MAIN	./Makefile	/^MAIN_OBJECT_NAME_MAIN = pi$/;"	m
 MAIN_OBJECT_SOURCE_MAIN	./Makefile	/^MAIN_OBJECT_SOURCE_MAIN = $(MAIN_OBJECT_NAME_MAIN).cpp$/;"	m
 MAIN_TESTING_FOLDER	./Makefile	/^MAIN_TESTING_FOLDER     = .\/Testing\/$/;"	m
+PrintHelp	./Testing/HW1_10767218/pi.cpp	/^inline void PrintHelp(){$/;"	f
 PrintHelp	./Testing/pi.cpp	/^inline void PrintHelp(){$/;"	f
 PrintHelp	./pi.cpp	/^inline void PrintHelp(){$/;"	f
+ThreadFunction	./Testing/HW1_10767218/pi.cpp	/^void *ThreadFunction(void *rank){$/;"	f
 ThreadFunction	./Testing/pi.cpp	/^void *ThreadFunction(void *rank){$/;"	f
 ThreadFunction	./pi.cpp	/^void *ThreadFunction(void *rank){$/;"	f
+each_thread_work_load	./Testing/HW1_10767218/pi.cpp	/^long long int each_thread_work_load = 0;$/;"	v
 each_thread_work_load	./Testing/pi.cpp	/^long long int each_thread_work_load = 0;$/;"	v
 each_thread_work_load	./pi.cpp	/^long long int each_thread_work_load = 0;$/;"	v
+main	./Testing/HW1_10767218/pi.cpp	/^int main(int argc, char *argv[]){$/;"	f
 main	./Testing/pi.cpp	/^int main(int argc, char *argv[]){$/;"	f
 main	./pi.cpp	/^int main(int argc, char *argv[]){$/;"	f
-main	./pi.line.cpp	/^int main(int argc, const char *argv[])$/;"	f
+mutex	./Testing/HW1_10767218/pi.cpp	/^pthread_mutex_t mutex;$/;"	v
 mutex	./Testing/pi.cpp	/^pthread_mutex_t mutex;$/;"	v
 mutex	./pi.cpp	/^pthread_mutex_t mutex;$/;"	v
-mutex	./pi.line.cpp	/^pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;$/;"	v
-number_in_circle	./pi.line.cpp	/^unlong number_in_circle = 0;$/;"	v
+number_in_circles	./Testing/HW1_10767218/pi.cpp	/^long long int number_in_circles     = 0;$/;"	v
 number_in_circles	./Testing/pi.cpp	/^long long int number_in_circles     = 0;$/;"	v
 number_in_circles	./pi.cpp	/^long long int number_in_circles     = 0;$/;"	v
+number_of_tosses	./Testing/HW1_10767218/pi.cpp	/^long long int number_of_tosses      = 0;$/;"	v
 number_of_tosses	./Testing/pi.cpp	/^long long int number_of_tosses      = 0;$/;"	v
 number_of_tosses	./pi.cpp	/^long long int number_of_tosses      = 0;$/;"	v
-points_per_thread	./pi.line.cpp	/^unlong points_per_thread;$/;"	v
-runner	./pi.line.cpp	/^void *runner(void *argu) {$/;"	f
+thread_num	./Testing/HW1_10767218/pi.cpp	/^unsigned  int thread_num            = 0;$/;"	v
 thread_num	./Testing/pi.cpp	/^unsigned  int thread_num            = 0;$/;"	v
 thread_num	./pi.cpp	/^unsigned  int thread_num            = 0;$/;"	v
-unlong	./pi.line.cpp	/^typedef unsigned long long int unlong;$/;"	t	file:
