@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <stdint.h>
 
-#define RAND_MAX_HALF_PRIV (RAND_MAX/2)
+#define RAND_MAX_HALF_PRIV (RAND_MAX/2.f)
 
 //Shared Variables
 long long int number_in_circles     = 0;
@@ -54,22 +54,24 @@ int main(int argc, char *argv[]){
         return EXIT_FAILURE;
     }*/
 
-    float pi_esimate      = 0;
+    float pi_esimate          = 0;
+    long int create_thread_num= 0;
     //long int seed_t       = time(NULL);
 
     thread_num                = std::stoi(argv[1]);
     number_of_tosses          = std::stoll(argv[2]);
     each_thread_work_load     = number_of_tosses/thread_num;
+    create_thread_num         = thread_num-1;
     pthread_t *thread_handles = new pthread_t [thread_num-1];
     pthread_mutex_init(&mutex, NULL);
 
-    for(long int thread_id=0;thread_id<thread_num-1;++thread_id){
+    for(long int thread_id=0;thread_id<create_thread_num;++thread_id){
         pthread_create(&thread_handles[thread_id], NULL, ThreadFunction, (void *)(thread_id));
     }
 
     ThreadFunction((void *)(thread_num));
 
-    for(long int thread_id=0;thread_id<thread_num-1;++thread_id){
+    for(long int thread_id=0;thread_id<create_thread_num;++thread_id){
         pthread_join(thread_handles[thread_id], NULL);
     }
 
