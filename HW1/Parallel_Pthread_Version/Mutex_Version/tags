@@ -18,7 +18,7 @@ MAIN_OBJECT_EXEC_OUTPUT	./Makefile	/^MAIN_OBJECT_EXEC_OUTPUT = .\/$/;"	m
 MAIN_OBJECT_NAME_MAIN	./Makefile	/^MAIN_OBJECT_NAME_MAIN = pi$/;"	m
 MAIN_OBJECT_SOURCE_MAIN	./Makefile	/^MAIN_OBJECT_SOURCE_MAIN = $(MAIN_OBJECT_NAME_MAIN).cpp$/;"	m
 MAIN_TESTING_FOLDER	./Makefile	/^MAIN_TESTING_FOLDER     = .\/Testing\/$/;"	m
-PrintHelp	./Testing/HW1_10767218/pi.cpp	/^inline void PrintHelp(){$/;"	f
+RAND_MAX_HALF_PRIV	./Testing/HW1_10767218/pi.cpp	12;"	d	file:
 RAND_MAX_HALF_PRIV	./Testing/pi.cpp	12;"	d	file:
 RAND_MAX_HALF_PRIV	./pi.cpp	12;"	d	file:
 ThreadFunction	./Testing/HW1_10767218/pi.cpp	/^void *ThreadFunction(void *rank){$/;"	f
@@ -40,6 +40,6 @@ number_in_circles	./pi.cpp	/^long long int number_in_circles     = 0;$/;"	v
 number_of_tosses	./Testing/HW1_10767218/pi.cpp	/^long long int number_of_tosses      = 0;$/;"	v
 number_of_tosses	./Testing/pi.cpp	/^long long int number_of_tosses      = 0;$/;"	v
 number_of_tosses	./pi.cpp	/^long long int number_of_tosses      = 0;$/;"	v
-thread_num	./Testing/HW1_10767218/pi.cpp	/^unsigned  int thread_num            = 0;$/;"	v
+thread_num	./Testing/HW1_10767218/pi.cpp	/^long  int     thread_num            = 0;$/;"	v
 thread_num	./Testing/pi.cpp	/^long  int     thread_num            = 0;$/;"	v
 thread_num	./pi.cpp	/^long  int     thread_num            = 0;$/;"	v

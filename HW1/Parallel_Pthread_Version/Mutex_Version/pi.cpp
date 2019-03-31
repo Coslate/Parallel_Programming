@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
     number_of_tosses          = std::stoll(argv[2]);
     each_thread_work_load     = number_of_tosses/thread_num;
     create_thread_num         = thread_num-1;
-    pthread_t *thread_handles = new pthread_t [thread_num-1];
+    pthread_t *thread_handles = new pthread_t [create_thread_num];
     pthread_mutex_init(&mutex, NULL);
 
     for(long int thread_id=0;thread_id<create_thread_num;++thread_id){
