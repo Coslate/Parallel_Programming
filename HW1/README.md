@@ -11,7 +11,7 @@ Contents
 * [Grading Policies](#Grading-Policies)
 * [Evaluation Platform](#Evaluation-Platform)
 * [Sumbission](#Submission) 
-* [Reference](#Reference)
+* [References](#References)
 
 ****
 Problem Statement

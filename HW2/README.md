@@ -10,7 +10,7 @@ Contents
 * [Problem Statement](#Problem-Statement)
 * [Requirement](#Requirement)
 * [Sumbission](#Submission) 
-* [Reference](#Reference)
+* [References](#References)
 
 ****
 Problem Statement
