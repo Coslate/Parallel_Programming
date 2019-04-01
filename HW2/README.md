@@ -16,8 +16,8 @@ Contents
 Problem Statement
 ------
 Conjugate gradient method is an algorithm for the numerical solution of particular systems of linear equations. It is often used to solve partial differential equations, or applied on some optimization problems. You may get more information on [Wikipedia](http://en.wikipedia.org/wiki/Conjugate_gradient_method). In this assignment, you are asked to parallelize a serial implementation of the conjugate gradient method using OpenMP. The serial implementation can be downloaded at [http://www.cs.nctu.edu.tw/~ypyou/courses/PP-s19/assignments/HW2/CG.tgz](http://www.cs.nctu.edu.tw/~ypyou/courses/PP-s19/assignments/HW2/CG.tgz). It contains:
-* cg.c
-  The implementation of the conjugate gradient method. <br>
+* cg.c <br>
+  The implementation of the conjugate gradient method.
 * globals.h
   Some data definitions. ***DO NOT*** modify this file.
 * common directory
