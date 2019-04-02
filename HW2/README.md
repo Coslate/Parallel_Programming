@@ -1,4 +1,4 @@
-Programming Assignment I: Pthreads Programming
+Programming Assignment II: OpenMP Programming
 ===========================
 The purpose of this assignment is to familiarize yourself with OpenMP programming.
 
