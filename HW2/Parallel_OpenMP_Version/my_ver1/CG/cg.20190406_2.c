@@ -22,11 +22,11 @@ static int acol[NAZ];
 /* common / main_flt_mem / */
 static double aelt[NAZ];
 static double a[NZ];
-static double x[NA+2];
-static double z[NA+2];
-static double p[NA+2];
-static double q[NA+2];
-static double r[NA+2];
+static double x[NA+2][DOUBLE_PAD_SIZE];
+static double z[NA+2][DOUBLE_PAD_SIZE];
+static double p[NA+2][DOUBLE_PAD_SIZE];
+static double q[NA+2][DOUBLE_PAD_SIZE];
+static double r[NA+2][DOUBLE_PAD_SIZE];
 
 /* common / partit_size / */
 static int naa;
@@ -48,12 +48,12 @@ static logical timeron;
 //---------------------------------------------------------------------
 static void conj_grad(int colidx[],
                       int rowstr[],
-                      double x[],
-                      double z[],
+                      double x[][DOUBLE_PAD_SIZE],
+                      double z[][DOUBLE_PAD_SIZE],
                       double a[],
-                      double p[],
-                      double q[],
-                      double r[],
+                      double p[][DOUBLE_PAD_SIZE],
+                      double q[][DOUBLE_PAD_SIZE],
+                      double r[][DOUBLE_PAD_SIZE],
                       double *rnorm);
 static void makea(int n,
                   int nz,
@@ -164,14 +164,14 @@ int main(int argc, char *argv[])
   //---------------------------------------------------------------------
   #pragma omp for nowait
   for (i = 0; i < NA+1; i++) {
-    x[i] = 1.0;
+    x[i][0] = 1.0;
   }
   #pragma omp for nowait
   for (j = 0; j < lastcol - firstcol + 1; j++) {
-    q[j] = 0.0;
-    z[j] = 0.0;
-    r[j] = 0.0;
-    p[j] = 0.0;
+    q[j][0] = 0.0;
+    z[j][0] = 0.0;
+    r[j][0] = 0.0;
+    p[j][0] = 0.0;
   }
 }
 
@@ -198,8 +198,8 @@ int main(int argc, char *argv[])
     norm_temp2 = 0.0;
 #pragma omp parallel for default(shared) private(j) reduction(+:norm_temp1,norm_temp2)    
     for (j = 0; j < lastcol - firstcol + 1; j++) {
-      norm_temp1 = norm_temp1 + x[j] * z[j];
-      norm_temp2 = norm_temp2 + z[j] * z[j];
+      norm_temp1 = norm_temp1 + x[j][0] * z[j][0];
+      norm_temp2 = norm_temp2 + z[j][0] * z[j][0];
     }
 
     norm_temp2 = 1.0 / sqrt(norm_temp2);
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
     //---------------------------------------------------------------------
 #pragma omp parallel for default(shared) private(j)
     for (j = 0; j < lastcol - firstcol + 1; j++) {     
-      x[j] = norm_temp2 * z[j];
+      x[j][0] = norm_temp2 * z[j][0];
     }
   } // end of do one iteration untimed
 
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
   //---------------------------------------------------------------------
 #pragma omp parallel for default(shared) private(i)
   for (i = 0; i < NA+1; i++) {
-    x[i] = 1.0;
+    x[i][0] = 1.0;
   }
 
   zeta = 0.0;
@@ -253,8 +253,8 @@ int main(int argc, char *argv[])
     norm_temp2 = 0.0;
 #pragma omp parallel for default(shared) private(j) reduction(+:norm_temp1,norm_temp2)    
     for (j = 0; j < lastcol - firstcol + 1; j++) {
-      norm_temp1 = norm_temp1 + x[j]*z[j];
-      norm_temp2 = norm_temp2 + z[j]*z[j];
+      norm_temp1 = norm_temp1 + x[j][0]*z[j][0];
+      norm_temp2 = norm_temp2 + z[j][0]*z[j][0];
     }
 
     norm_temp2 = 1.0 / sqrt(norm_temp2);
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
     //---------------------------------------------------------------------
 #pragma omp parallel for default(shared) private(j)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
-      x[j] = norm_temp2 * z[j];
+      x[j][0] = norm_temp2 * z[j][0];
     }
   } // end of main iter inv pow meth
 
@@ -309,12 +309,12 @@ int main(int argc, char *argv[])
 //---------------------------------------------------------------------
 static void conj_grad(int colidx[],
                       int rowstr[],
-                      double x[],
-                      double z[],
+                      double x[][DOUBLE_PAD_SIZE],
+                      double z[][DOUBLE_PAD_SIZE],
                       double a[],
-                      double p[],
-                      double q[],
-                      double r[],
+                      double p[][DOUBLE_PAD_SIZE],
+                      double q[][DOUBLE_PAD_SIZE],
+                      double r[][DOUBLE_PAD_SIZE],
                       double *rnorm)
 {
   int j, k;
@@ -330,10 +330,10 @@ static void conj_grad(int colidx[],
 {
   #pragma omp for
   for (j = 0; j < naa+1; j++) {
-    q[j] = 0.0;
-    z[j] = 0.0;
-    r[j] = x[j];
-    p[j] = r[j];
+    q[j][0] = 0.0;
+    z[j][0] = 0.0;
+    r[j][0] = x[j][0];
+    p[j][0] = r[j][0];
   }
 
   //---------------------------------------------------------------------
@@ -342,7 +342,7 @@ static void conj_grad(int colidx[],
   //---------------------------------------------------------------------
   #pragma omp for reduction(+:rho)
   for (j = 0; j < lastcol - firstcol + 1; j++) {
-    rho = rho + r[j]*r[j];
+    rho = rho + r[j][0]*r[j][0];
   }
 }
   //---------------------------------------------------------------------
@@ -368,9 +368,9 @@ static void conj_grad(int colidx[],
     for (j = 0; j < lastrow - firstrow + 1; j++) {
       sum = 0.0;
       for (k = rowstr[j]; k < rowstr[j+1]; k++) {
-        sum = sum + a[k]*p[colidx[k]];
+        sum = sum + a[k]*p[colidx[k]][0];
       }
-      q[j] = sum;
+      q[j][0] = sum;
     }
 }
 
@@ -382,7 +382,7 @@ static void conj_grad(int colidx[],
 {
     #pragma omp for reduction(+:d)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
-      d = d + p[j]*q[j];
+      d = d + p[j][0]*q[j][0];
     }
 }
     //---------------------------------------------------------------------
@@ -406,8 +406,8 @@ static void conj_grad(int colidx[],
 {
     #pragma omp for
     for (j = 0; j < lastcol - firstcol + 1; j++) {
-      z[j] = z[j] + alpha*p[j];  
-      r[j] = r[j] - alpha*q[j];
+      z[j][0] = z[j][0] + alpha*p[j][0];  
+      r[j][0] = r[j][0] - alpha*q[j][0];
     }
 }
             
@@ -420,7 +420,7 @@ static void conj_grad(int colidx[],
 {
     #pragma omp for reduction(+:rho)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
-      rho = rho + r[j]*r[j];
+      rho = rho + r[j][0]*r[j][0];
     }
 }
 
@@ -437,7 +437,7 @@ static void conj_grad(int colidx[],
 {
     #pragma omp for
     for (j = 0; j < lastcol - firstcol + 1; j++) {
-      p[j] = r[j] + beta*p[j];
+      p[j][0] = r[j][0] + beta*p[j][0];
     }
 }
   } // end of do cgit=1,cgitmax
@@ -460,9 +460,9 @@ double d_tmp;
   for (j = 0; j < lastrow - firstrow + 1; j++) {
     d = 0.0;
     for (k = rowstr[j]; k < rowstr[j+1]; k++) {
-      d = d + a[k]*z[colidx[k]];
+      d = d + a[k]*z[colidx[k]][0];
     }
-    r[j] = d;
+    r[j][0] = d;
   }
 
   //---------------------------------------------------------------------
@@ -470,7 +470,7 @@ double d_tmp;
   //---------------------------------------------------------------------
   #pragma omp for reduction(+:sum)
   for (j = 0; j < lastcol-firstcol+1; j++) {
-    d_tmp   = x[j] - r[j];
+    d_tmp   = x[j][0] - r[j][0];
     sum = sum + d_tmp*d_tmp;
   }
 }
