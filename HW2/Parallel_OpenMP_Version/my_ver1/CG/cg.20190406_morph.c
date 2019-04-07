@@ -376,7 +376,79 @@ static void conj_grad(int colidx[],
       }
       q[j] = sum;
     }
+    /*
+    #pragma omp for
+    for (j = 0; j < lastrow - firstrow + 1; j++) {
+      double sum1 = 0.0;
+      double sum2 = 0.0;
+      int start_idx = rowstr[j];
+      int end_idx   = rowstr[j+1];
+      int remainder = (end_idx-start_idx)%2;
 
+      if(remainder == 1){
+        sum1 = sum1 + a[start_idx]*p[colidx[start_idx]];
+      }
+      for (k = start_idx+remainder; k < end_idx; k+=2) {
+        sum1 = sum1 + a[k]*p[colidx[k]];
+        sum2 = sum2 + a[k+1]*p[colidx[k+1]];
+      }
+      q[j] = sum1+sum2;
+    }
+    */
+    /*
+    #pragma omp for
+    for (j = 0; j < lastrow - firstrow + 1; j++) {
+      double sum0 = 0.0;
+      double sum1 = 0.0;
+      double sum2 = 0.0;
+      double sum3 = 0.0;
+      double sum4 = 0.0;
+      double sum5 = 0.0;
+      double sum6 = 0.0;
+      double sum7 = 0.0;
+      int start_idx = rowstr[j];
+      int end_idx   = rowstr[j+1];
+      int remainder = (end_idx-start_idx)%8;
+
+      for (k = start_idx; k < start_idx+remainder; k++){
+        sum0 = sum0 + a[k]*p[colidx[k]];
+      }
+      for (k = start_idx+remainder; k < end_idx; k+=8) {
+        sum0 = sum0 + a[k]*p[colidx[k]];
+        sum1 = sum1 + a[k+1]*p[colidx[k+1]];
+        sum2 = sum2 + a[k+2]*p[colidx[k+2]];
+        sum3 = sum3 + a[k+3]*p[colidx[k+3]];
+        sum4 = sum4 + a[k+4]*p[colidx[k+4]];
+        sum5 = sum5 + a[k+5]*p[colidx[k+5]];
+        sum6 = sum6 + a[k+6]*p[colidx[k+6]];
+        sum7 = sum7 + a[k+7]*p[colidx[k+7]];
+      }
+      q[j] = sum0+sum1+sum2+sum3+sum4+sum5+sum6+sum7;
+    }
+    */
+    /*
+#pragma omp for private(j,k,sum)
+    for (j = 0; j <= lastrow-firstrow+1; j++) {
+	    int iresidue;
+        int i = rowstr[j]; 
+        iresidue = (rowstr[j+1]-i) % 8;
+        sum = 0.0;
+        for (k = i; k <= i+iresidue-1; k++) {
+            sum = sum +  a[k] * p[colidx[k]];
+        }
+        for (k = i+iresidue; k <= rowstr[j+1]-8; k += 8) {
+            sum = sum + a[k  ] * p[colidx[k  ]]
+                      + a[k+1] * p[colidx[k+1]]
+                      + a[k+2] * p[colidx[k+2]]
+                      + a[k+3] * p[colidx[k+3]]
+                      + a[k+4] * p[colidx[k+4]]
+                      + a[k+5] * p[colidx[k+5]]
+                      + a[k+6] * p[colidx[k+6]]
+                      + a[k+7] * p[colidx[k+7]];
+        }
+        q[j] = sum;
+    }
+    */
     //---------------------------------------------------------------------
     // Obtain p.q
     //---------------------------------------------------------------------

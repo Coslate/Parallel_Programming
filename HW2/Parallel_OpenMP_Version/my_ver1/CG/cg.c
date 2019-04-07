@@ -362,6 +362,7 @@ static void conj_grad(int colidx[],
     //       unrolled-by-two version is some 10% faster.  
     //       The unrolled-by-8 version below is significantly faster
     //       on the Cray t3d - overall speed of code is 1.5 times faster.
+/*
 #pragma omp parallel default(shared) private(j, k, sum)
 {
     #pragma omp for
@@ -373,17 +374,152 @@ static void conj_grad(int colidx[],
       q[j] = sum;
     }
 }
+*/
+
+#pragma omp parallel default(shared) private(j, k, sum)
+{
+    /*
+    #pragma omp for
+    for (j = 0; j < lastrow - firstrow + 1; j++) {
+      double sum1 = 0.0;
+      double sum2 = 0.0;
+      int start_idx = rowstr[j];
+      int end_idx   = rowstr[j+1];
+      int remainder = (start_idx-end_idx)%2;
+
+      if(remainder == 1){
+        sum1 = sum1 + a[start_idx]*p[colidx[start_idx]];
+      }
+      for (k = start_idx+remainder; k < end_idx; k+=2) {
+        sum1 = sum1 + a[k]*p[colidx[k]];
+        sum2 = sum2 + a[k+1]*p[colidx[k+1]];
+      }
+      q[j] = sum1+sum2;
+    }
+    */
+    #pragma omp for
+    for (j = 0; j < lastrow - firstrow + 1; j++) {
+      double sum0 = 0.0;
+      double sum1 = 0.0;
+      double sum2 = 0.0;
+      double sum3 = 0.0;
+      double sum4 = 0.0;
+      double sum5 = 0.0;
+      double sum6 = 0.0;
+      double sum7 = 0.0;
+      int start_idx = rowstr[j];
+      int end_idx   = rowstr[j+1];
+      int remainder = (end_idx-start_idx)%8;
+
+      for (k = start_idx; k < start_idx+remainder; k++){
+        sum0 = sum0 + a[k]*p[colidx[k]];
+      }
+      for (k = start_idx+remainder; k < end_idx; k+=8) {
+        sum0 = sum0 + a[k]*p[colidx[k]];
+        sum1 = sum1 + a[k+1]*p[colidx[k+1]];
+        sum2 = sum2 + a[k+2]*p[colidx[k+2]];
+        sum3 = sum3 + a[k+3]*p[colidx[k+3]];
+        sum4 = sum4 + a[k+4]*p[colidx[k+4]];
+        sum5 = sum5 + a[k+5]*p[colidx[k+5]];
+        sum6 = sum6 + a[k+6]*p[colidx[k+6]];
+        sum7 = sum7 + a[k+7]*p[colidx[k+7]];
+      }
+      q[j] = sum0+sum1+sum2+sum3+sum4+sum5+sum6+sum7;
+    }
+    /*
+    #pragma omp for
+    for (j = 0; j < lastrow - firstrow + 1; j++) {
+      double sum0 = 0.0;
+      double sum1 = 0.0;
+      double sum2 = 0.0;
+      double sum3 = 0.0;
+      double sum4 = 0.0;
+      double sum5 = 0.0;
+      double sum6 = 0.0;
+      double sum7 = 0.0;
+      double sum8 = 0.0;
+      double sum9 = 0.0;
+      double sum10 = 0.0;
+      double sum11 = 0.0;
+      double sum12 = 0.0;
+      double sum13 = 0.0;
+      double sum14 = 0.0;
+      double sum15 = 0.0;
+      int start_idx = rowstr[j];
+      int end_idx   = rowstr[j+1];
+      int remainder = (end_idx-start_idx)%16;
+
+      for (k = start_idx; k < start_idx+remainder; k++){
+        sum0 = sum0 + a[k]*p[colidx[k]];
+      }
+      for (k = start_idx+remainder; k < end_idx; k+=16) {
+        sum0 = sum0 + a[k]*p[colidx[k]];
+        sum1 = sum1 + a[k+1]*p[colidx[k+1]];
+        sum2 = sum2 + a[k+2]*p[colidx[k+2]];
+        sum3 = sum3 + a[k+3]*p[colidx[k+3]];
+        sum4 = sum4 + a[k+4]*p[colidx[k+4]];
+        sum5 = sum5 + a[k+5]*p[colidx[k+5]];
+        sum6 = sum6 + a[k+6]*p[colidx[k+6]];
+        sum7 = sum7 + a[k+7]*p[colidx[k+7]];
+        sum8 = sum8 + a[k+8]*p[colidx[k+8]];
+        sum9 = sum9 + a[k+9]*p[colidx[k+9]];
+        sum10 = sum10 + a[k+10]*p[colidx[k+10]];
+        sum11 = sum11 + a[k+11]*p[colidx[k+11]];
+        sum12 = sum12 + a[k+12]*p[colidx[k+12]];
+        sum13 = sum13 + a[k+13]*p[colidx[k+13]];
+        sum14 = sum14 + a[k+14]*p[colidx[k+14]];
+        sum15 = sum15 + a[k+15]*p[colidx[k+15]];
+      }
+      q[j] = sum0+sum1+sum2+sum3+sum4+sum5+sum6+sum7+sum8+sum9+sum10+sum11+sum12+sum13+sum14+sum15;
+    }
+    */
+}
+
 
     //---------------------------------------------------------------------
     // Obtain p.q
     //---------------------------------------------------------------------
     d = 0.0;
+    double d1=0.0;
+    double d2=0.0;
+    double d3=0.0;
+    double d4=0.0;
+    double d5=0.0;
+    double d6=0.0;
+    double d7=0.0;
+
+
+    int start_idx = 0;
+    int end_idx   = lastcol-firstcol+1;
+    int remainder = (end_idx-start_idx)%8;
+
+#pragma omp parallel default(shared) private(k)
+    #pragma omp for reduction(+:d)
+    for (k = start_idx; k < start_idx+remainder; k++){
+        d  = d  + p[k]*q[k];
+    }
+
 #pragma omp parallel default(shared) private(j)
 {
-    #pragma omp for reduction(+:d)
+/*    #pragma omp for reduction(+:d)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       d = d + p[j]*q[j];
     }
+*/
+    #pragma omp for reduction(+:d, d1, d2, d3, d4, d5, d6, d7)
+    for (j = start_idx+remainder; j < end_idx; j+=8) {
+      d  = d  + p[j]*q[j];
+      d1 = d1 + p[j+1]*q[j+1];
+      d2 = d2 + p[j+2]*q[j+2];
+      d3 = d3 + p[j+3]*q[j+3];
+      d4 = d4 + p[j+4]*q[j+4];
+      d5 = d5 + p[j+5]*q[j+5];
+      d6 = d6 + p[j+6]*q[j+6];
+      d7 = d7 + p[j+7]*q[j+7];
+    }
+
+    #pragma omp single
+    d = d+d1+d2+d3+d4+d5+d6+d7;
 }
     //---------------------------------------------------------------------
     // Obtain alpha = rho / (p.q)
