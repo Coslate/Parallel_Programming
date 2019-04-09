@@ -239,7 +239,6 @@ int main(int argc, char *argv[])
     //---------------------------------------------------------------------
     // The call to the conjugate gradient routine:
     //---------------------------------------------------------------------
-    timer_clear(T_conj_grad);
     if (timeron) timer_start(T_conj_grad);
     conj_grad(colidx, rowstr, x, z, a, p, q, r, &rnorm);
     if (timeron) timer_stop(T_conj_grad);
@@ -262,8 +261,8 @@ int main(int argc, char *argv[])
 
     zeta = SHIFT + 1.0 / norm_temp1;
     if (it == 1) 
-      printf("\n   iteration           ||r||                 zeta             conj_seconds\n");
-    printf("    %5d       %20.14E%20.13f         %lf\n", it, rnorm, zeta, timer_read(T_conj_grad));
+      printf("\n   iteration           ||r||                 zeta\n");
+    printf("    %5d       %20.14E%20.13f\n", it, rnorm, zeta);
 
     //---------------------------------------------------------------------
     // Normalize z to obtain x
@@ -322,8 +321,6 @@ static void conj_grad(int colidx[],
   int cgit, cgitmax = 25;
   double d, sum, rho, rho0, alpha, beta;
 
-  rho = 0.0;
-
   //---------------------------------------------------------------------
   // Initialize the CG algorithm:
   //---------------------------------------------------------------------
@@ -363,6 +360,9 @@ static void conj_grad(int colidx[],
     //       unrolled-by-two version is some 10% faster.  
     //       The unrolled-by-8 version below is significantly faster
     //       on the Cray t3d - overall speed of code is 1.5 times faster.
+    rho0 = rho;
+    d   = 0.0;
+    rho = 0.0;
 #pragma omp parallel default(shared) private(j, k, sum)
 {
     #pragma omp for
@@ -378,7 +378,6 @@ static void conj_grad(int colidx[],
     //---------------------------------------------------------------------
     // Obtain p.q
     //---------------------------------------------------------------------
-    d = 0.0;
 #pragma omp parallel default(shared) private(j)
 {
     #pragma omp for reduction(+:d)
@@ -389,18 +388,16 @@ static void conj_grad(int colidx[],
     //---------------------------------------------------------------------
     // Obtain alpha = rho / (p.q)
     //---------------------------------------------------------------------
-    alpha = rho / d;
+    alpha = rho0 / d;    
 
     //---------------------------------------------------------------------
     // Save a temporary of rho
     //---------------------------------------------------------------------
-    rho0 = rho;
 
     //---------------------------------------------------------------------
     // Obtain z = z + alpha*p
     // and    r = r - alpha*q
     //---------------------------------------------------------------------
-    rho = 0.0;
 
 
 #pragma omp parallel default(shared) private(j)
@@ -453,10 +450,10 @@ static void conj_grad(int colidx[],
     printf("j = %d, colidx[%d] = %d, z[%d] = %lf\n", j, j, colidx[j], colidx[j], z[colidx[j]][0]);
   }
 */
-double d_tmp;
+  double d_tmp;
+  sum = 0.0;
 #pragma omp parallel default(shared) private(j, d, d_tmp) shared(sum) 
 {
-  sum = 0.0;
   #pragma omp for 
   for (j = 0; j < lastrow - firstrow + 1; j++) {
     d = 0.0;
@@ -597,6 +594,7 @@ static void sparse(double a[],
   //---------------------------------------------------------------------
   // ...count the number of triples in each row
   //---------------------------------------------------------------------
+  #pragma omp parallel for default(shared) private(j)
   for (j = 0; j < nrows+1; j++) {
     rowstr[j] = 0;
   }
@@ -627,6 +625,7 @@ static void sparse(double a[],
   //---------------------------------------------------------------------
   // ... preload data pages
   //---------------------------------------------------------------------
+  #pragma omp parallel for default(shared) private(j, k)
   for (j = 0; j < nrows; j++) {
     for (k = rowstr[j]; k < rowstr[j+1]; k++) {
       a[k] = 0.0;
@@ -718,6 +717,7 @@ static void sparse(double a[],
       nza = nza + 1;
     }
   }
+  #pragma omp parallel for default(shared) private(j)
   for (j = 1; j < nrows+1; j++) {
     rowstr[j] = rowstr[j] - nzloc[j-1];
   }
