@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "globals.h"
 #include "randdp.h"
@@ -150,7 +152,14 @@ int main(int argc, char *argv[])
   //      Shift the col index vals from actual (firstcol --> lastcol ) 
   //      to local, i.e., (0 --> lastcol-firstcol)
   //---------------------------------------------------------------------
-#pragma omp parallel default(shared) private(i,j,k)
+  int j0, j1, j2, j3, j4; 
+  int k0, k1; 
+  int total_num = lastcol-firstcol+1;
+  int residue   = total_num%8;
+  int total_num_NA = NA+1;
+  int residue_NA   = total_num_NA%8;
+
+#pragma omp parallel default(shared) private(i, j, k, j0, j1, j2, j3, j4, k0, k1)
 {	
   #pragma omp for nowait
   for (j = 0; j < lastrow - firstrow + 1; j++) {
@@ -163,6 +172,79 @@ int main(int argc, char *argv[])
   // set starting vector to (1, 1, .... 1)
   //---------------------------------------------------------------------
   #pragma omp for nowait
+  for (k0 = 0; k0 < residue_NA; k0++) {
+    x[k0] = 1;
+  }
+
+  #pragma omp for nowait
+  for (j4 = residue_NA; j4 < total_num_NA; j4=j4+8) {
+    x[j4] = 1;
+    x[j4+1] = 1;
+    x[j4+2] = 1;
+    x[j4+3] = 1;
+    x[j4+4] = 1;
+    x[j4+5] = 1;
+    x[j4+6] = 1;
+    x[j4+7] = 1;
+  } 
+
+  #pragma omp for nowait
+  for (k1 = 0; k1 < residue; k1++) {
+    q[k1] = 0.0;
+    z[k1] = 0.0;
+    r[k1] = 0.0;
+    p[k1] = 0.0;
+  }
+
+  #pragma omp for nowait
+  for (j2 = residue; j2 < total_num; j2=j2+8) {
+    r[j2]   = 0.0;
+    r[j2+1] = 0.0;
+    r[j2+2] = 0.0;
+    r[j2+3] = 0.0;
+    r[j2+4] = 0.0;
+    r[j2+5] = 0.0;
+    r[j2+6] = 0.0;
+    r[j2+7] = 0.0;
+  }
+
+  #pragma omp for nowait
+  for (j0 = residue; j0 < total_num; j0=j0+8) {
+    q[j0]   = 0.0;
+    q[j0+1] = 0.0;
+    q[j0+2] = 0.0;
+    q[j0+3] = 0.0;
+    q[j0+4] = 0.0;
+    q[j0+5] = 0.0;
+    q[j0+6] = 0.0;
+    q[j0+7] = 0.0;
+  }
+
+  #pragma omp for nowait
+  for (j1 = residue; j1 < total_num; j1=j1+8) {
+    z[j1]   = 0.0;
+    z[j1+1] = 0.0;
+    z[j1+2] = 0.0;
+    z[j1+3] = 0.0;
+    z[j1+4] = 0.0;
+    z[j1+5] = 0.0;
+    z[j1+6] = 0.0;
+    z[j1+7] = 0.0;
+  }
+
+  #pragma omp for
+  for (j3 = residue; j3 < total_num; j3=j3+8) {
+    p[j3]   = 0.0;
+    p[j3+1] = 0.0;
+    p[j3+2] = 0.0;
+    p[j3+3] = 0.0;
+    p[j3+4] = 0.0;
+    p[j3+5] = 0.0;
+    p[j3+6] = 0.0;
+    p[j3+7] = 0.0;
+  } 
+  /*
+  #pragma omp for nowait
   for (i = 0; i < NA+1; i++) {
     x[i] = 1.0;
   }
@@ -173,7 +255,15 @@ int main(int argc, char *argv[])
     r[j] = 0.0;
     p[j] = 0.0;
   }
+  */
 }
+/*
+  memset(x, 1, (NA+1) * sizeof(double));
+  memset(q, 0, (lastcol-firstcol+1) * sizeof(double));
+  memset(z, 0, (lastcol-firstcol+1) * sizeof(double));
+  memset(r, 0, (lastcol-firstcol+1) * sizeof(double));
+  memset(p, 0, (lastcol-firstcol+1) * sizeof(double));
+*/
 
   zeta = 0.0;
 
@@ -197,7 +287,7 @@ int main(int argc, char *argv[])
     norm_temp1 = 0.0;
     norm_temp2 = 0.0;
 #pragma omp parallel for default(shared) private(j) reduction(+:norm_temp1,norm_temp2)    
-    for (j = 0; j < lastcol - firstcol + 1; j++) {
+    for (j = 0; j < total_num; j++) {
       norm_temp1 = norm_temp1 + x[j] * z[j];
       norm_temp2 = norm_temp2 + z[j] * z[j];
     }
@@ -207,20 +297,60 @@ int main(int argc, char *argv[])
     //---------------------------------------------------------------------
     // Normalize z to obtain x
     //---------------------------------------------------------------------
+/*
+#pragma omp parallel default(shared) private(j, k)
+{
+    #pragma omp for nowait
+    for (k = 0; k < residue; k++) {
+        x[k] = norm_temp2 * z[k];
+    }
+
+    #pragma omp for 
+    for (j = residue; j < total_num; j=j+8) {
+        x[j] = norm_temp2 * z[j];
+    }
+}
+*/
+/*
 #pragma omp parallel for default(shared) private(j)
     for (j = 0; j < lastcol - firstcol + 1; j++) {     
       x[j] = norm_temp2 * z[j];
     }
+*/
+
   } // end of do one iteration untimed
 
 
   //---------------------------------------------------------------------
   // set starting vector to (1, 1, .... 1)
   //---------------------------------------------------------------------
+#pragma omp parallel default(shared) private(j, k)
+{
+    #pragma omp for nowait
+    for (k = 0; k < residue_NA; k++) {
+        x[k] = 1;
+    }
+
+    #pragma omp for 
+    for (j = residue_NA; j < total_num_NA; j=j+8) {
+        x[j] = 1;
+        x[j+1] = 1;
+        x[j+2] = 1;
+        x[j+3] = 1;
+        x[j+4] = 1;
+        x[j+5] = 1;
+        x[j+6] = 1;
+        x[j+7] = 1;
+    }
+}
+/*
 #pragma omp parallel for default(shared) private(i)
   for (i = 0; i < NA+1; i++) {
     x[i] = 1.0;
   }
+*/
+
+  //memset(x, 1, (NA+1) * sizeof(double));
 
   zeta = 0.0;
 
@@ -267,11 +397,33 @@ int main(int argc, char *argv[])
     //---------------------------------------------------------------------
     // Normalize z to obtain x
     //---------------------------------------------------------------------
+#pragma omp parallel default(shared) private(j, k)
+{
+    #pragma omp for nowait
+    for (k = 0; k < residue; k++) {
+        x[k] = norm_temp2 * z[k];
+    }
+
+    #pragma omp for 
+    for (j = residue; j < total_num; j=j+8) {
+      x[j] = norm_temp2 * z[j];
+      x[j+1] = norm_temp2 * z[j+1];
+      x[j+2] = norm_temp2 * z[j+2];
+      x[j+3] = norm_temp2 * z[j+3];
+      x[j+4] = norm_temp2 * z[j+4];
+      x[j+5] = norm_temp2 * z[j+5];
+      x[j+6] = norm_temp2 * z[j+6];
+      x[j+7] = norm_temp2 * z[j+7];
+    }
+}
+/*
 #pragma omp parallel for default(shared) private(j)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       x[j] = norm_temp2 * z[j];
     }
+*/
   } // end of main iter inv pow meth
+
 
   timer_stop(T_bench);
 
@@ -317,7 +469,7 @@ static void conj_grad(int colidx[],
                       double r[],
                       double *rnorm)
 {
-  int j, k, j1, j2, j3;
+  int j, k, j0, j1, j2, j3, j4;
   int cgit, cgitmax = 25;
   double d, sum, rho, rho0, alpha, beta;
   int total_num = naa+1;
@@ -330,9 +482,14 @@ static void conj_grad(int colidx[],
   //---------------------------------------------------------------------
   // Initialize the CG algorithm:
   //---------------------------------------------------------------------
-#pragma omp parallel default(shared) private(j, k)
+  /*
+  memset(q, 0, total_num*sizeof(double));
+  memset(z, 0, total_num*sizeof(double));
+  memcpy(r, x, total_num*sizeof(double));
+  memcpy(p, x, total_num*sizeof(double));
+  */
+#pragma omp parallel default(shared) private(j, k, j0, j1, j2, j3, j4)
 {
-
   #pragma omp for nowait
   for (k = 0; k < residue; k++) {
     q[k] = 0.0;
@@ -354,15 +511,15 @@ static void conj_grad(int colidx[],
   }
 
   #pragma omp for nowait
-  for (j = residue; j < total_num; j=j+8) {
-    q[j]   = 0.0;
-    q[j+1] = 0.0;
-    q[j+2] = 0.0;
-    q[j+3] = 0.0;
-    q[j+4] = 0.0;
-    q[j+5] = 0.0;
-    q[j+6] = 0.0;
-    q[j+7] = 0.0;
+  for (j0 = residue; j0 < total_num; j0=j0+8) {
+    q[j0]   = 0.0;
+    q[j0+1] = 0.0;
+    q[j0+2] = 0.0;
+    q[j0+3] = 0.0;
+    q[j0+4] = 0.0;
+    q[j0+5] = 0.0;
+    q[j0+6] = 0.0;
+    q[j0+7] = 0.0;
   }
 
   #pragma omp for nowait
@@ -388,15 +545,14 @@ static void conj_grad(int colidx[],
     p[j3+6] = x[j3+6];
     p[j3+7] = x[j3+7];
   }
-
   //---------------------------------------------------------------------
   // rho = r.r
   // Now, obtain the norm of r: First, sum squares of r elements locally...
   //---------------------------------------------------------------------
   //#pragma omp for reduction(+:rho)
-  #pragma omp single
-  for (j = 0; j < residue2; j++) {
-    rho = rho + r[j]*r[j];
+  #pragma omp for reduction(+:rho)
+  for (j4 = 0; j4 < residue2; j4++) {
+    rho = rho + r[j4]*r[j4];
   }
   
   #pragma omp for reduction(+:rho)
@@ -411,6 +567,7 @@ static void conj_grad(int colidx[],
               + r[j+7]*r[j+7];
   }
 }
+
   //---------------------------------------------------------------------
   //---->
   // The conj grad iteration loop
@@ -643,6 +800,7 @@ static void sparse(double a[],
   //---------------------------------------------------------------------
   // ...count the number of triples in each row
   //---------------------------------------------------------------------
+  //memset(rowstr, 0, (nrows+1)*sizeof(int));
   #pragma omp parallel for default(shared) private(j)
   for (j = 0; j < nrows+1; j++) {
     rowstr[j] = 0;
