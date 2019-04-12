@@ -317,30 +317,98 @@ static void conj_grad(int colidx[],
                       double r[],
                       double *rnorm)
 {
-  int j, k;
+  int j, k, j1, j2, j3;
   int cgit, cgitmax = 25;
   double d, sum, rho, rho0, alpha, beta;
+  int total_num = naa+1;
+  int residue  = (total_num)%8;
+  int rho_num  = lastcol-firstcol+1;
+  int residue2 = (rho_num)%8;
+
+  rho = 0.0;
 
   //---------------------------------------------------------------------
   // Initialize the CG algorithm:
   //---------------------------------------------------------------------
-#pragma omp parallel default(shared) private(j)
+#pragma omp parallel default(shared) private(j, k)
 {
-  #pragma omp for
-  for (j = 0; j < naa+1; j++) {
-    q[j] = 0.0;
-    z[j] = 0.0;
-    r[j] = x[j];
-    p[j] = r[j];
+
+  #pragma omp for nowait
+  for (k = 0; k < residue; k++) {
+    q[k] = 0.0;
+    z[k] = 0.0;
+    r[k] = x[k];
+    p[k] = x[k];
+  }
+
+  #pragma omp for nowait
+  for (j2 = residue; j2 < total_num; j2=j2+8) {
+    r[j2]   = x[j2];
+    r[j2+1] = x[j2+1];
+    r[j2+2] = x[j2+2];
+    r[j2+3] = x[j2+3];
+    r[j2+4] = x[j2+4];
+    r[j2+5] = x[j2+5];
+    r[j2+6] = x[j2+6];
+    r[j2+7] = x[j2+7];
+  }
+
+  #pragma omp for nowait
+  for (j = residue; j < total_num; j=j+8) {
+    q[j]   = 0.0;
+    q[j+1] = 0.0;
+    q[j+2] = 0.0;
+    q[j+3] = 0.0;
+    q[j+4] = 0.0;
+    q[j+5] = 0.0;
+    q[j+6] = 0.0;
+    q[j+7] = 0.0;
+  }
+
+  #pragma omp for nowait
+  for (j1 = residue; j1 < total_num; j1=j1+8) {
+    z[j1]   = 0.0;
+    z[j1+1] = 0.0;
+    z[j1+2] = 0.0;
+    z[j1+3] = 0.0;
+    z[j1+4] = 0.0;
+    z[j1+5] = 0.0;
+    z[j1+6] = 0.0;
+    z[j1+7] = 0.0;
+  }
+
+  #pragma omp for nowait
+  for (j3 = residue; j3 < total_num; j3=j3+8) {
+    p[j3]   = x[j3];
+    p[j3+1] = x[j3+1];
+    p[j3+2] = x[j3+2];
+    p[j3+3] = x[j3+3];
+    p[j3+4] = x[j3+4];
+    p[j3+5] = x[j3+5];
+    p[j3+6] = x[j3+6];
+    p[j3+7] = x[j3+7];
   }
 
   //---------------------------------------------------------------------
   // rho = r.r
   // Now, obtain the norm of r: First, sum squares of r elements locally...
   //---------------------------------------------------------------------
-  #pragma omp for reduction(+:rho)
-  for (j = 0; j < lastcol - firstcol + 1; j++) {
+  //#pragma omp for reduction(+:rho)
+  #pragma omp single
+  for (j = 0; j < residue2; j++) {
     rho = rho + r[j]*r[j];
+  }
+  
+  #pragma omp for reduction(+:rho)
+  for(j=residue2; j<rho_num; j+=8){
+    rho = rho + r[j]*r[j]
+              + r[j+1]*r[j+1]
+              + r[j+2]*r[j+2]
+              + r[j+3]*r[j+3]
+              + r[j+4]*r[j+4]
+              + r[j+5]*r[j+5]
+              + r[j+6]*r[j+6]
+              + r[j+7]*r[j+7];
   }
 }
   //---------------------------------------------------------------------
@@ -360,12 +428,13 @@ static void conj_grad(int colidx[],
     //       unrolled-by-two version is some 10% faster.  
     //       The unrolled-by-8 version below is significantly faster
     //       on the Cray t3d - overall speed of code is 1.5 times faster.
+    
     rho0 = rho;
     d   = 0.0;
     rho = 0.0;
-#pragma omp parallel default(shared) private(j, k, sum)
+#pragma omp parallel default(shared)
 {
-    #pragma omp for
+    #pragma omp for private(sum, j, k)
     for (j = 0; j < lastrow - firstrow + 1; j++) {
       sum = 0.0;
       for (k = rowstr[j]; k < rowstr[j+1]; k++) {
@@ -373,67 +442,48 @@ static void conj_grad(int colidx[],
       }
       q[j] = sum;
     }
-}
-
     //---------------------------------------------------------------------
     // Obtain p.q
     //---------------------------------------------------------------------
-#pragma omp parallel default(shared) private(j)
-{
-    #pragma omp for reduction(+:d)
+    #pragma omp for private(j) reduction(+:d)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       d = d + p[j]*q[j];
     }
-}
     //---------------------------------------------------------------------
     // Obtain alpha = rho / (p.q)
     //---------------------------------------------------------------------
+    #pragma omp single
     alpha = rho0 / d;
-
-    //---------------------------------------------------------------------
-    // Save a temporary of rho
-    //---------------------------------------------------------------------
 
     //---------------------------------------------------------------------
     // Obtain z = z + alpha*p
     // and    r = r - alpha*q
     //---------------------------------------------------------------------
-
-
-#pragma omp parallel default(shared) private(j)
-{
-    #pragma omp for
+    #pragma omp for private(j)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       z[j] = z[j] + alpha*p[j];  
       r[j] = r[j] - alpha*q[j];
     }
-}
-            
+
     //---------------------------------------------------------------------
     // rho = r.r
     // Now, obtain the norm of r: First, sum squares of r elements locally...
     //---------------------------------------------------------------------
-    
-#pragma omp parallel default(shared) private(j)
-{
-    #pragma omp for reduction(+:rho)
+    #pragma omp for private(j) reduction(+:rho)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       rho = rho + r[j]*r[j];
     }
-}
 
     //---------------------------------------------------------------------
     // Obtain beta:
     //---------------------------------------------------------------------
+    #pragma omp single
     beta = rho / rho0;
 
     //---------------------------------------------------------------------
     // p = r + beta*p
     //---------------------------------------------------------------------
-    
-#pragma omp parallel default(shared) private(j)
-{
-    #pragma omp for
+    #pragma omp for private(j)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       p[j] = r[j] + beta*p[j];
     }
@@ -450,9 +500,8 @@ static void conj_grad(int colidx[],
     printf("j = %d, colidx[%d] = %d, z[%d] = %lf\n", j, j, colidx[j], colidx[j], z[colidx[j]][0]);
   }
 */
-  double d_tmp;
   sum = 0.0;
-#pragma omp parallel default(shared) private(j, d, d_tmp) shared(sum) 
+#pragma omp parallel default(shared) private(j, d) shared(sum) 
 {
   #pragma omp for 
   for (j = 0; j < lastrow - firstrow + 1; j++) {
@@ -468,7 +517,7 @@ static void conj_grad(int colidx[],
   //---------------------------------------------------------------------
   #pragma omp for reduction(+:sum)
   for (j = 0; j < lastcol-firstcol+1; j++) {
-    d_tmp   = x[j] - r[j];
+    double d_tmp   = x[j] - r[j];
     sum = sum + d_tmp*d_tmp;
   }
 }
@@ -717,7 +766,7 @@ static void sparse(double a[],
       nza = nza + 1;
     }
   }
-  #pragma omp parallel for default(shared) private(j)
+  #pragma omp parallel for default(shared) private(j)  
   for (j = 1; j < nrows+1; j++) {
     rowstr[j] = rowstr[j] - nzloc[j-1];
   }
@@ -755,7 +804,6 @@ static void sprnvc(int n, int nz, int nn1, double v[], int iv[])
     // was this integer generated already?
     //---------------------------------------------------------------------
     logical was_gen = false;
-
     for (ii = 0; ii < nzv; ii++) {
       if (iv[ii] == i) {
         was_gen = true;
