@@ -1,0 +1,23 @@
+全參數:
+EyeGazeTrackingSystem_v3 -ct 3 -mo 2 -cpl 5 -cps 2 -tt 5 -dom 50 -pcm 0.028 -tn 16 -imrf 1 -imaf 100 -imrt 6 - imro 0.5 -tcase subject4 -cFileName CalibrationNum_0
+
+簡化:
+EyeGazeTrackingSystem_v3 -mo 2 -cpl 5 -cps 2 -imrt 6 -imro 0.5 -ct 3 -imaf 100 -imrf 1 -tcase subject4 -cfilename CalibrationNum_0
+
+
+
+
+//ct = calibrationInterTimePoints;每一個calibration point display的時間。
+//mo = calibrationInterMappingFunctionOrder;PolyNomial Interpolation的order。
+//cpl = calPtsLength;選擇calibration procedure用的chessboard大小(ex.-cpl 5意思是5X5的chessboard)，可選擇3~7。
+//cps = calibrationPts_space;選擇calibration chessboard的種類，有兩種，第一種是calibration點中間無空格(Step_space_one)，第二種是中間有空格(Step_space_two)，實驗做出來是第二種比較有效，第一種就沒繼續做了。
+//tt = testInterTimePoints;做testing時控制random的16個test point每一個point出現得時間。
+//dom = distanceOfMonitor;頭部到銀幕的距離，單位為公分。
+//pcm = pixelToCentiMeter;計算螢幕上的一個pixel為多少公分。
+//tn = testNumOfPts;計算用己的點做testing，目前設定16個點，可支援9or25點，但是資料夾要先設好。
+//imrf = iris_maskModel_refreshFrame_Initial;設定一開始要隔幾個frame去抓User的虹膜區域。在main.cpp的3344行。
+//imaf = iris_maskModel_refreshFrame_AfterGet;設定一抓到第一次的虹膜color model(H-S histogram)後要隔幾個frame去再抓User的虹膜區域(更新)。在main.cpp的5474行。
+//imrt = iris_colorModelValidTestingIrisRate_initial;設定ratio比要大於多少才可以算 valid 的iris color model。
+//imro = iris_colorModelIrisRate_pixelInOthersOne;若是做Iris color valid testing的時後沒有pixel落在iris region外面，則rate會無限大，無法評估，故要設定落在iris region內部的點總共佔了多少iris regoin，大於一定的比例才可以算valid，此參數就是這比例。
+//tcase = subjectFileName;設定test別人的output 資料夾，這參數可有可無，若是沒有，就會進到Pattern_Step_Two or Pattern_Step_One(cps參數決定)資料夾，Pattern_Step_Two or Pattern_Step_One是記錄自己當測試者的實驗，subjectx是記錄別人當測試者的實驗。
+//cfilename = calibrationNumTimesName;紀錄第幾次的測試。
