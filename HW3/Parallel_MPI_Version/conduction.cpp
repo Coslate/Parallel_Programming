@@ -3,6 +3,8 @@
 #include <string.h>
 #include <mpi.h>
 
+#define MASTER 0
+#define FROM_MASTER 1
 
 int main(int argc, char **argv) {
     int N;
@@ -17,8 +19,8 @@ int main(int argc, char **argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocess);
 
-    //time0 = MPI_Wtime();//start timing
     //-----------Argument Parser----------//
+    //time0 = MPI_Wtime();//start timing
     N = atoi(argv[1]);
     seed = atoi(argv[2]);
     srand(seed);
@@ -31,7 +33,7 @@ int main(int argc, char **argv) {
     int temp[N][N];
 
     srand(seed);
-    if(my_rank == 0){
+    if(my_rank == MASTER){
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 temp[i][j] = random() >> 3; // avoid overflow
@@ -52,10 +54,39 @@ int main(int argc, char **argv) {
     MPI_Bcast(temp, N*N, MPI_INT, 0, MPI_COMM_WORLD);
     //time1 = MPI_Wtime();
     //printf("Initialization using time: %lf\n", (time1-time0));
+    
     //-----------Main Calculation----------//
     time0 = MPI_Wtime();
     int count = 0, balance = 0;
+    int nworkers   = nprocess-1;
+    int avg_rows   = N/nworkers;
+    int extra_rows = N%nworkers;
+    int offset     = 0;
+    int rows;
     int next[N][N];
+
+    while (!balance) {
+        count++;
+        balance = 1;
+
+        if(my_rank == MASTER){//Master
+            if(count > 0){
+                for(int dest=1;dest<=nworkers;++dest){
+                    rows = (dest<extra_rows)?(avg_rows+1):avg_rows;
+                    MPI_Send(&offset, 1, MPI_INT, dest, FROM_MASTER, MPI_COMM_WORLD);
+                    MPI_Send(&rows, 1, MPI_INT, dest, FROM_MASTER, MPI_COMM_WORLD);
+                    MPI_Send(&temp[offset][0], rows*N, MPI_INT, dest, FROM_MASTER, MPI_COMM_WORLD);
+        
+                }
+            }
+        }else{//Workers
+    
+        }
+    }
+    
+
+
+    //Workers
     while (!balance) {
         count++;
         balance = 1;
