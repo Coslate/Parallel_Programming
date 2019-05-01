@@ -88,13 +88,17 @@ int main(int argc, char **argv) {
     }
 
     while (!balance) {
+        printf("rank = %d, calculating...\n", my_rank);
         count++;
         balance = 1;
 
         if(count > 1){
+            printf("MPI_Bcast, rank = %d\n", my_rank);
             MPI_Bcast(temp, N*N, MPI_INT, 0, MPI_COMM_WORLD);
+            printf("MPI_Bcast done, rank = %d\n", my_rank);
         }
         
+        if(my_rank == 3){
         printf("Iteration %d, rank = %d, temp = \n", count, my_rank);
         for(int i=0;i<N;++i){
             for(int j=0;j<N;++j){
@@ -103,6 +107,7 @@ int main(int argc, char **argv) {
                     printf("\n");
                 }
             }
+        }
         }
 
         for (int i = my_rank_start[my_rank]; i <= my_rank_end[my_rank]; i++) {
@@ -119,6 +124,7 @@ int main(int argc, char **argv) {
             }
         }
 
+        if(my_rank == 3){
         printf("Iteration %d, rank = %d, next = \n", count, my_rank);
         for(int i=0;i<N;++i){
             for(int j=0;j<N;++j){
@@ -128,27 +134,39 @@ int main(int argc, char **argv) {
                 }
             }
         }
+        }
 
         if(my_rank == MASTER){//Master, combine all the next[][]
             int balance_from_others = 1;
 
+            printf("MASTER receive from othres!\n");
             for(int i=1;i<nprocess;++i){
+                printf("=======0. Receiver i = %d, next_tmp=======\n", i);
                 MPI_Recv(&next_tmp[0][0], (avg_rows+1)*N, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
+                printf("=======1. Receiver i = %d, next_tmp done.=======\n", i);
                 int sender_rank = status.MPI_SOURCE;
                 MPI_Recv(&balance_from_others, 1, MPI_INT, sender_rank, 0, MPI_COMM_WORLD, &status);
+                printf("=======2. Receiver i = %d, sender_rank = %d, balance_from_others = %d=======\n", i, sender_rank, balance_from_others);
                 memcpy(&temp[my_rank_start[sender_rank]][0], next_tmp, my_rank_rows[sender_rank] * N * sizeof(int));
+                printf("=======3. Receiver i = %d, sender_rank = %d=======\n", i, sender_rank);
+                printf("Receive balance = %d, sender_rank = %d\n", balance_from_others, sender_rank);
                 balance = balance*balance_from_others;
             }
             //copy the result of Master next[][]
             memcpy(&temp[my_rank_start[MASTER]][0], next, my_rank_rows[MASTER] * N * sizeof(int));
         }else{//Workers, send the result : next[][]
+            printf(">>>>>>>0. Sender sender_rank = %d>>>>>>>>\n", my_rank);
             MPI_Send(&next[my_rank_start[my_rank]][0], my_rank_rows[my_rank]*N, MPI_INT, MASTER, 0, MPI_COMM_WORLD);
+            printf(">>>>>>>1. Sender sender_rows= %d, sender_rank = %d>>>>>>>>\n", my_rank_rows[my_rank], my_rank);
             MPI_Send(&balance, 1, MPI_INT, MASTER, 0, MPI_COMM_WORLD);
+            printf(">>>>>>>2. Sender sender_balance= %d, sender_rank = %d>>>>>>>>\n", balance, my_rank);
+            //balance = 0;
         }
         printf("rank = %d, count = %d, balance = %d\n", my_rank, count, balance);
         //char ch = getchar();
     }//end while
     
+    printf("End while, rank = %d\n", my_rank);
     time1 = MPI_Wtime();
     if(my_rank == MASTER){
         printf("Size: %d*%d, Seed: %d, ", N, N, seed);
