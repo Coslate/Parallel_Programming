@@ -55,6 +55,9 @@ int main(int argc, char **argv) {
     MPI_Status status;
     int count               = 0;
     int balance             = 0;
+    int balance_internal    = 0;
+    int balance_from_upper  = 0;
+    int balance_from_lower  = 0;
     int avg_rows            = N/nprocess;
     int extra_rows          = N%nprocess;
     int next[avg_rows+1][N] = { {0} };
@@ -153,14 +156,6 @@ int main(int argc, char **argv) {
             time0 = MPI_Wtime();//start timing
 
             int sub_temp[(my_rank_rows[my_rank]+(2*num_pad))][N];
-
-            //if (my_rank == MASTER) {
-            //    memcpy(padded_upper, &temp[my_rank_start[my_rank]][0], N*num_pad*sizeof(int));
-            //}
-            //if (my_rank == last_rank) {
-            //    memcpy(padded_lower, &temp[my_rank_end[my_rank]][0], N*num_pad*sizeof(int));
-            //}
-            //
             memcpy(sub_temp, padded_upper, N*num_pad*sizeof(int)); 
             memcpy(&sub_temp[num_pad][0], &temp[my_rank_start[my_rank]][0], N*my_rank_rows[my_rank]*sizeof(int));    
             memcpy(&sub_temp[(my_rank_rows[my_rank]+num_pad)][0], padded_lower, N*num_pad*sizeof(int));
@@ -275,10 +270,15 @@ int main(int argc, char **argv) {
         }//end if(my_rank_rows[my_rank] > 0)
 
         //printf("Bef, balance = %d, my_rank = %d\n", balance, my_rank);
+        
+        
+
+        /*
         time0 = MPI_Wtime();
         MPI_Allreduce(&balance, &balance, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
         time1 = MPI_Wtime();
         all_reduce_time_message_passing += (time1-time0);
+        */
         //printf("Aft, balance = %d, my_rank = %d\n", balance, my_rank);
         //char aa = getchar();
     }//end while
