@@ -154,13 +154,6 @@ int main(int argc, char **argv) {
 
             int sub_temp[(my_rank_rows[my_rank]+(2*num_pad))][N];
 
-            //if (my_rank == MASTER) {
-            //    memcpy(padded_upper, &temp[my_rank_start[my_rank]][0], N*num_pad*sizeof(int));
-            //}
-            //if (my_rank == last_rank) {
-            //    memcpy(padded_lower, &temp[my_rank_end[my_rank]][0], N*num_pad*sizeof(int));
-            //}
-            //
             memcpy(sub_temp, padded_upper, N*num_pad*sizeof(int)); 
             memcpy(&sub_temp[num_pad][0], &temp[my_rank_start[my_rank]][0], N*my_rank_rows[my_rank]*sizeof(int));    
             memcpy(&sub_temp[(my_rank_rows[my_rank]+num_pad)][0], padded_lower, N*num_pad*sizeof(int));
