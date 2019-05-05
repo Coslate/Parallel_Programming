@@ -36,15 +36,17 @@ int main(int argc, char **argv) {
         }
     }
     
+    /*
     printf("Original temp with rank %d is: \n", my_rank);
     for(int i=0;i<N;++i){
         for(int j=0;j<N;++j){
-            printf("%15d ", temp[i][j]);
+            printf("%10d ", temp[i][j]);
             if(j==N-1){
                 printf("\n");
             }
         }
     }
+    */
 
     time1 = MPI_Wtime();
     printf("Initialization using time: %lf\n", (time1-time0));
@@ -53,6 +55,7 @@ int main(int argc, char **argv) {
     MPI_Status status;
     int count               = 0;
     int balance             = 0;
+    int balance_collect_ms  = 0;
     int balance_internal    = 0;
     int balance_from_upper  = 0;
     int balance_from_lower  = 0;
@@ -76,17 +79,16 @@ int main(int argc, char **argv) {
     double avg_time_message_passing = 0;
     double memcpy1_time_message_passing = 0;
     double memcpy2_time_message_passing = 0;
-    double all_reduce_time_message_passing = 0;
+    double balance_cal_time_message_passing = 0;
     int test_rank          = 0;
 
     time0 = MPI_Wtime();//start timing
     //work division
     for(int i=0;i<nprocess;++i){
-        int i_rows = (i<(extra_rows))?(avg_rows+1):avg_rows;
+        my_rank_rows[i]  = (i<(extra_rows))?(avg_rows+1):avg_rows;
         my_rank_start[i] = (i==0)?0:my_rank_end[i-1]+1;
-        my_rank_end[i]   = my_rank_start[i]+(i_rows-1);
-        my_rank_rows[i]  = i_rows;
-        if(i_rows > 0){
+        my_rank_end[i]   = my_rank_start[i]+(my_rank_rows[i]-1);
+        if(my_rank_rows[i] > 0){
             last_rank = i;
             ++count_work_process;
         }
@@ -115,6 +117,7 @@ int main(int argc, char **argv) {
     time1 = MPI_Wtime();//start timing
     printf("work division using time: %lf\n", (time1-time0));
 
+    /*
     if(my_rank == test_rank){
         for(int i=0;i<nprocess;++i){
             printf("my_rank_start[%d] = %d\n", i, my_rank_start[i]);
@@ -141,6 +144,7 @@ int main(int argc, char **argv) {
             }
         }
     }
+    */
 
     while (!balance) {
         //printf("rank = %d, calculating...\n", my_rank);
@@ -158,51 +162,53 @@ int main(int argc, char **argv) {
             time1 = MPI_Wtime();//start timing
             memcpy1_time_message_passing += (time1-time0);
 
+            /*
             if(my_rank==test_rank){
             printf("Iteration %d, rank = %d, sub_temp = \n", count, my_rank);
             for(int i=0;i<(my_rank_rows[my_rank]+(2*num_pad));++i){
                 for(int j=0;j<N;++j){
-                    printf("%15d ", sub_temp[i][j]);
+                    printf("%10d ", sub_temp[i][j]);
                     if(j==N-1){
                         printf("\n");
                     }
                 }
             }
             }
+            */
 
             //Calculating
             time0 = MPI_Wtime();//start timing
-            if(!balance_internal){
-                balance_internal = 1;
-                for (int i = num_pad; i < (num_pad+my_rank_rows[my_rank]); ++i) {
-                    for (int j = 0; j < N; j++) {
-                        int up    = i - 1;
-                        int down  = i + 1;
-                        int left  = j - 1 < 0 ? 0 : j - 1;
-                        int right = j + 1 >= N ? j : j + 1;
-                        int next_i= i-num_pad;
+            balance_internal = 1;
+            for (int i = num_pad; i < (num_pad+my_rank_rows[my_rank]); ++i) {
+                for (int j = 0; j < N; j++) {
+                    int up    = i - 1;
+                    int down  = i + 1;
+                    int left  = j - 1 < 0 ? 0 : j - 1;
+                    int right = j + 1 >= N ? j : j + 1;
+                    int next_i= i-num_pad;
 
-                        next[next_i][j] = (sub_temp[i][j] + sub_temp[up][j] + sub_temp[down][j] + sub_temp[i][left] + sub_temp[i][right]) / 5;
-                        if (next[next_i][j] != sub_temp[i][j]) {
-                            balance_internal = 0;
-                        }
+                    next[next_i][j] = (sub_temp[i][j] + sub_temp[up][j] + sub_temp[down][j] + sub_temp[i][left] + sub_temp[i][right]) / 5;
+                    if (next[next_i][j] != sub_temp[i][j]) {
+                        balance_internal = 0;
                     }
                 }
             }
             time1 = MPI_Wtime();//start timing
             avg_time_message_passing += (time1-time0);
 
+            /*
             if(my_rank==test_rank){
             printf("Iteration %d, rank = %d, next = \n", count, my_rank);
             for(int i=0;i<(avg_rows+1);++i){
                 for(int j=0;j<N;++j){
-                    printf("%15d ", next[i][j]);
+                    printf("%10d ", next[i][j]);
                     if(j==N-1){
                         printf("\n");
                     }
                 }
             }
             }
+            */
 
             memcpy(lower, &next[my_rank_rows[my_rank]-1][0], N*num_pad*sizeof(int));
             memcpy(upper, &next[0][0], N*num_pad*sizeof(int));
@@ -210,6 +216,7 @@ int main(int argc, char **argv) {
             lower[N*num_pad] = balance_internal;
             upper[N*num_pad] = balance_internal;
 
+            /*
             if(my_rank==test_rank){
                 printf("balance_internal = %d\n", balance_internal);
                 printf("lower[N*num_pad] = %d\n", lower[N*num_pad]);
@@ -231,13 +238,14 @@ int main(int argc, char **argv) {
                     }
                 }
             }
+            */
 
             time0 = MPI_Wtime();//start timing
             if((nprocess > 1) && (count_work_process > 1)){
                 if(my_rank % 2 == 1){//odd
                     if(my_rank == last_rank){
                         MPI_Recv(padded_upper, N*num_pad+1, MPI_INT, prev_process, 1, MPI_COMM_WORLD, &status);
-                }else{
+                    }else{
                         MPI_Recv(padded_lower, N*num_pad+1, MPI_INT, next_process, 1, MPI_COMM_WORLD, &status);
                         MPI_Recv(padded_upper, N*num_pad+1, MPI_INT, prev_process, 1, MPI_COMM_WORLD, &status);
                     }
@@ -275,6 +283,8 @@ int main(int argc, char **argv) {
                 //memcpy(padded_upper, upper, N*num_pad*sizeof(int));
                 //memcpy(padded_lower, lower, N*num_pad*sizeof(int));
             }
+
+            //temp & padded_lower & padded_lower update
             time1 = MPI_Wtime();//start timing
             accu_time_message_passing += (time1-time0);
 
@@ -290,17 +300,53 @@ int main(int argc, char **argv) {
             memcpy(&temp[my_rank_start[my_rank]][0], next, my_rank_rows[my_rank]*N*sizeof(int));
             time1 = MPI_Wtime();
             memcpy2_time_message_passing += (time1-time0);
-        }//end if(my_rank_rows[my_rank] > 0)
 
-        //printf("Bef, balance = %d, my_rank = %d\n", balance, my_rank);
-        
-        balance_from_upper = padded_upper[N*num_pad];
-        balance_from_lower = padded_lower[N*num_pad];
-        balance = balance_internal*balance_from_upper*balance_from_lower;
+            //balnce collection
+            time0 = MPI_Wtime();
+            if((nprocess > 1) && (count_work_process > 1)){
+                balance_from_upper = padded_upper[N*num_pad];
+                balance_from_lower = padded_lower[N*num_pad];
+                balance = balance_internal*balance_from_upper*balance_from_lower;
 
+                /*
+                if(my_rank==test_rank){
+                    printf("[Internal] balance            = %d\n", balance);
+                    printf("[Internal] balance_internal   = %d\n", balance_internal);
+                    printf("[Internal] balance_from_lower = %d\n", balance_from_lower);
+                    printf("[Internal] balance_from_upper = %d\n", balance_from_upper);
+                }
+                */
+
+                if(my_rank == MASTER){
+                    for(int i=2;i<=last_rank;i+=2){
+                        MPI_Recv(&balance_collect_ms, 1, MPI_INT, i, 2, MPI_COMM_WORLD, &status);
+                        balance = balance*balance_collect_ms;
+                    }
+                    for(int i=1;i<=last_rank;++i){
+                        MPI_Send(&balance           , 1, MPI_INT, i, 2, MPI_COMM_WORLD);
+                    }
+                }else if(my_rank % 2 == 0){
+                    MPI_Send(&balance           , 1, MPI_INT, MASTER, 2, MPI_COMM_WORLD);
+                    MPI_Recv(&balance_collect_ms, 1, MPI_INT, MASTER, 2, MPI_COMM_WORLD, &status);
+                    balance = balance_collect_ms;
+                }else{
+                    MPI_Recv(&balance_collect_ms, 1, MPI_INT, MASTER, 2, MPI_COMM_WORLD, &status);
+                    balance = balance_collect_ms;
+                }
+            }else{//only one process 
+                balance = balance_internal;
+            }
+            time1 = MPI_Wtime();
+            balance_cal_time_message_passing += (time1-time0);       
+        }else{//end if(my_rank_rows[my_rank] > 0)
+            balance = 1;
+        }
+
+        /*
         if(my_rank==test_rank){
             printf("balance            = %d\n", balance);
             printf("balance_internal   = %d\n", balance_internal);
+            printf("balance_collect_ms = %d\n", balance_collect_ms);
             printf("balance_from_lower = %d\n", balance_from_lower);
             printf("balance_from_upper = %d\n", balance_from_upper);
             printf("padded_lower[N*num_pad] = %d\n", padded_lower[N*num_pad]);
@@ -327,13 +373,17 @@ int main(int argc, char **argv) {
             printf("Iteration %d, rank = %d, temp = \n", count, my_rank);
             for(int i=0;i<N;++i){
                 for(int j=0;j<N;++j){
-                    printf("%15d ", temp[i][j]);
+                    printf("%10d ", temp[i][j]);
                     if(j==N-1){
                         printf("\n");
                     }
                 }
             }
+
+
+            printf("==========================================\n");
         }
+        */
         
         /*
         time0 = MPI_Wtime();
@@ -342,22 +392,23 @@ int main(int argc, char **argv) {
         all_reduce_time_message_passing += (time1-time0);
         */
         //printf("Aft, balance = %d, my_rank = %d\n", balance, my_rank);
-        char aa = getchar();
+        //char aa = getchar();
     }//end while
 
-    if(my_rank == MASTER){
-        printf("Size: %d*%d, Seed: %d, ", N, N, seed);
-        printf("Iteration: %d, Temp: %d\n", count, temp[0][0]);
-    }
 
     /*
     printf("avg_time_message_passing = %lf\n", avg_time_message_passing);
     printf("accu_time_message_passing = %lf\n", accu_time_message_passing);
     printf("memcpy1_time_message_passing = %lf\n", memcpy1_time_message_passing);
     printf("memcpy2_time_message_passing = %lf\n", memcpy2_time_message_passing);
-    printf("all_reduce_time_message_passing = %lf\n", all_reduce_time_message_passing);
-    printf("avg_time_message_passing+accu_time_message_passing+memcpy1_time_message_passing+memcpy2_time_message_passing+all_reduce_time_message_passing = %lf+%lf+%lf+%lf+%lf = %lf\n", avg_time_message_passing, accu_time_message_passing, memcpy1_time_message_passing, memcpy2_time_message_passing, all_reduce_time_message_passing, (avg_time_message_passing+accu_time_message_passing+memcpy1_time_message_passing+memcpy2_time_message_passing+all_reduce_time_message_passing));
+    printf("balance_cal_time_message_passing = %lf\n", balance_cal_time_message_passing);
+    printf("avg_time_message_passing+accu_time_message_passing+memcpy1_time_message_passing+memcpy2_time_message_passing+balance_cal_time_message_passing = %lf+%lf+%lf+%lf+%lf = %lf, rank %d\n", avg_time_message_passing, accu_time_message_passing, memcpy1_time_message_passing, memcpy2_time_message_passing, balance_cal_time_message_passing, (avg_time_message_passing+accu_time_message_passing+memcpy1_time_message_passing+memcpy2_time_message_passing+balance_cal_time_message_passing), my_rank);
     */
+
+    if(my_rank == MASTER){
+        printf("Size: %d*%d, Seed: %d, ", N, N, seed);
+        printf("Iteration: %d, Temp: %d\n", count, temp[0][0]);
+    }
 
     //printf("End while, rank = %d\n", my_rank);
     MPI_Finalize();

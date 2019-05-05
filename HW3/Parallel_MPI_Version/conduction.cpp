@@ -318,14 +318,14 @@ int main(int argc, char **argv) {
                 */
 
                 if(my_rank == MASTER){
-                    for(int i=2;i<=last_rank;i+=2){
+                    for(int i=1;i<=last_rank;i+=2){
                         MPI_Recv(&balance_collect_ms, 1, MPI_INT, i, 2, MPI_COMM_WORLD, &status);
                         balance = balance*balance_collect_ms;
                     }
                     for(int i=1;i<=last_rank;++i){
                         MPI_Send(&balance           , 1, MPI_INT, i, 2, MPI_COMM_WORLD);
                     }
-                }else if(my_rank % 2 == 0){
+                }else if(my_rank % 2 == 1){
                     MPI_Send(&balance           , 1, MPI_INT, MASTER, 2, MPI_COMM_WORLD);
                     MPI_Recv(&balance_collect_ms, 1, MPI_INT, MASTER, 2, MPI_COMM_WORLD, &status);
                     balance = balance_collect_ms;
