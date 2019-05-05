@@ -85,11 +85,10 @@ int main(int argc, char **argv) {
     time0 = MPI_Wtime();//start timing
     //work division
     for(int i=0;i<nprocess;++i){
-        int i_rows = (i<(extra_rows))?(avg_rows+1):avg_rows;
+        my_rank_rows[i]  = (i<(extra_rows))?(avg_rows+1):avg_rows;
         my_rank_start[i] = (i==0)?0:my_rank_end[i-1]+1;
-        my_rank_end[i]   = my_rank_start[i]+(i_rows-1);
-        my_rank_rows[i]  = i_rows;
-        if(i_rows > 0){
+        my_rank_end[i]   = my_rank_start[i]+(my_rank_rows[i]-1);
+        if(my_rank_rows[i] > 0){
             last_rank = i;
             ++count_work_process;
         }
