@@ -107,11 +107,9 @@ int main(int argc, char **argv) {
                     int down  = i + 1;
                     int left  = j - 1;
                     int right = j + 1;
-                    int next_i= i - 1;
-                    int next_j= j - 1;
 
-                    next[next_i][next_j] = (sub_temp[i][j] + sub_temp[up][j] + sub_temp[down][j] + sub_temp[i][left] + sub_temp[i][right]) / 5;
-                    if (next[next_i][next_j] != sub_temp[i][j]) {
+                    next[up][left] = (sub_temp[i][j] + sub_temp[up][j] + sub_temp[down][j] + sub_temp[i][left] + sub_temp[i][right]) / 5;
+                    if (next[up][left] != sub_temp[i][j]) {
                         balance_internal = 0;
                     }
                 }
