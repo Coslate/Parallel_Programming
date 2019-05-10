@@ -15,6 +15,8 @@ all : clean
 test : 
 	/usr/bin/time -f "%e" ${MAIN_OBJECT_EXEC_OUTPUT}$(MAIN_OBJECT_EXEC_MAIN) $(tp) $(ns)
 
+compare : 
+	./compare.py $(tp) $(ns)
 clean : 
 	rm -rf $(MAIN_OBJECT_EXEC_OUTPUT)$(MAIN_OBJECT_EXEC_MAIN)
 
