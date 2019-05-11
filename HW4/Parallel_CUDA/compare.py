@@ -33,7 +33,7 @@ def CalculateErrorValue(in1_list, in2_list):
     err_count = 0
     for i, x in enumerate(in1_list):
         error_value = abs(in1_list[i]-in2_list[i])
-        if(error_value > 0.1):
+        if(error_value > 0.01):
             err_count += 1
             print("Error: read_serial_data - read_cuda_data => {} - {} = {} is larger than 0.01.".format(in1_list[i], in2_list[i], error_value))
 
