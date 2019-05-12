@@ -16,7 +16,7 @@ test :
 	/usr/bin/time -f "%e" ${MAIN_OBJECT_EXEC_OUTPUT}$(MAIN_OBJECT_EXEC_MAIN) $(tp) $(ns)
 
 compile_info : 
-	$(CC) $(INCLUDE_FLAGS) $(MAIN_OBJECT_SOURCE_MAIN) -o $(MAIN_OBJECT_EXEC_OUTPUT)$(MAIN_OBJECT_EXEC_MAIN) $(CFLAGS) --ptxas-options=-v
+	$(CC) $(INCLUDE_FLAGS) $(MAIN_OBJECT_SOURCE_MAIN) -o $(MAIN_OBJECT_EXEC_OUTPUT)$(MAIN_OBJECT_EXEC_MAIN) $(CFLAGS) --resource-usage
 
 compare : 
 	./compare.py $(tp) $(ns)
