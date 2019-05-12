@@ -269,5 +269,5 @@ int main(int argc, char *argv[])
     printfinal_cuda(tpoints, values);
     printf("\nDone.\n\n");
 	
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
