@@ -33,9 +33,9 @@ def CalculateErrorValue(in1_list, in2_list):
     err_count = 0
     for i, x in enumerate(in1_list):
         error_value = abs(in1_list[i]-in2_list[i])
-        if(error_value > 0.01):
+        if(error_value >= 0.01):
             err_count += 1
-            print("Error: read_serial_data - read_cuda_data => {} - {} = {} is larger than 0.01.".format(in1_list[i], in2_list[i], error_value))
+            print("Error: {}-th data, read_serial_data - read_cuda_data => {} - {} = {} is larger than 0.01.".format((i+1), in1_list[i], in2_list[i], error_value))
 
     if(err_count == 0):
         print("PASS")
@@ -64,7 +64,8 @@ def TestRun(p, s):
     print("cuda wave equation program run {} seconds".format(end_time2 - start_time2))
 
 def RunDiff():
-    subprocess.call(["diff", "result_cuda.txt", "result_serial.txt"])
+    f = open("./result_diff.txt", "w")
+    subprocess.call(["diff", "result_cuda.txt", "result_serial.txt"], stdout=f)
 
     read_serial_data = []
     read_cuda_data   = []

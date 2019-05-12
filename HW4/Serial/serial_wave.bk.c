@@ -26,29 +26,6 @@ float  values[MAXPOINTS+2], 	/* values at time t */
        newval[MAXPOINTS+2]; 	/* values at time (t+dt) */
 
 
-int maxThreadsPerBlock;
-float* valptr;
-float* oldptr;
-float* newptr;
-int* datasizeptr;
-float cuda_val[MAXPOINTS+2];
-
-__global__ void cuda_do_math(float* values, float* oldval, float* newval, int* datasize) {
-	
-	float dtime, c, dx, tau, sqtau;
-	dtime = 0.3;
-	c = 1.0;
-	dx = 1.0;
-	tau= (c * dtime / dx);
-	sqtau = tau * tau;
-	
-	int i = (blockIdx.x * blockDim.x) + threadIdx.x;
-	if (i < (*datasize)) {
-	    newval[i] = (2.0 * values[i]) - oldval[i] + (sqtau *  (-2.0) * values[i]);
-	}
-}
-
-
 /**********************************************************************
  *	Checks input values from parameters
  *********************************************************************/
@@ -123,42 +100,38 @@ void update()
 {
    int i, j;
 
-   int numBlocks = tpoints / maxThreadsPerBlock;
-   if (tpoints % maxThreadsPerBlock != 0) {
-   	numBlocks++;
-   }
    /* Update values for each time step */
    for (i = 1; i<= nsteps; i++) {
-      
-      cuda_do_math<<<numBlocks, maxThreadsPerBlock>>>(valptr, oldptr, newptr, datasizeptr);
-      float* temp;
-      temp = oldptr;
-      oldptr = valptr;
-      valptr = newptr;
-      newptr = temp; 
+      /* Update points along line for this time step */
+      for (j = 1; j <= tpoints; j++) {
+         /* global endpoints */
+         if ((j == 1) || (j  == tpoints))
+            newval[j] = 0.0;
+         else
+            do_math(j);
+      }
+
       /* Update old values with new values */
       for (j = 1; j <= tpoints; j++) {
          oldval[j] = values[j];
          values[j] = newval[j];
       }
    }
-   cudaMemcpy(cuda_val, valptr, sizeof(float) * tpoints, cudaMemcpyDeviceToHost);
 }
 
 /**********************************************************************
  *     Print final results
  *********************************************************************/
-void printfinal_cuda()
+void printfinal()
 {
    int i;
 
    for (i = 1; i <= tpoints; i++) {
-      printf("%6.4f ", cuda_val[i]);
+      printf("%6.4f ", values[i]);
       if (i%10 == 0)
          printf("\n");
    }
 }
-
 
 /**********************************************************************
  *	Main program
@@ -170,51 +143,11 @@ int main(int argc, char *argv[])
 	check_param();
 	printf("Initializing points on the line...\n");
 	init_line();
-
-	int count;
-	cudaGetDeviceCount(&count);
-	if (count == 0) {
-		fprintf(stderr, "Here is no cuda device\n");
-		return 1;
-	}
-
-	int i;
-	for (i = 0; i < count; i++) {
-		cudaDeviceProp prop;
-		if (cudaGetDeviceProperties(&prop, i) == cudaSuccess) {
-            /*
-			printf("max grid size = %d\n", prop.maxGridSize);
-			printf("max threads dim = %d\n", prop.maxThreadsDim);
-			printf("max threads per block = %d\n", prop.maxThreadsPerBlock);
-            */
-			maxThreadsPerBlock = prop.maxThreadsPerBlock;
-		}
-	}
-
-	cudaSetDevice(i);
-
-	/* Allocate global memory on device */
-	cudaMalloc((void**)&valptr, sizeof(float) * tpoints);
-	cudaMalloc((void**)&oldptr, sizeof(float) * tpoints);
-	cudaMalloc((void**)&newptr, sizeof(float) * tpoints);
-	cudaMalloc((void**)&datasizeptr, sizeof(int));
-
-	cudaMemcpy(valptr, values, sizeof(float) * tpoints, cudaMemcpyHostToDevice);	
-	cudaMemcpy(oldptr, oldval, sizeof(float) * tpoints, cudaMemcpyHostToDevice);
-	cudaMemcpy(newptr, newval, sizeof(float) * tpoints, cudaMemcpyHostToDevice);
-	cudaMemcpy(datasizeptr, &tpoints, sizeof(int), cudaMemcpyHostToDevice);
-
 	printf("Updating all points for all time steps...\n");
 	update();
 	printf("Printing final results...\n");
-
-	printfinal_cuda();
-
+	printfinal();
 	printf("\nDone.\n\n");
-	
-	cudaFree(valptr);
-	cudaFree(oldptr);
-	cudaFree(newptr);
 	
 	return 0;
 }
