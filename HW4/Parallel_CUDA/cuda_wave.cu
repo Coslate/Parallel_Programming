@@ -212,9 +212,9 @@ void PrintDevProp(cudaDeviceProp &devProp){
  *********************************************************************/
 int main(int argc, char *argv[])
 {
-	sscanf(argv[1],"%d",&tpoints);
-	sscanf(argv[2],"%d",&nsteps);
-	check_param();
+    sscanf(argv[1],"%d",&tpoints);
+    sscanf(argv[2],"%d",&nsteps);
+    check_param();
 
     // Number of CUDA devices
     int devCount;
@@ -248,26 +248,26 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-	cudaSetDevice(0);
+    cudaSetDevice(0);
     blocks_num = (tpoints+threads_per_block-1)/threads_per_block;
 
     //Malloc mem in GPU for values_d
     HANDLE_ERROR(cudaMalloc((void**) &values_d, tpoints * sizeof(float)));
 
     //Initialization - already merged into kernel function
-	printf("Initializing points on the line...\n");
-	//init_line();
+    printf("Initializing points on the line...\n");
+    //init_line();
 
     //Update - kernel function
-	printf("Updating all points for all time steps...\n");
+    printf("Updating all points for all time steps...\n");
     cuda_update<<<blocks_num, threads_per_block>>>(values_d, tpoints, nsteps);
     //Copy back from GPU to CPU
     HANDLE_ERROR(cudaMemcpy(values, values_d, tpoints*sizeof(float), cudaMemcpyDeviceToHost));
 
     //Print final results
-	printf("Printing final results...\n");
-	printfinal_cuda(tpoints, values);
-	printf("\nDone.\n\n");
+    printf("Printing final results...\n");
+    printfinal_cuda(tpoints, values);
+    printf("\nDone.\n\n");
 	
 	return EXIT_SUCCESS;
 }
