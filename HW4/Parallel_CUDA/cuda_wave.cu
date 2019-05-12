@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
     blocks_num = (tpoints+threads_per_block-1)/threads_per_block;
 
     //Malloc mem in GPU for values_d
-    HANDLE_ERROR(cudaMalloc((void**) &values_d, tpoints * sizeof(float)));
+    HANDLE_ERROR(cudaMalloc((void**) &values_d, tpoints*sizeof(float)));
 
     //Initialization - already merged into kernel function
     printf("Initializing points on the line...\n");
