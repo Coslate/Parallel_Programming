@@ -5274,8 +5274,8 @@ int main(int argc , char *argv[]){
 		}
 		//===========Camera Choose==========/
 		//VideoCapture cap(3);
-		VideoCapture cap(0);
-		VideoCapture cap_scene(1);
+		VideoCapture cap(1);
+		VideoCapture cap_scene(0);
 		//VideoCapture cap("F:\\LAB_new\\LAB\\eye_frame\\eye_frame_source\\NoIRlight\\med_down\\med_down_19.avi");
 
 
