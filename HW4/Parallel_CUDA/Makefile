@@ -15,7 +15,7 @@ all : clean
 test : 
 	/usr/bin/time -f "%e" ${MAIN_OBJECT_EXEC_OUTPUT}$(MAIN_OBJECT_EXEC_MAIN) $(tp) $(ns)
 
-compile_info : 
+compile_info : clean
 	$(CC) $(INCLUDE_FLAGS) $(MAIN_OBJECT_SOURCE_MAIN) -o $(MAIN_OBJECT_EXEC_OUTPUT)$(MAIN_OBJECT_EXEC_MAIN) $(CFLAGS) --resource-usage
 
 compare : 
