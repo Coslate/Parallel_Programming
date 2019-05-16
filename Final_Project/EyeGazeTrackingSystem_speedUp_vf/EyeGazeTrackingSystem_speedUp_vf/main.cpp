@@ -40,8 +40,10 @@ bool outputAvgFps = false;
 char testVarOutFileName[MAX_WORD_LEN];
 char analysisGazeOutputDir [MAX_WORD_LEN]= ".\\Result\\Gaze_Result_Polynomial";
 char testVariancePtsDir[MAX_WORD_LEN] = ".\\Test_Mean_Variance_Data";
+char testVarianceFolder[MAX_WORD_LEN] = ".\\pp_test_med_down_15";
 char imageTestScene[MAX_WORD_LEN] = ".\\testImage\\image_test_scene.jpg";
 char imageTestScene_words[MAX_WORD_LEN] = ".\\testImage\\image_testWords_scene.jpg";
+
 
 
 
@@ -87,6 +89,7 @@ int countCalibrationPatternPtsStep_One_pos = 0;
 int orderOpt;
 int calibrationPts_space = calibrationPattern::Step_space_two;
 int calBrationMethod = calibrationMethod::Polynomial_All;
+int video_num = 15;
 
 
 
@@ -124,7 +127,7 @@ Mat ROI_Leftcorner ;
 Mat ROI_Rightcorner ;
 Point leftCornerOriginalPoint = Point(10,281);
 Point rightCornerOriginalPoint = Point(598,281);		
-bool setEyeCornerAndEyePosReady = false;
+bool setEyeCornerAndEyePosReady = true;
 bool doNotdisplayEyeCorner = false;
 
 
@@ -3052,7 +3055,8 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 												, Point &eyeRefinedIrisCenter , bool &caculateComplete
 												, const bool &calibrationProcedureBegin
 												, deque<int> &posNonlinearRegionEyeQueueY
-												, ofstream &file_time_fpsOut)
+												, ofstream &file_time_fpsOut
+												, VideoWriter &writer_result_roi)
 {	
 	
 	if(printDebug){
@@ -3440,6 +3444,7 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 						double imshow_time_a = omp_get_wtime();
 						imshow("testROI" ,testROI);
 						imshow("Iris_ROI_forModel" , Iris_ROI_forModel);
+						writer_result_roi.write(testROI);
 						double imshow_time_b = omp_get_wtime();					
 					}
 				}
@@ -5171,9 +5176,13 @@ int main(int argc , char *argv[]){
 				sprintf(subjectFileName , "%s" , argv[i+1]);
 			}else if(!strcmp(argv[i] , "-cfilename")){
 				sprintf(calibrationNumTimesName, "%s", argv[i+1]);
+			}else if (!strcmp(argv[i], "-testVarianceFolder")) {
+				sprintf(testVarianceFolder, "%s", argv[i + 1]);
+			}else if (!strcmp(argv[i], "-video_num")) {
+				video_num = atof(argv[i + 1]);
 			}
-
 		}
+
 		std::cout<<"calibrationInterTimePoints = "<<calibrationInterTimePoints<<endl;
 		std::cout<<"calibrationInterMappingFunctionOrder = "<<calibrationInterMappingFunctionOrder<<endl;
 		std::cout<<"calPtsLength = "<<calPtsLength<<endl;
@@ -5187,6 +5196,8 @@ int main(int argc , char *argv[]){
 		std::cout<<"iris_colorModelValidTestingIrisRate_initial = "<<iris_colorModelValidTestingIrisRate_initial<<endl;
 		std::cout<<"iris_colorModelIrisRate_pixelInOthersOne = "<<iris_colorModelIrisRate_pixelInOthersOne <<endl;
 		std::cout<<"calibrationNumTimesName = "<<calibrationNumTimesName <<endl;
+		std::cout <<"testVarianceFolder = " << testVarianceFolder << endl;
+		std::cout <<"video_num = " << video_num << endl;
 
 		if(testSubject){
 			std::cout<<"subjectFileName = "<<subjectFileName <<endl;			
@@ -5273,10 +5284,14 @@ int main(int argc , char *argv[]){
 			}
 		}
 		//===========Camera Choose==========/
+		char video_input_file[MAX_WORD_LEN];
+		sprintf(video_input_file, "C:\\Users\\Coslate\\Parallel_Programming\\Final_Project\\EyeGazeTrackingSystem_speedUp_vf\\EyeGazeTrackingSystem_speedUp_vf\\Test_Mean_Variance_Data\\med_down_%d\\med_down_%d.avi", video_num, video_num);
+		std::cout << "video_input_file = " << video_input_file << std::endl;
 		//VideoCapture cap(3);
 		//VideoCapture cap(0);
 		VideoCapture cap_scene(1);
-		VideoCapture cap("C:\\Users\\Coslate\\Parallel_Programming\\Final_Project\\EyeGazeTrackingSystem_speedUp_vf\\EyeGazeTrackingSystem_speedUp_vf\\Test_Mean_Variance_Data\\med_down_15\\med_down_15.avi");
+		//VideoCapture cap("C:\\Users\\Coslate\\Parallel_Programming\\Final_Project\\EyeGazeTrackingSystem_speedUp_vf\\EyeGazeTrackingSystem_speedUp_vf\\Test_Mean_Variance_Data\\med_down_15\\med_down_15.avi");
+		VideoCapture cap(video_input_file);
 
 
 		//===========Input/Output File Set==========/
@@ -5296,13 +5311,15 @@ int main(int argc , char *argv[]){
 		char result_WhiteBalanceWriteOutFile[MAX_WORD_LEN];
 		char result_CoarseCenterWriteOutFile[MAX_WORD_LEN];
 		char result_Fitting[MAX_WORD_LEN];
+		char result_ROI[MAX_WORD_LEN];
 		sprintf(wirteOutCalVideoFileName , "%s\\Calibration.avi" , analysisGazeOutputDir);
 		sprintf(wirteOutTestVideoFileName , "%s\\GazeTest.avi" , analysisGazeOutputDir);
-		sprintf(result_EyePosWriteOutFile , "%s\\pp_test_med_down_15\\EyePosResult.avi" , testVariancePtsDir);
+		sprintf(result_EyePosWriteOutFile , "%s\\%s\\EyePosResult.avi" , testVariancePtsDir, testVarianceFolder);
 		sprintf(result_BlinkWriteOutFile , "%s\\BlinkResult.avi" , analysisGazeOutputDir);
 		sprintf(result_GazeWriteOutFile , "%s\\GazeResult.avi" , analysisGazeOutputDir);
-		sprintf(result_WhiteBalanceWriteOutFile , "%s\\pp_test_med_down_15\\WhiteBalance.avi" , testVariancePtsDir);
-		sprintf(result_Fitting, "%s\\pp_test_med_down_15\\Fitting.avi", testVariancePtsDir);
+		sprintf(result_WhiteBalanceWriteOutFile , "%s\\%s\\WhiteBalance.avi" , testVariancePtsDir, testVarianceFolder);
+		sprintf(result_Fitting, "%s\\%s\\Fitting.avi", testVariancePtsDir, testVarianceFolder);
+		sprintf(result_ROI, "%s\\%s\\ROI.avi", testVariancePtsDir, testVarianceFolder);
 		sprintf(result_CoarseCenterWriteOutFile , "%s\\CoarseCenter_FrontLight.avi" , analysisGazeOutputDir);
 		
 //#if writeResult
@@ -5349,6 +5366,10 @@ int main(int argc , char *argv[]){
 
 			VideoWriter writer_result_ft(
 						result_Fitting
+						, VideoWriter::fourcc('M', 'J', 'P', 'G'), 15.f, Size(FRAMEW, FRAMEH));// for saving frame
+
+			VideoWriter writer_result_roi(
+						result_ROI
 						, VideoWriter::fourcc('M', 'J', 'P', 'G'), 15.f, Size(FRAMEW, FRAMEH));// for saving frame
 
 		//===========Check Camera Set==========/
@@ -5488,7 +5509,8 @@ int main(int argc , char *argv[]){
 												, eyeRefinedIrisCenter , caculateComplete
 												, calibrationProcedureBegin
 												, posNonlinearRegionEyeQueueY
-												, file_time_fpsOut);	
+												, file_time_fpsOut
+												, writer_result_roi);
 				
 				//============Eye Blinking Detection============/						
 				EyeBlinkDetection(noLimbusFeaturePts , caculateIris_Mask_done
@@ -5902,7 +5924,7 @@ int main(int argc , char *argv[]){
 
 		//======Testing Variance======/
 		if(testVariance){
-			sprintf(testVarOutFileName, "%s\\pp_test_med_down_15", testVariancePtsDir);
+			sprintf(testVarOutFileName, "%s\\%s", testVariancePtsDir, testVarianceFolder);
 			WriteOutTestingData(testVarOutFileName);
 		}		
 
