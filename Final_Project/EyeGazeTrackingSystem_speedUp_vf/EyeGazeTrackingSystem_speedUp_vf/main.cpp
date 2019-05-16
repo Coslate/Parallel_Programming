@@ -1,11 +1,11 @@
-#include <opencv2\opencv.hpp>
-#include <opencv2\features2d.hpp>
-#include <opencv2\imgproc\imgproc_c.h>
-#include <opencv2\core\types_c.h>
-#include <opencv2\core\core.hpp>
-#include <opencv2\highgui\highgui.hpp>
-#include <opencv2\core\operations.hpp>
-#include <opencv2\video\tracking.hpp>
+#include <opencv2/opencv.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/imgproc\imgproc_c.h>
+#include <opencv2/core/types_c.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/operations.hpp>
+#include <opencv2/video/tracking.hpp>
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -5274,9 +5274,9 @@ int main(int argc , char *argv[]){
 		}
 		//===========Camera Choose==========/
 		//VideoCapture cap(3);
-		VideoCapture cap(1);
-		VideoCapture cap_scene(0);
-		//VideoCapture cap("F:\\LAB_new\\LAB\\eye_frame\\eye_frame_source\\NoIRlight\\med_down\\med_down_19.avi");
+		//VideoCapture cap(0);
+		VideoCapture cap_scene(1);
+		VideoCapture cap("C:\\Users\\Coslate\\Parallel_Programming\\Final_Project\\EyeGazeTrackingSystem_speedUp_vf\\EyeGazeTrackingSystem_speedUp_vf\\Test_Mean_Variance_Data\\med_down_15\\med_down_15.avi");
 
 
 		//===========Input/Output File Set==========/
@@ -5295,12 +5295,14 @@ int main(int argc , char *argv[]){
 		char result_GazeWriteOutFile[MAX_WORD_LEN];
 		char result_WhiteBalanceWriteOutFile[MAX_WORD_LEN];
 		char result_CoarseCenterWriteOutFile[MAX_WORD_LEN];
+		char result_Fitting[MAX_WORD_LEN];
 		sprintf(wirteOutCalVideoFileName , "%s\\Calibration.avi" , analysisGazeOutputDir);
 		sprintf(wirteOutTestVideoFileName , "%s\\GazeTest.avi" , analysisGazeOutputDir);
-		sprintf(result_EyePosWriteOutFile , "%s\\EyePosResult.avi" , analysisGazeOutputDir);
+		sprintf(result_EyePosWriteOutFile , "%s\\pp_test_med_down_15\\EyePosResult.avi" , testVariancePtsDir);
 		sprintf(result_BlinkWriteOutFile , "%s\\BlinkResult.avi" , analysisGazeOutputDir);
 		sprintf(result_GazeWriteOutFile , "%s\\GazeResult.avi" , analysisGazeOutputDir);
-		sprintf(result_WhiteBalanceWriteOutFile , "%s\\WhiteBalance.avi" , analysisGazeOutputDir);
+		sprintf(result_WhiteBalanceWriteOutFile , "%s\\pp_test_med_down_15\\WhiteBalance.avi" , testVariancePtsDir);
+		sprintf(result_Fitting, "%s\\pp_test_med_down_15\\Fitting.avi", testVariancePtsDir);
 		sprintf(result_CoarseCenterWriteOutFile , "%s\\CoarseCenter_FrontLight.avi" , analysisGazeOutputDir);
 		
 //#if writeResult
@@ -5336,6 +5338,19 @@ int main(int argc , char *argv[]){
 			//result_CoarseCenterWriteOutFile
 			//, CV_FOURCC('M', 'J', 'P', 'G'), 15.f, Size(FRAMEW, FRAMEH));// for saving frame
 
+
+			VideoWriter writer_result_EyePos(
+						result_EyePosWriteOutFile
+						, VideoWriter::fourcc('M', 'J', 'P', 'G'), 15.f, Size(FRAMEW, FRAMEH));// for saving frame
+
+			VideoWriter writer_result_wh(
+						result_WhiteBalanceWriteOutFile
+						, VideoWriter::fourcc('M', 'J', 'P', 'G'), 15.f, Size(FRAMEW, FRAMEH));// for saving frame
+
+			VideoWriter writer_result_ft(
+						result_Fitting
+						, VideoWriter::fourcc('M', 'J', 'P', 'G'), 15.f, Size(FRAMEW, FRAMEH));// for saving frame
+
 		//===========Check Camera Set==========/
         if(!cap.isOpened()){
                 cout << "Error"; getchar();return -1;
@@ -5364,17 +5379,17 @@ int main(int argc , char *argv[]){
 		while(cap.read(Frame) && cap_scene.read(Scene_image)){
 
 			//===========Camera Distortion Free==========/			
-			Mat temp = Frame.clone();			
-            undistort(temp, Frame, CameraMatrix_Eye, DistCoeffs_Eye);					
+			Mat temp = Frame.clone();
+            undistort(temp, Frame, CameraMatrix_Eye, DistCoeffs_Eye);
 
 			if(!(eyeGazeTestProcedure || calibrationProcedureBegin)){
 				Mat temp = Scene_image.clone();
-				undistort(temp, Scene_image, CameraMatrix_Scene, DistCoeffs_Scene);		
-			}			
+				undistort(temp, Scene_image, CameraMatrix_Scene, DistCoeffs_Scene);
+			}
 
 			//===========Mat Scene_image Resize==========//				
-			if(calibrationProcedureDone && !eyeGazeTestProcedure){						
-				if(changeScene==0){					
+			if(calibrationProcedureDone && !eyeGazeTestProcedure){
+				if(changeScene==0){	
 					Scene_image = Scene_chessboard.clone();
 				}else if(changeScene==1){
 					Scene_image = imread(imageTestScene, cv::IMREAD_COLOR);
@@ -5489,9 +5504,10 @@ int main(int argc , char *argv[]){
 				//---------------Test Variance can be removed finally---------------//
 				if(caculateComplete){
 					++countForColorModelHistValidTesting;
+					centerEstimation_convexHullFineCenter.push_back(eyeRefinedIrisCenter);
 				}
 			}
-			//============Gaze Estimation============/	
+			//============Gaze Estimation============/
 			if(calibrationProcedureDone){
 				if(eyeState==Eyeopen){
 
@@ -5755,7 +5771,7 @@ int main(int argc , char *argv[]){
 			if(key==32/*Space*/){
 				printf("Space\n");
 				waitKey(0);
-			}else if(key==27){	
+			}else if(key==27){
 				break;			
 			}else if(key=='r'){				
 				printf("r");
@@ -5839,6 +5855,12 @@ int main(int argc , char *argv[]){
 
 
 			//============Save Input Frame============/		
+			if (setEyeCornerAndEyePosReady){
+				writer_result_EyePos.write(EyePosition_CenterResult);
+				writer_result_ft.write(EyePosition_Result);
+				writer_result_wh.write(Frame_wh);
+			}
+
 //#if writeResult
 //				writer_result_Gaze.write(Scene_image);
 //
@@ -5864,7 +5886,8 @@ int main(int argc , char *argv[]){
 			Frame_Gray.release();
 			Histogram_Eq.release();
 			Frame_wh.release();	
-			//EyePosition_Result.release();
+			EyePosition_CenterResult.release();
+			EyePosition_Result.release();
 			//Parabola.release();				
 
 			//Frame.u->refcount = 0;
@@ -5879,7 +5902,7 @@ int main(int argc , char *argv[]){
 
 		//======Testing Variance======/
 		if(testVariance){
-			sprintf(testVarOutFileName, "%s\\med_down_19", testVariancePtsDir);
+			sprintf(testVarOutFileName, "%s\\pp_test_med_down_15", testVariancePtsDir);
 			WriteOutTestingData(testVarOutFileName);
 		}		
 
@@ -5890,6 +5913,5 @@ int main(int argc , char *argv[]){
 		cout<<"frame_number = "<<frame_number_outputFps<<endl;
 		cout<<"average fps = "<<1.f/avg_fps<<endl;
 		//EstimationError(groundTruth , irisCenterEstimation);
-		getchar();
 		return 0;
 }

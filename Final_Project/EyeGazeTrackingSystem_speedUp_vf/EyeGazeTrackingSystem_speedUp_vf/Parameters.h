@@ -97,7 +97,7 @@ static const int testUsedH = MonitorH;
 //Debug
 static const bool showDetail = false;
 static const bool printDebug = false;
-static bool testVariance = false;
+static bool testVariance = true;
 static bool thesisClipImage = false;
 static bool thesisClipImageForStarburst = false;
 static const int testNum = 0;
