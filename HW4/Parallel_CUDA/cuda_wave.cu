@@ -155,7 +155,7 @@ __global__ void cuda_update(float *values_d, const int tpoints, const int nsteps
             curr_val= new_val;
         }
         */
-        //unroll 4
+        //unroll 128
         for(int i = 0; i < residue_nstep; ++i){
             new_val = 1.82*curr_val-old_val;
             old_val = curr_val;
