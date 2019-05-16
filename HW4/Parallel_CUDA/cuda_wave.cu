@@ -142,16 +142,43 @@ __global__ void cuda_update(float *values_d, const int tpoints, const int nsteps
 
     if(thread_id < tpoints){
         //init_line()
-        float x  = (float)thread_id/(tpoints - 1);
-        curr_val = __sinf(FAC * x);
-        old_val  = curr_val;
+        float x           = (float)thread_id/(tpoints - 1);
+        int residue_nstep = nsteps%4;
+        curr_val          = __sinf(FAC * x);
+        old_val           = curr_val;
         
         //update()
+        /*
         for(int i = 0; i < nsteps; ++i){
             new_val = 1.82*curr_val-old_val;
             old_val = curr_val;
             curr_val= new_val;
         }
+        */
+        //unroll 4
+        for(int i = 0; i < residue_nstep; ++i){
+            new_val = 1.82*curr_val-old_val;
+            old_val = curr_val;
+            curr_val= new_val;
+        }
+        for(int i = residue_nstep; i < nsteps; i+=4){
+            new_val = 1.82*curr_val-old_val;
+            old_val = curr_val;
+            curr_val= new_val;
+
+            new_val = 1.82*curr_val-old_val;
+            old_val = curr_val;
+            curr_val= new_val;
+
+            new_val = 1.82*curr_val-old_val;
+            old_val = curr_val;
+            curr_val= new_val;
+
+            new_val = 1.82*curr_val-old_val;
+            old_val = curr_val;
+            curr_val= new_val;
+        }
+
         values_d[thread_id] = curr_val;
     }
 }
