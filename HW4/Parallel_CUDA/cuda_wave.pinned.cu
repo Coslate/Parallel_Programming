@@ -23,9 +23,13 @@ int nsteps,                 	/* number of time steps */
     tpoints, 	     		/* total points along string */
     rcode;                  	/* generic return code */
 
-float  values[MAXPOINTS+2]; 	/* values at time t */
+float *values;
+//float  values[MAXPOINTS+2], 	/* values at time t */
 //       oldval[MAXPOINTS+2], 	/* values at time (t-dt) */
 //       newval[MAXPOINTS+2]; 	/* values at time (t+dt) */
+
+int threads_per_block;
+float *values_d;
 
 /**********************************************************************
  *	Handle errors function
@@ -733,10 +737,6 @@ void PrintDevProp(cudaDeviceProp &devProp){
  *********************************************************************/
 int main(int argc, char *argv[])
 {
-
-    int threads_per_block;
-    float *values_d = NULL;
-
     sscanf(argv[1],"%d",&tpoints);
     sscanf(argv[2],"%d",&nsteps);
     check_param();
@@ -786,6 +786,9 @@ int main(int argc, char *argv[])
     //Update - kernel function
     printf("Updating all points for all time steps...\n");
     cuda_update<<<blocks_num, threads_per_block>>>(values_d, tpoints, nsteps);
+    //Allocate pinned mem in host
+    HANDLE_ERROR(cudaMallocHost((void**)&values, tpoints*sizeof(float)) );
+
     //Copy back from GPU to CPU
     HANDLE_ERROR(cudaMemcpy(values, values_d, tpoints*sizeof(float), cudaMemcpyDeviceToHost));
 
@@ -793,9 +796,10 @@ int main(int argc, char *argv[])
     printf("Printing final results...\n");
     printfinal_cuda(tpoints, values);
     printf("\nDone.\n\n");
-
-    //Cleanup
-    cudaFree(values_d);
 	
+    //Cleanup
+    cudaFreeHost(values);
+    cudaFree(values_d);
+
     return EXIT_SUCCESS;
 }
