@@ -103,7 +103,6 @@ bool   do_profiling_white_balance = false;
 double avg_time     = 0;
 double t            = 0;
 vector<int64> time_camera_calibration;
-vector<int64> time_white_balance;
 vector<int64> time_cvt_color;
 vector<int64> time_hist_equal;
 vector<int64> time_iris_model_handling;
@@ -116,6 +115,8 @@ vector<int64> time_eye_position_detection_limbus_feature_detection;
 vector<int64> time_eye_position_detection_center_calculation;
 vector<int64> time_eye_position_detection_refresh_iris_ROI_region;
 vector<int64> time_eye_position_test;
+vector<int64> time_white_balance_parallel;
+vector<int64> time_white_balance_serial;
 
 /*Eye Gaze Testing*/
 int testNumOfPts = 16;
@@ -348,9 +349,9 @@ inline void Draw_Cross(Mat &image, int centerx, int centery, int x_cross_length,
 }
 
 
-inline double remap(uchar &v, const double &min, const double &max){
-	return (v-min)/(double)(max-min);
-}
+//inline double remap(uchar &v, const double &min, const double &max){
+//	return (v-min)/(double)(max-min);
+//}
 
 
 inline bool checkpoint(const int &x ,const int &y , const Mat &src){
@@ -387,6 +388,254 @@ inline const float& DistanceCaculateEuclidean(const Point2f &x1 , const Point2f 
 	return sqrtf(vectorLineX1X2.x*vectorLineX1X2.x + vectorLineX1X2.y*vectorLineX1X2.y);
 }
 
+inline void Parallel_MinMax_Process1(const Mat &src1, double &min_1, double &max_1, const int remain_threads) {
+	//minMaxLoc(src1, &min_1, &max_1, NULL, NULL);
+
+	if (remain_threads > 0) {
+		//Mat min_val_cand = Mat::zeros(1, remain_threads, CV_64F);
+		//Mat max_val_cand = Mat::zeros(1, remain_threads, CV_64F);
+		double *min_val_cand = new double[remain_threads]();
+		double *max_val_cand = new double[remain_threads]();
+		min_1 = FLT_MAX;
+		max_1 = -FLT_MAX;
+
+		cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process_find_min_max_arr(src1, min_val_cand, max_val_cand, remain_threads));
+		//cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process_find_min_max(src1, min_val_cand1, max_val_cand1, remain_threads));
+		//minMaxLoc(min_val_cand, &min_1, NULL, NULL, NULL);
+		//minMaxLoc(max_val_cand, NULL, &max_1, NULL, NULL);
+		for (int i = 0; i < remain_threads; ++i) {
+			if (min_1 > min_val_cand[i]) {
+				min_1 = min_val_cand[i];
+			}
+			if (max_1 < max_val_cand[i]) {
+				max_1 = max_val_cand[i];
+			}
+		}
+
+		delete min_val_cand;
+		delete max_val_cand;
+	}else {
+		minMaxLoc(src1, &min_1, &max_1, NULL, NULL);
+	}
+}
+
+inline void Parallel_MinMax_Process2(const Mat &src1, const Mat&src2, double &min_1, double &max_1, double &min_2, double &max_2, const int remain_threads) {
+	//minMaxLoc(src1, &min_1, &max_1, NULL, NULL);
+	//minMaxLoc(src2, &min_2, &max_2, NULL, NULL);
+
+	if (remain_threads > 0) {
+		//Mat min_val_cand1 = Mat::zeros(1, remain_threads, CV_64F);
+		//Mat max_val_cand1 = Mat::zeros(1, remain_threads, CV_64F);
+		//Mat min_val_cand2 = Mat::zeros(1, remain_threads, CV_64F);
+		//Mat max_val_cand2 = Mat::zeros(1, remain_threads, CV_64F);
+		double *min_val_cand1 = new double[remain_threads]();
+		double *max_val_cand1 = new double[remain_threads]();
+		double *min_val_cand2 = new double[remain_threads]();
+		double *max_val_cand2 = new double[remain_threads]();
+		min_1 = min_2 = FLT_MAX;
+		max_1 = max_2 = -FLT_MAX;
+
+		//cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process_find_min_max(src1, min_val_cand1, max_val_cand1, remain_threads));
+		//minMaxLoc(min_val_cand1, &min_1, NULL, NULL, NULL);
+		//minMaxLoc(max_val_cand1, NULL, &max_1, NULL, NULL);
+
+		//cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process_find_min_max(src2, min_val_cand2, max_val_cand2, remain_threads));
+		//minMaxLoc(min_val_cand2, &min_2, NULL, NULL, NULL);
+		//minMaxLoc(max_val_cand2, NULL, &max_2, NULL, NULL);
+
+		cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process_find_min_max_arr(src1, min_val_cand1, max_val_cand1, remain_threads));
+		cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process_find_min_max_arr(src2, min_val_cand2, max_val_cand2, remain_threads));
+
+		for (int i = 0; i < remain_threads; ++i) {
+			if (min_1 > min_val_cand1[i]) {
+				min_1 = min_val_cand1[i];
+			}
+			if (max_1 < max_val_cand1[i]) {
+				max_1 = max_val_cand1[i];
+			}
+			if (min_2 > min_val_cand2[i]) {
+				min_2 = min_val_cand2[i];
+			}
+			if (max_2 < max_val_cand2[i]) {
+				max_2 = max_val_cand2[i];
+			}
+		}
+		delete min_val_cand1;
+		delete max_val_cand1;
+		delete min_val_cand2;
+		delete max_val_cand2;
+	}
+	else {
+		minMaxLoc(src1, &min_1, &max_1, NULL, NULL);
+		minMaxLoc(src2, &min_2, &max_2, NULL, NULL);
+	}
+}
+
+inline void Parallel_MinMax_Process3(const Mat &src1, const Mat&src2, const Mat&src3, double &min_1, double &max_1, double &min_2, double &max_2, double &min_3, double &max_3, const int remain_threads) {
+	//minMaxLoc(src1, &min_1, &max_1, NULL, NULL);
+	//minMaxLoc(src2, &min_2, &max_2, NULL, NULL);
+	//minMaxLoc(src3, &min_3, &max_3, NULL, NULL);
+
+	if (remain_threads > 0) {
+		//Mat min_val_cand1 = Mat::zeros(1, remain_threads, CV_64F);
+		//Mat max_val_cand1 = Mat::zeros(1, remain_threads, CV_64F);
+		//Mat min_val_cand2 = Mat::zeros(1, remain_threads, CV_64F);
+		//Mat max_val_cand2 = Mat::zeros(1, remain_threads, CV_64F);
+		double *min_val_cand1 = new double[remain_threads]();
+		double *max_val_cand1 = new double[remain_threads]();
+		double *min_val_cand2 = new double[remain_threads]();
+		double *max_val_cand2 = new double[remain_threads]();
+		double *min_val_cand3 = new double[remain_threads]();
+		double *max_val_cand3 = new double[remain_threads]();
+		min_1 = min_2 = min_3 = FLT_MAX;
+		max_1 = max_2 = max_3 = -FLT_MAX;
+
+
+		//cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process_find_min_max(src1, min_val_cand1, max_val_cand1, remain_threads));
+		//minMaxLoc(min_val_cand1, &min_1, NULL, NULL, NULL);
+		//minMaxLoc(max_val_cand1, NULL, &max_1, NULL, NULL);
+
+		//cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process_find_min_max(src2, min_val_cand2, max_val_cand2, remain_threads));
+		//minMaxLoc(min_val_cand2, &min_2, NULL, NULL, NULL);
+		//minMaxLoc(max_val_cand2, NULL, &max_2, NULL, NULL);
+
+		cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process_find_min_max_arr(src1, min_val_cand1, max_val_cand1, remain_threads));
+		cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process_find_min_max_arr(src2, min_val_cand2, max_val_cand2, remain_threads));
+		cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process_find_min_max_arr(src3, min_val_cand3, max_val_cand3, remain_threads));
+
+		for (int i = 0; i < remain_threads; ++i) {
+			if (min_1 > min_val_cand1[i]) {
+				min_1 = min_val_cand1[i];
+			}
+			if (max_1 < max_val_cand1[i]) {
+				max_1 = max_val_cand1[i];
+			}
+			if (min_2 > min_val_cand2[i]) {
+				min_2 = min_val_cand2[i];
+			}
+			if (max_2 < max_val_cand2[i]) {
+				max_2 = max_val_cand2[i];
+			}
+			if (min_3 > min_val_cand3[i]) {
+				min_3 = min_val_cand3[i];
+			}
+			if (max_3 < max_val_cand3[i]) {
+				max_3 = max_val_cand3[i];
+			}
+		}
+		delete min_val_cand1;
+		delete max_val_cand1;
+		delete min_val_cand2;
+		delete max_val_cand2;
+		delete min_val_cand3;
+		delete max_val_cand3;
+	}
+	else {
+		minMaxLoc(src1, &min_1, &max_1, NULL, NULL);
+		minMaxLoc(src2, &min_2, &max_2, NULL, NULL);
+		minMaxLoc(src3, &min_3, &max_3, NULL, NULL);
+	}
+}
+
+inline void Parallel_MinMax_Process3_ver2(const Mat3b &src, Mat3b &out, const Mat &src1, const Mat&src2, const Mat&src3, const int remain_threads) {
+	double *min_val_cand1 = new double[remain_threads]();
+	double *max_val_cand1 = new double[remain_threads]();
+	double *min_val_cand2 = new double[remain_threads]();
+	double *max_val_cand2 = new double[remain_threads]();
+	double *min_val_cand3 = new double[remain_threads]();
+	double *max_val_cand3 = new double[remain_threads]();
+	double MIN_b = FLT_MAX;
+	double MIN_g = FLT_MAX;
+	double MIN_r = FLT_MAX;
+	double MAX_b = -FLT_MAX;
+	double MAX_g = -FLT_MAX;
+	double MAX_r = -FLT_MAX;
+
+
+	/*FIND MAX PIXEL VALUE*/
+	cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process3_find_min_max_arr(src1, src2, src3, min_val_cand1, max_val_cand1, min_val_cand2, max_val_cand2, min_val_cand3, max_val_cand3, remain_threads));
+
+	for (int i = 0; i < remain_threads; ++i) {
+		if (MIN_b > min_val_cand1[i]) {
+			MIN_b = min_val_cand1[i];
+		}
+		if (MAX_b < max_val_cand1[i]) {
+			MAX_b = max_val_cand1[i];
+		}
+		if (MIN_g > min_val_cand2[i]) {
+			MIN_g = min_val_cand2[i];
+		}
+		if (MAX_g < max_val_cand2[i]) {
+			MAX_g = max_val_cand2[i];
+		}
+		if (MIN_r > min_val_cand3[i]) {
+			MIN_r = min_val_cand3[i];
+		}
+		if (MAX_r < max_val_cand3[i]) {
+			MAX_r = max_val_cand3[i];
+		}
+	}
+
+	delete min_val_cand1;
+	delete max_val_cand1;
+	delete min_val_cand2;
+	delete max_val_cand2;
+	delete min_val_cand3;
+	delete max_val_cand3;
+
+	//std::cout << "=================Parallel : ===============" << std::endl;
+	//std::cout << "min_b = " << MIN_b << ", max_b = " << MAX_b << std::endl;
+	//std::cout << "min_g = " << MIN_g << ", max_g = " << MAX_g << std::endl;
+	//std::cout << "min_r = " << MIN_r << ", max_r = " << MAX_r << std::endl;
+
+	/*Remapping*/
+	cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process3_remap(src, out, MIN_b, MAX_b, MIN_g, MAX_g, MIN_r, MAX_r, remain_threads));
+}
+
+inline void Parallel_Component_Stretching(const Mat3b &src, Mat3b &dst, const int thread_num) {
+	dst = Mat::zeros(src.rows, src.cols, CV_8UC3);
+
+	double MAX_r;
+	double MAX_g;
+	double MAX_b;
+
+	double MIN_r;
+	double MIN_g;
+	double MIN_b;
+
+	Point minLoc_r;
+	Point minLoc_g;
+	Point minLoc_b;
+
+	Point maxLoc_r;
+	Point maxLoc_g;
+	Point maxLoc_b;
+
+	/*SPLIT SRC TO RGB CHANNELS*/
+	vector<Mat> bgr_planes;
+	vector<thread> threads;
+	split(src, bgr_planes);
+
+	double time_loc_start;
+	double time_loc_end;
+
+	if (do_profiling) {
+		time_loc_start = getTickCount();
+	}
+
+	/*FIND MAX PIXEL VALUE*//*Remapping*/
+	Parallel_MinMax_Process3_ver2(src, dst, bgr_planes[0], bgr_planes[1], bgr_planes[2], thread_num);
+
+	//std::cout << "=================Parallel : ===============" << std::endl;
+	//std::cout << "min_b = " << MIN_b << ", max_b = " << MAX_b << std::endl;
+	//std::cout << "min_g = " << MIN_g << ", max_g = " << MAX_g << std::endl;
+	//std::cout << "min_r = " << MIN_r << ", max_r = " << MAX_r << std::endl;
+
+	if (do_profiling || do_profiling_white_balance) {
+		time_loc_end = getTickCount();
+		time_white_balance_parallel.push_back(time_loc_end - time_loc_start);
+	}
+}
 
 inline void Component_Stretching(const Mat3b &src , Mat3b &dst){
 	dst = Mat::zeros(src.rows , src.cols , CV_8UC3);
@@ -412,16 +661,26 @@ inline void Component_Stretching(const Mat3b &src , Mat3b &dst){
 	split( src, bgr_planes );
 	
 	/*FIND MAX PIXEL VALUE*/
-    minMaxLoc( bgr_planes[0], &MIN_b, &MAX_b, &minLoc_b, &maxLoc_b);	
+	double time_start_loc;
+	double time_end_loc;
+
+	if (do_profiling || do_profiling_white_balance) {
+		time_start_loc = getTickCount();
+	}
+
+    minMaxLoc( bgr_planes[0], &MIN_b, &MAX_b, &minLoc_b, &maxLoc_b);
 	minMaxLoc( bgr_planes[1], &MIN_g, &MAX_g, &minLoc_g, &maxLoc_g );
 	minMaxLoc( bgr_planes[2], &MIN_r, &MAX_r, &minLoc_r, &maxLoc_r );
-	
+
+	//std::cout << "=================Serial : ===============" << std::endl;
+	//std::cout << "min_b = " << MIN_b << ", max_b = " << MAX_b << std::endl;
+	//std::cout << "min_g = " << MIN_g << ", max_g = " << MAX_g << std::endl;
+	//std::cout << "min_r = " << MIN_r << ", max_r = " << MAX_r << std::endl;
+
 	cv::Mat_<cv::Vec3b>::const_iterator it = src.begin();
 	cv::Mat_<cv::Vec3b>::const_iterator itend = src.end();
 	cv::Mat_<cv::Vec3b>::iterator itout = dst.begin();
 
-	//normalize(bgr_planes[0], b_hist, 0, , NORM_MINMAX, -1, Mat() );
-	
 	for(;it!=itend;++it , ++itout){
 		Vec3b vi = *it;
 
@@ -442,6 +701,10 @@ inline void Component_Stretching(const Mat3b &src , Mat3b &dst){
 		*itout = vout;
 	}
 
+	if (do_profiling || do_profiling_white_balance) {
+		time_end_loc = getTickCount();
+		time_white_balance_serial.push_back(time_end_loc - time_start_loc);
+	}
 }
 
 inline void Morphology_Operations(const Mat &src , Mat &dst , const int &operation, const int &morph_size ,  const int &morph_elem = 0){  
@@ -5394,6 +5657,7 @@ int main(int argc , char *argv[]){
 		char result_EyePosWriteOutFile[MAX_WORD_LEN];
 		char result_BlinkWriteOutFile[MAX_WORD_LEN];
 		char result_GazeWriteOutFile[MAX_WORD_LEN];
+		char result_InputFrameOutFile[MAX_WORD_LEN];
 		char result_WhiteBalanceWriteOutFile[MAX_WORD_LEN];
 		char result_CoarseCenterWriteOutFile[MAX_WORD_LEN];
 		char result_Fitting[MAX_WORD_LEN];
@@ -5405,6 +5669,7 @@ int main(int argc , char *argv[]){
 		sprintf(result_BlinkWriteOutFile , "%s\\BlinkResult.avi" , analysisGazeOutputDir);
 		sprintf(result_GazeWriteOutFile , "%s\\GazeResult.avi" , analysisGazeOutputDir);
 		sprintf(result_WhiteBalanceWriteOutFile , "%s\\%s\\WhiteBalance.avi" , testVariancePtsDir, testVarianceFolder);
+		sprintf(result_InputFrameOutFile, "%s\\%s\\InputFrame.avi", testVariancePtsDir, testVarianceFolder);
 		sprintf(result_Fitting, "%s\\%s\\Fitting.avi", testVariancePtsDir, testVarianceFolder);
 		sprintf(result_ROI, "%s\\%s\\ROI.avi", testVariancePtsDir, testVarianceFolder);
 		sprintf(result_CoarseCenterWriteOutFile , "%s\\CoarseCenter_FrontLight.avi" , analysisGazeOutputDir);
@@ -5445,6 +5710,10 @@ int main(int argc , char *argv[]){
 
 			VideoWriter writer_result_EyePos(
 						result_EyePosWriteOutFile
+						, VideoWriter::fourcc('M', 'J', 'P', 'G'), 15.f, Size(FRAMEW, FRAMEH));// for saving frame
+
+			VideoWriter writer_result_input(
+						result_InputFrameOutFile
 						, VideoWriter::fourcc('M', 'J', 'P', 'G'), 15.f, Size(FRAMEW, FRAMEH));// for saving frame
 
 			VideoWriter writer_result_wh(
@@ -5519,15 +5788,11 @@ int main(int argc , char *argv[]){
 			}
 			resize(Scene_image , Scene_image , Size(calUsedW , calUsedH) , 0 , 0 , INTER_NEAREST);		
 			//============White Balence============/
-			if (do_profiling || do_profiling_white_balance) {
-				time_start = getTickCount();
-			}
-			Component_Stretching(Frame , Frame_wh);		
-			if (do_profiling || do_profiling_white_balance) {
-				time_end = getTickCount();
-				time_white_balance.push_back(time_end - time_start);
-			}
+			//Component_Stretching(Frame , Frame_wh);	
+			Parallel_Component_Stretching(Frame, Frame_wh, thread_num);
 
+			//waitKey(0);
+		
 			//===========Check Whether Already Set Eye Corner==========/			
 			if(!setEyeCornerAndEyePosReady && !doNotdisplayEyeCorner){
 				Draw_Cross(Frame_wh, leftCornerOriginalPoint.x, leftCornerOriginalPoint.y, 20, 20, Scalar(255 , 255 , 50) , 3);		
@@ -5880,7 +6145,7 @@ int main(int argc , char *argv[]){
 			if (do_profiling) {
 				t = (double)(
 				//(time_camera_calibration.size()>0 ? time_camera_calibration.back() : 0)                                                      +
-				(time_white_balance.size()>0? time_white_balance.back():0)                                                                   + 
+				(time_white_balance_parallel.size()>0? time_white_balance_parallel.back():0)                                                                   +
 				(time_cvt_color.size()    >0? time_cvt_color.back():0)                                                                       +
 				(time_hist_equal.size()   >0? time_hist_equal.back():0)                                                                      +
 				(time_iris_model_handling.size()   >0 ? time_iris_model_handling.back():0)                                                   +
@@ -5894,7 +6159,7 @@ int main(int argc , char *argv[]){
 				) / getTickFrequency();
 			}else {
 				t = (double)(getTickCount() - t +
-					(time_white_balance.size()>0?time_white_balance.back():0)
+					(time_white_balance_parallel.size()>0? time_white_balance_parallel.back():0)
 					) / getTickFrequency();
 			}
 
@@ -5950,6 +6215,7 @@ int main(int argc , char *argv[]){
 				imshow("Scene",Scene_image);		
 				imshow("White_Balence",Frame_wh);										
 			}
+			imshow("Input_Frame", Frame);
 			imshow("White_Balence",Frame_wh);		
 
 			if(calibrationProcedureBegin){
@@ -6079,6 +6345,7 @@ int main(int argc , char *argv[]){
 			if (setEyeCornerAndEyePosReady){
 				writer_result_EyePos.write(EyePosition_CenterResult);
 				writer_result_ft.write(EyePosition_Result);
+				writer_result_input.write(Frame);
 				writer_result_wh.write(Frame_wh);
 			}
 
@@ -6135,15 +6402,15 @@ int main(int argc , char *argv[]){
 
 		//======Profiling======/
 		if (do_profiling) {
-			//if (time_white_balance.size() > 0) {
-			//	avg_time = std::accumulate(time_camera_calibration.begin(), time_camera_calibration.end(), 0);
-			//	avg_time = (avg_time / getTickFrequency()) / time_camera_calibration.size();
-			//	file_time_fpsOut << "time_camera_calibration     = " << avg_time << endl;
-			//}
-			if (time_white_balance.size() > 0) {
-				avg_time = std::accumulate(time_white_balance.begin(), time_white_balance.end(), 0);
-				avg_time = (avg_time / getTickFrequency()) / time_white_balance.size();
-				file_time_fpsOut << "time_white_balance          = " << avg_time << endl;
+			if (time_white_balance_serial.size() > 0) {
+				avg_time = std::accumulate(time_white_balance_serial.begin(), time_white_balance_serial.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_white_balance_serial.size();
+				file_time_fpsOut << ">> time_white_balance_serial     = " << avg_time << endl;
+			}
+			if (time_white_balance_parallel.size() > 0) {
+				avg_time = std::accumulate(time_white_balance_parallel.begin(), time_white_balance_parallel.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_white_balance_parallel.size();
+				file_time_fpsOut << ">> time_white_balance_parallel   = " << avg_time << endl;
 			}
 			if (time_cvt_color.size() > 0) {
 				avg_time = std::accumulate(time_cvt_color.begin(), time_cvt_color.end(), 0);

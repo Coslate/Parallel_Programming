@@ -594,6 +594,187 @@ public:
 	}
 };
 
+class Parallel_process_find_min_max : public cv::ParallelLoopBody
+{
+
+private:
+	cv::Mat img;
+	int diff;
+	cv::Mat &min_val_cand;
+	cv::Mat &max_val_cand;
+public:
+	Parallel_process_find_min_max(cv::Mat inputImgage, cv::Mat &min_val_cand, cv::Mat &max_val_cand, int diffVal)
+		: img(inputImgage), diff(diffVal), min_val_cand(min_val_cand), max_val_cand(max_val_cand) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+
+		//#pragma omp parallel for		
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			cv::Mat in(img, cv::Rect(0, (img.rows / diff)*i,
+				img.cols, img.rows / diff));
+			double min_val;
+			double max_val;
+
+			minMaxLoc(in, &min_val, &max_val, NULL, NULL);
+
+			min_val_cand.at<double>(0, i) = min_val;
+			max_val_cand.at<double>(0, i) = max_val;
+		}
+	}
+};
+
+class Parallel_process_find_min_max_arr : public cv::ParallelLoopBody
+{
+
+private:
+	cv::Mat img;
+	int diff;
+	double *min_val_cand;
+	double *max_val_cand;
+public:
+	Parallel_process_find_min_max_arr(cv::Mat inputImgage, double *min_val_cand, double *max_val_cand, int diffVal)
+		: img(inputImgage), diff(diffVal), min_val_cand(min_val_cand), max_val_cand(max_val_cand) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+
+		//#pragma omp parallel for		
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			cv::Mat in(img, cv::Rect(0, (img.rows / diff)*i,
+				img.cols, img.rows / diff));
+			double min_val;
+			double max_val;
+
+			minMaxLoc(in, &min_val, &max_val, NULL, NULL);
+
+
+			min_val_cand[i] = min_val;
+			max_val_cand[i] = max_val;
+		}
+	}
+};
+
+class Parallel_process3_find_min_max_arr : public cv::ParallelLoopBody
+{
+
+private:
+	cv::Mat img1;
+	cv::Mat img2;
+	cv::Mat img3;
+	int diff;
+	double *min_val_cand1;
+	double *max_val_cand1;
+	double *min_val_cand2;
+	double *max_val_cand2;
+	double *min_val_cand3;
+	double *max_val_cand3;
+public:
+	Parallel_process3_find_min_max_arr(cv::Mat inputImgage1, cv::Mat inputImgage2, cv::Mat inputImgage3, double *min_val_cand1, double *max_val_cand1, double *min_val_cand2, double *max_val_cand2, double *min_val_cand3, double *max_val_cand3, int diffVal)
+		: img1(inputImgage1), img2(inputImgage2), img3(inputImgage3),
+		  diff(diffVal), min_val_cand1(min_val_cand1), max_val_cand1(max_val_cand1),
+		  min_val_cand2(min_val_cand2), max_val_cand2(max_val_cand2), 
+		  min_val_cand3(min_val_cand3), max_val_cand3(max_val_cand3){}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+
+		//#pragma omp parallel for		
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			double min_val;
+			double max_val;
+			cv::Mat in1(img1, cv::Rect(0, (img1.rows / diff)*i,
+				img1.cols, img1.rows / diff));
+			cv::Mat in2(img2, cv::Rect(0, (img2.rows / diff)*i,
+				img2.cols, img2.rows / diff));
+			cv::Mat in3(img3, cv::Rect(0, (img3.rows / diff)*i,
+				img3.cols, img3.rows / diff));
+
+			minMaxLoc(in1, &min_val, &max_val, NULL, NULL);
+			min_val_cand1[i] = min_val;
+			max_val_cand1[i] = max_val;
+
+			minMaxLoc(in2, &min_val, &max_val, NULL, NULL);
+			min_val_cand2[i] = min_val;
+			max_val_cand2[i] = max_val;
+
+			minMaxLoc(in3, &min_val, &max_val, NULL, NULL);
+			min_val_cand3[i] = min_val;
+			max_val_cand3[i] = max_val;
+		}
+	}
+};
+
+inline double remap(uchar &v, const double &min, const double &max) {
+	return (v - min) / (double)(max - min);
+}
+
+class Parallel_process3_remap : public cv::ParallelLoopBody
+{
+
+private:
+	cv::Mat3b img;
+	cv::Mat3b &retVal;
+	int MIN_b, MIN_g, MIN_r;
+	int MAX_b, MAX_g, MAX_r;
+	int diff;
+public:
+	Parallel_process3_remap(cv::Mat3b inputImgage, cv::Mat3b &retVal, int MIN_b, int MAX_b, int MIN_g, int MAX_g, int MIN_r, int MAX_r, int diffVal)
+		: img(inputImgage), retVal(retVal), diff(diffVal),
+		  MIN_b(MIN_b), MAX_b(MAX_b), MIN_g(MIN_g), MAX_g(MAX_g), MIN_r(MIN_r), MAX_r(MAX_r){}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+
+		//#pragma omp parallel for		
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			double min_val;
+			double max_val;
+			cv::Mat3b in(img, cv::Rect(0, (img.rows / diff)*i,
+				img.cols, img.rows / diff));
+			cv::Mat3b out(retVal, cv::Rect(0, (retVal.rows / diff)*i,
+				retVal.cols, retVal.rows / diff));
+
+
+			cv::Mat_<cv::Vec3b>::const_iterator it = in.begin();
+			cv::Mat_<cv::Vec3b>::const_iterator itend = in.end();
+			cv::Mat_<cv::Vec3b>::iterator itout = out.begin();
+
+			for (; it != itend; ++it, ++itout) {
+				Vec3b vi = *it;
+
+				double R_new;
+				double G_new;
+				double B_new;
+
+				R_new = remap(vi.val[2], MIN_r, MAX_r);
+				G_new = remap(vi.val[1], MIN_g, MAX_g);
+				B_new = remap(vi.val[0], MIN_b, MAX_b);
+
+				cv::Vec3b vout;
+
+				vout.val[0] = B_new * 255;
+				vout.val[1] = G_new * 255;
+				vout.val[2] = R_new * 255;
+
+				*itout = vout;
+			}
+		}
+	}
+};
+
 inline void ParallelOtsu(cv::Mat inputImgage, cv::Mat& outImage, int type, int thread_num) {
 	int *threshold_cand = new int[thread_num]();
 	double *var_cand = new double[thread_num]();
