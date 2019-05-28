@@ -1,7 +1,9 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <ios>
+#include <iostream>
+#include <stdint.h>
+#include <stdlib.h>
 
 typedef struct
 {
