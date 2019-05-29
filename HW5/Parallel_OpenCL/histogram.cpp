@@ -105,7 +105,6 @@ int main(int argc, char *argv[]){
     cl_platform_id      plat_id         = 0;
     cl_device_id        device_id       = 0;
 	cl_uint             device_num      = 0;
-    cl_context          context         = 0;
     cl_int              ret_code        = 0;
     size_t              device_num_b    = 0;
     size_t              value_b         = 0;
@@ -114,14 +113,17 @@ int main(int argc, char *argv[]){
     char*               driver_version  = NULL;
     char*               opencl_version  = NULL;
     cl_uint             maxComputeUnits = 0;
+    cl_uint             maxWorkItemDimension = 0;
+    size_t             *maxWorkItemSize = NULL;
+    size_t              maxWorkGroupSize = 0;
+    cl_context          context;
 
 
     //-------------------Get platform & device---------------------//
     HANDLE_ERROR(clGetPlatformIDs(1, &plat_id, &plat_num));
-    //HANDLE_ERROR(clGetDeviceIDs(plat_id, CL_DEVICE_TYPE_ALL, 0, NULL, &device_num));
     HANDLE_ERROR(clGetDeviceIDs(plat_id, CL_DEVICE_TYPE_GPU, 1, &device_id, &device_num));
-    //HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_MAX_WORK_ITEM_SIZES, sizeof(max_work), &max_work, NULL));
     
+    /*
     HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_NAME, 0, NULL, &device_num_b));
     device_name = (char*) malloc(device_num_b);
     HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_NAME, device_num_b, device_name, &device_num_b));
@@ -138,19 +140,17 @@ int main(int argc, char *argv[]){
     opencl_version = (char*) malloc(value_b);
     HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_OPENCL_C_VERSION, value_b, opencl_version, NULL));
 
+    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, sizeof(maxWorkItemDimension), &maxWorkItemDimension, NULL));
+
     HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(maxComputeUnits), &maxComputeUnits, NULL));
 
-    //-------------------Create context---------------------//
-    context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret_code);
-    HANDLE_ERROR(ret_code);
+    maxWorkItemSize = new size_t[maxWorkItemDimension]();
+    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_MAX_WORK_ITEM_SIZES, maxWorkItemDimension*sizeof(size_t), maxWorkItemSize, NULL));
 
-    //-------------------Create a command queue---------------------//
-    cl_command_queue command_queue = clCreateCommandQueue(context, device_id, 0, &ret_code);
-    HANDLE_ERROR(ret_code);
+    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(maxWorkGroupSize), &maxWorkGroupSize, NULL));
+    */
 
-
-
-
+    /*
     std::cout<<"plat_num         = "<<plat_num<<std::endl;
     std::cout<<"plat_id          = "<<plat_id<<std::endl;
     std::cout<<"device_num       = "<<device_num<<std::endl;
@@ -161,6 +161,19 @@ int main(int argc, char *argv[]){
     std::cout<<"driver_version   = "<<driver_version<<std::endl;
     std::cout<<"opencl_version   = "<<opencl_version<<std::endl;
     std::cout<<"max_compite_units= "<<maxComputeUnits<<std::endl;
+    std::cout<<"max_work_item_dimension = "<<maxWorkItemDimension<<std::endl;
+    for(int i=0;i<3;++i){
+        std::cout<<"max_work_item_size["<<i<<"] = "<<maxWorkItemSize[i]<<std::endl;
+    }
+    std::cout<<"max_work_group_size = "<<maxWorkGroupSize<<std::endl;
+    */
+    //-------------------Create context---------------------//
+    context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret_code);
+    HANDLE_ERROR(ret_code);
+
+    //-------------------Create a command queue---------------------//
+    cl_command_queue command_queue = clCreateCommandQueue(context, device_id, 0, &ret_code);
+    HANDLE_ERROR(ret_code);
 
     clReleaseContext(context);
     return EXIT_SUCCESS;
