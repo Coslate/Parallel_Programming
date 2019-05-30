@@ -6,7 +6,6 @@
 #include <iostream>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
@@ -219,11 +218,11 @@ inline void LoadProgram(cl_context context, const char *file_name, cl_program &p
     program_buffer[program_size] = '\0';
     fread(program_buffer, sizeof(char), program_size, program_handle);
     fclose(program_handle);
-    printf("source code = \n %s\n", program_buffer);
+    printf("%s\n", buffer);
 
     // create program from buffer
     program = clCreateProgramWithSource(context, 1, (const char**) &program_buffer, &program_size, &ret_code);
-    HANDLE_ERROR(ret_code);
+    HANDLE_ERROR(ret_code)
     free(program_buffer);
 }
 
@@ -324,10 +323,10 @@ int main(int argc, char *argv[]){
 
             //------------------Memory allocation on host------------------//
             uint32_t *hist_calc_h = (uint32_t*) malloc (sizeof(uint32_t) * 256 * 3);
-            memset(hist_calc_h, 0, sizeof(uint32_t) * 256 * 4);
+            memset(hist_calc_h, 0, sizeof(uint32_t) * 256 * 3);
 
             //------------------Memory allocation on device------------------//
-            cl_mem orig_img_d = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(uint8_t) * 4 * img->size, NULL, &ret_code); 
+            cl_mem orig_img_d = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(uint32_t) * img->size, NULL, &ret_code); 
             HANDLE_ERROR(ret_code);
             cl_mem hist_calc_d = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint32_t) * 256 * 3, NULL, &ret_code); 
             HANDLE_ERROR(ret_code);
@@ -340,27 +339,13 @@ int main(int argc, char *argv[]){
             //-------------------Set kernel arguments-----------------//
             clSetKernelArg(kernel_obj, 0, sizeof(cl_mem), &orig_img_d);
             clSetKernelArg(kernel_obj, 1, sizeof(cl_mem), &hist_calc_d);
-            clSetKernelArg(kernel_obj, 2, sizeof(uint32_t), &img->height);
-            clSetKernelArg(kernel_obj, 3, sizeof(uint32_t), &img->weight);
 
-            //-------------------Execute kernel function--------------//
-            size_t local_work_size[3] = {32, 32, 1};
-            int num_groups_x = (img->weight+local_work_size[0]-1)/local_work_size[0];
-            int num_groups_y = (img->height+local_work_size[1]-1)/local_work_size[1];
-            size_t global_work_size[3] = {num_groups_x * local_work_size[0], num_groups_y * local_work_size[1], 4};
-
-            HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_obj, 3, NULL, global_work_size, local_work_size, 0, NULL, NULL));
-
-            //-------------------Read the result back to host--------//
-            HANDLE_ERROR(clEnqueueReadBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 3, hist_calc_h, 0, NULL, NULL));
 
             uint32_t R[256];
             uint32_t G[256];
             uint32_t B[256];
 
-            memcpy(R, &hist_calc_h[0], 256*sizeof(uint32_t));
-            memcpy(G, &hist_calc_h[256], 256*sizeof(uint32_t));
-            memcpy(B, &hist_calc_h[512], 256*sizeof(uint32_t));
+            histogram(img,R,G,B);
 
             int max = 0;
             for(int i=0;i<256;i++){
@@ -389,18 +374,11 @@ int main(int argc, char *argv[]){
 
             std::string newfile = "hist_" + std::string(filename); 
             writebmp(newfile.c_str(), ret);
-
-            free(hist_calc_h);
-            HANDLE_ERROR(clReleaseMemObject(hist_calc_d));
-            HANDLE_ERROR(clReleaseMemObject(orig_img_d));
         }
     }else{
         printf("Usage: ./hist <img.bmp> [img2.bmp ...]\n");
     }
 
-    HANDLE_ERROR(clReleaseKernel(kernel_obj));
-    HANDLE_ERROR(clReleaseProgram(kernel_program));
-    HANDLE_ERROR(clReleaseCommandQueue(command_queue));
-    HANDLE_ERROR(clReleaseContext(context));
+    clReleaseContext(context);
     return EXIT_SUCCESS;
 }
