@@ -316,7 +316,6 @@ int main(int argc, char *argv[]){
 
     }
 
-    //HANDLE_ERROR(clBuildProgram(kernel_program, 1, &device_id, NULL, NULL, NULL));
     cl_kernel kernel_obj = clCreateKernel(kernel_program, "histogram", &ret_code);
     HANDLE_ERROR(ret_code);
 
@@ -347,6 +346,35 @@ int main(int argc, char *argv[]){
             HANDLE_ERROR(clEnqueueWriteBuffer(command_queue, orig_img_d, CL_TRUE, 0, sizeof(uint8_t) * 4 * img->size, img->data, 0, NULL, NULL));
             HANDLE_ERROR(clEnqueueWriteBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 4, hist_calc_h, 0, NULL, NULL));
 
+            //debug
+            /*
+            uint8_t *img_debug_h = (uint8_t*) malloc (sizeof(uint8_t) * 4 * img->size);
+            memset(img_debug_h, 0, sizeof(uint8_t) * 4 * img->size);
+            HANDLE_ERROR(clEnqueueReadBuffer(command_queue, orig_img_d, CL_TRUE, 0, sizeof(uint8_t) * 4 * img->size, img_debug_h, 0, NULL, NULL));
+
+
+            std::cout<<"image->size = "<<img->size<<std::endl<<"image-data = "<<std::endl;
+            for (int j = 0; j < img->size; j++){
+                if(j%2==0 && j!=0){
+                    std::cout<<std::endl;
+                }
+
+                RGB &pixel = img->data[j];
+                std::cout<<(unsigned)pixel.R<<" "<<(unsigned)pixel.G<<" "<<(unsigned)pixel.B<<" "<<(unsigned)pixel.align<<" ";
+            }
+
+            std::cout<<std::endl;
+            std::cout<<"image->size = "<<img->size<<std::endl<<"img_debug_h = "<<std::endl;
+            for (int j = 0; j < 4*img->size; j+=4){
+                if(j%8==0 && j!=0){
+                    std::cout<<std::endl;
+                }
+
+                std::cout<<(unsigned)img_debug_h[j]<<" "<<(unsigned)img_debug_h[j+1]<<" "<<(unsigned)img_debug_h[j+2]<<" "<<(unsigned)img_debug_h[j+3]<<" ";
+            }
+            std::cout<<std::endl;
+            */
+
 
             //-------------------Set kernel arguments-----------------//
             clSetKernelArg(kernel_obj, 0, sizeof(cl_mem), &orig_img_d);
@@ -363,7 +391,7 @@ int main(int argc, char *argv[]){
             HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_obj, 3, NULL, global_work_size, local_work_size, 0, NULL, NULL));
 
             //-------------------Read the result back to host--------//
-            HANDLE_ERROR(clEnqueueReadBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 3, hist_calc_h, 0, NULL, NULL));
+            HANDLE_ERROR(clEnqueueReadBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 4, hist_calc_h, 0, NULL, NULL));
 
             uint32_t R[256];
             uint32_t G[256];

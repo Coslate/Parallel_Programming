@@ -5,6 +5,6 @@ __kernel void histogram(__global unsigned char *orig_img_d, __global unsigned in
 
     if(thread_id_x < width && thread_id_y < height){
         int color_offset    = thread_id_z << 8;
-        atomic_inc(&hist_calc_d[color_offset + orig_img_d[thread_id_y * width + thread_id_x + thread_id_z]]);
+        atomic_inc(&hist_calc_d[color_offset + orig_img_d[(thread_id_y * width + thread_id_x)*4 + thread_id_z]]);
     }
 }
