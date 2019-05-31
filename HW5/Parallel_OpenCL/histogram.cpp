@@ -219,7 +219,7 @@ inline void LoadProgram(cl_context context, const char *file_name, cl_program &p
     program_buffer[program_size] = '\0';
     fread(program_buffer, sizeof(char), program_size, program_handle);
     fclose(program_handle);
-    printf("source code = \n %s\n", program_buffer);
+    //printf("source code = \n %s\n", program_buffer);
 
     // create program from buffer
     program = clCreateProgramWithSource(context, 1, (const char**) &program_buffer, &program_size, &ret_code);
@@ -300,12 +300,23 @@ int main(int argc, char *argv[]){
     HANDLE_ERROR(ret_code);
 
     //-------------------Create a command queue---------------------//
-    cl_command_queue command_queue = clCreateCommandQueue(context, device_id, 0, &ret_code);
+    cl_command_queue command_queue = clCreateCommandQueueWithProperties(context, device_id, NULL, &ret_code);
     HANDLE_ERROR(ret_code);
 
     //-------------------Build kernel------------------------------//
     LoadProgram(context, "./histogram.cl", kernel_program);
-    HANDLE_ERROR(clBuildProgram(kernel_program, 1, &device_id, NULL, NULL, NULL));
+    cl_int err_t = clBuildProgram(kernel_program, 1, &device_id, NULL, NULL, NULL);
+    if(err_t != CL_SUCCESS){
+        size_t len;
+        clGetProgramBuildInfo(kernel_program, device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
+        char *log = new char[len];
+        clGetProgramBuildInfo(kernel_program, device_id, CL_PROGRAM_BUILD_LOG, len, log, NULL);
+
+        std::cout<<"log = "<<log<<std::endl;
+
+    }
+
+    //HANDLE_ERROR(clBuildProgram(kernel_program, 1, &device_id, NULL, NULL, NULL));
     cl_kernel kernel_obj = clCreateKernel(kernel_program, "histogram", &ret_code);
     HANDLE_ERROR(ret_code);
 
@@ -323,13 +334,13 @@ int main(int argc, char *argv[]){
             std::cout << img->weight << ":" << img->height << "\n";
 
             //------------------Memory allocation on host------------------//
-            uint32_t *hist_calc_h = (uint32_t*) malloc (sizeof(uint32_t) * 256 * 3);
+            uint32_t *hist_calc_h = (uint32_t*) malloc (sizeof(uint32_t) * 256 * 4);
             memset(hist_calc_h, 0, sizeof(uint32_t) * 256 * 4);
 
             //------------------Memory allocation on device------------------//
             cl_mem orig_img_d = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(uint8_t) * 4 * img->size, NULL, &ret_code); 
             HANDLE_ERROR(ret_code);
-            cl_mem hist_calc_d = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint32_t) * 256 * 3, NULL, &ret_code); 
+            cl_mem hist_calc_d = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint32_t) * 256 * 4, NULL, &ret_code); 
             HANDLE_ERROR(ret_code);
             
             //------------------Memory host to device------------------//
@@ -361,6 +372,42 @@ int main(int argc, char *argv[]){
             memcpy(R, &hist_calc_h[0], 256*sizeof(uint32_t));
             memcpy(G, &hist_calc_h[256], 256*sizeof(uint32_t));
             memcpy(B, &hist_calc_h[512], 256*sizeof(uint32_t));
+
+            std::cout<<"R = "<<std::endl;
+            for(int j=0;j<256;++j){
+                if(j%10==0 && j!=0){
+                    std::cout<<std::endl;
+                    std::cout<<R[j]<<" ";
+                }else{
+                    std::cout<<R[j]<<" ";
+                }
+            }
+            std::cout<<std::endl;
+            std::cout<<"Done. "<<std::endl;
+
+            std::cout<<"G = "<<std::endl;
+            for(int j=0;j<256;++j){
+                if(j%10==0 && j!=0){
+                    std::cout<<std::endl;
+                    std::cout<<G[j]<<" ";
+                }else{
+                    std::cout<<G[j]<<" ";
+                }
+            }
+            std::cout<<std::endl;
+            std::cout<<"Done. "<<std::endl;
+
+            std::cout<<"B = "<<std::endl;
+            for(int j=0;j<256;++j){
+                if(j%10==0 && j!=0){
+                    std::cout<<std::endl;
+                    std::cout<<B[j]<<" ";
+                }else{
+                    std::cout<<B[j]<<" ";
+                }
+            }
+            std::cout<<std::endl;
+            std::cout<<"Done. "<<std::endl;
 
             int max = 0;
             for(int i=0;i<256;i++){

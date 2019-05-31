@@ -1,4 +1,4 @@
-__kernel void histogram(__global uint8_t *orig_img_d, __global uint32_t *hist_calc_d, const int height, const int width){
+__kernel void histogram(__global unsigned char *orig_img_d, __global unsigned int *hist_calc_d, const int height, const int width){
     int thread_id_x       = get_global_id(0);
     int thread_id_y       = get_global_id(1);
     int thread_id_z       = get_global_id(2);

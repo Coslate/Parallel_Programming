@@ -15,6 +15,8 @@ all : clean
 test : 
 	/usr/bin/time -f "%e" ${MAIN_OBJECT_EXEC_OUTPUT}$(MAIN_OBJECT_EXEC_MAIN) $(bp)
 
+compare : 
+	./compare.py $(bp)
 clean : 
 	rm -rf $(MAIN_OBJECT_EXEC_OUTPUT)$(MAIN_OBJECT_EXEC_MAIN)
 	rm -rf ./hist*.bmp
