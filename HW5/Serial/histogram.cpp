@@ -128,12 +128,61 @@ int main(int argc, char *argv[])
             Image *img = readbmp(filename);
 
             std::cout << img->weight << ":" << img->height << "\n";
+            /*
+            std::cout<<"image->size = "<<img->size<<std::endl<<"image-data = "<<std::endl;
+            for (int j = 0; j < img->size; j++){
+                if(j%2==0 && j!=0){
+                    std::cout<<std::endl;
+                }
+
+                RGB &pixel = img->data[j];
+                std::cout<<(unsigned)pixel.R<<" "<<(unsigned)pixel.G<<" "<<(unsigned)pixel.B<<" "<<(unsigned)pixel.align<<" ";
+            }
+
+            std::cout<<std::endl;
+            */
 
             uint32_t R[256];
             uint32_t G[256];
             uint32_t B[256];
 
             histogram(img,R,G,B);
+            
+            std::cout<<"R = "<<std::endl;
+            for(int j=0;j<256;++j){
+                if(j%10==0 && j!=0){
+                    std::cout<<std::endl;
+                    std::cout<<R[j]<<" ";
+                }else{
+                    std::cout<<R[j]<<" ";
+                }
+            }
+            std::cout<<std::endl;
+            std::cout<<"Done. "<<std::endl;
+
+            std::cout<<"G = "<<std::endl;
+            for(int j=0;j<256;++j){
+                if(j%10==0 && j!=0){
+                    std::cout<<std::endl;
+                    std::cout<<G[j]<<" ";
+                }else{
+                    std::cout<<G[j]<<" ";
+                }
+            }
+            std::cout<<std::endl;
+            std::cout<<"Done. "<<std::endl;
+
+            std::cout<<"B = "<<std::endl;
+            for(int j=0;j<256;++j){
+                if(j%10==0 && j!=0){
+                    std::cout<<std::endl;
+                    std::cout<<B[j]<<" ";
+                }else{
+                    std::cout<<B[j]<<" ";
+                }
+            }
+            std::cout<<std::endl;
+            std::cout<<"Done. "<<std::endl;
 
             int max = 0;
             for(int i=0;i<256;i++){
