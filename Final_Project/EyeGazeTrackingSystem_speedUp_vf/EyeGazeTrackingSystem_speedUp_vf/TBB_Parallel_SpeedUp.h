@@ -13,12 +13,12 @@ class Parallel_process_gau : public cv::ParallelLoopBody
     {
 
     private:
-        Mat img;
+        const Mat &img;
         Mat& retVal;
         const int size;
         int diff;
     public:
-        Parallel_process_gau(cv::Mat inputImgage, cv::Mat& outImage, 
+        Parallel_process_gau(const cv::Mat &inputImgage, cv::Mat& outImage, 
                         const int &sizeVal, int diffVal)
                     : img(inputImgage), retVal(outImage), 
                       size(sizeVal), diff(diffVal){}
@@ -32,11 +32,12 @@ class Parallel_process_gau : public cv::ParallelLoopBody
                 /* divide image in 'diff' number 
                 of parts and process simultaneously */
                 cv::Mat in(img, cv::Rect(0, (img.rows/diff)*i, 
-                           img.cols, img.rows/diff));				
+                           img.cols, img.rows/diff));		
                 cv::Mat out(retVal, cv::Rect(0, (retVal.rows/diff)*i, 
                                     retVal.cols, retVal.rows/diff));
 
-				GaussianBlur( in, out, Size(size,size) , 0);		
+
+				GaussianBlur( in, out, Size(size,size) , 0);
             }
         }
 };
@@ -45,23 +46,22 @@ class Parallel_process_er : public cv::ParallelLoopBody
     {
 
     private:
-        Mat img;
+        const Mat &img;
+		const Mat &element;
         Mat& retVal;
-		Mat element;
-        const int size;
 		int struc_elem;
         int diff;
     public:
-        Parallel_process_er(cv::Mat inputImgage, cv::Mat& outImage, 
-                         const int &sizeVal, int struc_ele, int diffVal)
+        Parallel_process_er(const cv::Mat &inputImgage, cv::Mat& outImage, 
+                            const cv::Mat &struc_ele, int diffVal)
                     : img(inputImgage), retVal(outImage), 
-                      size(sizeVal) , struc_elem(struc_ele), diff(diffVal){}
+                      element(struc_ele), diff(diffVal){}
 
         virtual void operator()(const cv::Range& range) const
         {
 
 			//#pragma omp parallel for
-			Mat element = getStructuringElement( struc_elem, Size( 2*size + 1, 2*size+1 ), Point( size, size ) );
+			//Mat element = getStructuringElement( struc_elem, Size( 2*size + 1, 2*size+1 ), Point( size, size ) );
             for(int i = range.start; i < range.end; ++i)
             {
                 /* divide image in 'diff' number 
@@ -82,23 +82,22 @@ class Parallel_process_di : public cv::ParallelLoopBody
     {
 
     private:
-        Mat img;
+        const Mat &img;
+		const Mat &element;
         Mat& retVal;
-		Mat element;
-        const int size;
 		int struc_elem;
         int diff;
     public:
-        Parallel_process_di(cv::Mat inputImgage, cv::Mat& outImage, 
-                         const int &sizeVal, int struc_ele, int diffVal)
+        Parallel_process_di(const cv::Mat &inputImgage, cv::Mat& outImage, 
+							const cv::Mat &struc_ele, int diffVal)
                     : img(inputImgage), retVal(outImage), 
-					size(sizeVal), struc_elem(struc_ele), diff(diffVal){}
+					  element(struc_ele), diff(diffVal){}
 
         virtual void operator()(const cv::Range& range) const
         {
 
 			//#pragma omp parallel for
-			Mat element = getStructuringElement( struc_elem, Size( 2*size + 1, 2*size+1 ), Point( size, size ) );
+			//Mat element = getStructuringElement( struc_elem, Size( 2*size + 1, 2*size+1 ), Point( size, size ) );
             for(int i = range.start; i < range.end; ++i)
             {
                 /* divide image in 'diff' number 
@@ -116,48 +115,16 @@ class Parallel_process_di : public cv::ParallelLoopBody
         }
 };
 
-class Parallel_process_thre : public cv::ParallelLoopBody
-    {
-
-    private:
-        Mat img;
-        Mat& retVal;
-		Mat element;        
-        int diff;
-    public:
-        Parallel_process_thre(cv::Mat inputImgage, cv::Mat& outImage, 
-                         int diffVal)
-                    : img(inputImgage), retVal(outImage), 
-                      diff(diffVal){}
-
-        virtual void operator()(const cv::Range& range) const
-        {
-
-			//#pragma omp parallel for			
-            for(int i = range.start; i < range.end; ++i)
-            {
-                /* divide image in 'diff' number 
-                of parts and process simultaneously */
-                cv::Mat in(img, cv::Rect(0, (img.rows/diff)*i, 
-                           img.cols, img.rows/diff));			
-                cv::Mat out(retVal, cv::Rect(0, (retVal.rows/diff)*i, 
-                                    retVal.cols, retVal.rows/diff));
-				threshold(in, out, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-							
-            }
-        }
-};
-
 class Parallel_process_threBinary : public cv::ParallelLoopBody
     {
 
     private:
-        Mat img;
+		const Mat &img;
         Mat& retVal;
 		const int thresholdValue;
         int diff;
     public:
-        Parallel_process_threBinary(cv::Mat inputImgage, cv::Mat& outImage, 
+        Parallel_process_threBinary(const cv::Mat &inputImgage, cv::Mat& outImage,
                          const int &thresh_value, int diffVal)
                     : img(inputImgage), retVal(outImage), 
 					thresholdValue(thresh_value), diff(diffVal){}
@@ -184,11 +151,11 @@ class Parallel_process_scharrX: public cv::ParallelLoopBody
     {
 
     private:
-        Mat img;
+        const Mat &img;
         Mat& retVal;       
         int diff;
     public:
-        Parallel_process_scharrX(cv::Mat inputImgage, cv::Mat& outImage, 
+        Parallel_process_scharrX(const cv::Mat &inputImgage, cv::Mat& outImage, 
                          int diffVal)
                     : img(inputImgage), retVal(outImage), 
                       diff(diffVal){}
@@ -216,11 +183,11 @@ class Parallel_process_scharrY: public cv::ParallelLoopBody
     {
 
     private:
-        Mat img;
+        const Mat &img;
         Mat& retVal;       
         int diff;
     public:
-        Parallel_process_scharrY(cv::Mat inputImgage, cv::Mat& outImage, 
+        Parallel_process_scharrY(const cv::Mat &inputImgage, cv::Mat& outImage, 
                          int diffVal)
                     : img(inputImgage), retVal(outImage), 
                       diff(diffVal){}
@@ -248,12 +215,12 @@ class Parallel_process_convertScaleAbs : public cv::ParallelLoopBody
     {
 
     private:
-        Mat img;
+        const Mat &img;
         Mat& retVal;
 		Mat element;        
         int diff;
     public:
-        Parallel_process_convertScaleAbs(cv::Mat inputImgage, cv::Mat& outImage, 
+        Parallel_process_convertScaleAbs(const cv::Mat &inputImgage, cv::Mat& outImage, 
                          int diffVal)
                     : img(inputImgage), retVal(outImage), 
                       diff(diffVal){}
@@ -280,12 +247,12 @@ class Parallel_process_normalize : public cv::ParallelLoopBody
     {
 
     private:
-        Mat img;
+        const Mat &img;
         Mat& retVal;
 		Mat element;        
         int diff;
     public:
-        Parallel_process_normalize(cv::Mat inputImgage, cv::Mat& outImage, 
+        Parallel_process_normalize(const cv::Mat &inputImgage, cv::Mat& outImage, 
                          int diffVal)
                     : img(inputImgage), retVal(outImage), 
                       diff(diffVal){}
@@ -316,13 +283,13 @@ class Parallel_process_bitwiseand : public cv::ParallelLoopBody
     {
 
     private:
-        Mat imgA;
-		Mat imgB;
+        const Mat &imgA;
+		const Mat &imgB;
         Mat& retVal;
 		Mat element;        
         int diff;
     public:
-        Parallel_process_bitwiseand(cv::Mat inputImgageA, cv::Mat inputImgageB, cv::Mat& outImage, 
+        Parallel_process_bitwiseand(const cv::Mat &inputImgageA, const cv::Mat &inputImgageB, cv::Mat& outImage, 
                          int diffVal)
                     : imgA(inputImgageA), imgB(inputImgageB), retVal(outImage), 
                       diff(diffVal){}
@@ -342,8 +309,7 @@ class Parallel_process_bitwiseand : public cv::ParallelLoopBody
                 cv::Mat out(retVal, cv::Rect(0, (retVal.rows/diff)*i, 
                                     retVal.cols, retVal.rows/diff));
 
-				bitwise_and(inA , inB, out);	
-							
+				bitwise_and(inA, inB, out);
             }
         }
 };
@@ -353,12 +319,12 @@ class Parallel_process_displayIrisRegion : public cv::ParallelLoopBody
     {
 
     private:
-        Mat img;		
+        const Mat &img;		
         Mat& retVal;
 		Mat element;        
         int diff;
     public:
-        Parallel_process_displayIrisRegion(cv::Mat inputImgage, cv::Mat& outImage, 
+        Parallel_process_displayIrisRegion(const cv::Mat &inputImgage, cv::Mat& outImage, 
                          int diffVal)
                     : img(inputImgage), retVal(outImage), 
                       diff(diffVal){}
@@ -388,15 +354,15 @@ class Parallel_process_displayIrisRegion : public cv::ParallelLoopBody
         }
 };
 
-class Parallel_process_sub : public cv::ParallelLoopBody
+class Parallel_process_inv : public cv::ParallelLoopBody
 {
 
 private:
-	Mat img;
+	const Mat &img;
 	Mat& retVal;
 	int diff;
 public:
-	Parallel_process_sub(cv::Mat inputImgage, cv::Mat& outImage, int diffVal)
+	Parallel_process_inv(const cv::Mat &inputImgage, cv::Mat& outImage, int diffVal)
 		: img(inputImgage), retVal(outImage), diff(diffVal){}
 
 	virtual void operator()(const cv::Range& range) const
@@ -416,18 +382,51 @@ public:
 	}
 };
 
+class Parallel_process_sub : public cv::ParallelLoopBody
+{
+
+private:
+	const Mat &imgA;
+	const Mat &imgB;
+	Mat& retVal;
+	int diff;
+public:
+	Parallel_process_sub(const cv::Mat &inputImgageA, const cv::Mat &inputImgageB, cv::Mat& outImage, int diffVal)
+		: imgA(inputImgageA), imgB(inputImgageB), retVal(outImage), diff(diffVal) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+
+		//#pragma omp parallel for		
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			cv::Mat inA(imgA, cv::Rect(0, (imgA.rows / diff)*i,
+				imgA.cols, imgA.rows / diff));
+			cv::Mat inB(imgB, cv::Rect(0, (imgB.rows / diff)*i,
+				imgB.cols, imgB.rows / diff));
+			cv::Mat out(retVal, cv::Rect(0, (retVal.rows / diff)*i,
+				retVal.cols, retVal.rows / diff));
+
+			cv::subtract(inA, inB, out);
+			//out = inA - inB;
+		}
+	}
+};
+
 class Parallel_process_hist : public cv::ParallelLoopBody
 {
 
 private:
-	Mat img;
+	const Mat &img;
 	int diff;
 	int *hist;
 	std::mutex &mtx;
 	int  &total_hist_sum;
 
 public:
-	Parallel_process_hist(cv::Mat inputImgage, int *hist, std::mutex &mtx, int &total_hist_sum, int diffVal)
+	Parallel_process_hist(const cv::Mat &inputImgage, int *hist, std::mutex &mtx, int &total_hist_sum, int diffVal)
 		: img(inputImgage), diff(diffVal), hist(hist), mtx(mtx), total_hist_sum(total_hist_sum){}
 
 	virtual void operator()(const cv::Range& range) const
@@ -556,87 +555,16 @@ public:
 	}
 };
 
-class Parallel_process_my_apply_threshold : public cv::ParallelLoopBody
-{
-
-private:
-	Mat img;
-	Mat& retVal;
-	int diff;
-	int threshold_value;
-public:
-	Parallel_process_my_apply_threshold(cv::Mat inputImgage, cv::Mat& outImage, int threshold_value, int diffVal)
-		: img(inputImgage), retVal(outImage), diff(diffVal), threshold_value(threshold_value) {}
-
-	virtual void operator()(const cv::Range& range) const
-	{
-
-		//#pragma omp parallel for		
-		for (int i = range.start; i < range.end; ++i)
-		{
-			/* divide image in 'diff' number
-			of parts and process simultaneously */
-			cv::Mat in(img, cv::Rect(0, (img.rows / diff)*i,
-				img.cols, img.rows / diff));
-			cv::Mat out(retVal, cv::Rect(0, (retVal.rows / diff)*i,
-				retVal.cols, retVal.rows / diff));
-			
-			for (int r = 0; r<in.rows; ++r) {
-				for (int c = 0; c<in.cols; ++c) {
-					if (in.at<uchar>(r, c) > threshold_value) {
-						out.at<uchar>(r, c) = 255;
-					}else {
-						out.at<uchar>(r, c) = 0;
-					}
-				}
-			}
-		}
-	}
-};
-
-class Parallel_process_find_min_max : public cv::ParallelLoopBody
-{
-
-private:
-	cv::Mat img;
-	int diff;
-	cv::Mat &min_val_cand;
-	cv::Mat &max_val_cand;
-public:
-	Parallel_process_find_min_max(cv::Mat inputImgage, cv::Mat &min_val_cand, cv::Mat &max_val_cand, int diffVal)
-		: img(inputImgage), diff(diffVal), min_val_cand(min_val_cand), max_val_cand(max_val_cand) {}
-
-	virtual void operator()(const cv::Range& range) const
-	{
-
-		//#pragma omp parallel for		
-		for (int i = range.start; i < range.end; ++i)
-		{
-			/* divide image in 'diff' number
-			of parts and process simultaneously */
-			cv::Mat in(img, cv::Rect(0, (img.rows / diff)*i,
-				img.cols, img.rows / diff));
-			double min_val;
-			double max_val;
-
-			minMaxLoc(in, &min_val, &max_val, NULL, NULL);
-
-			min_val_cand.at<double>(0, i) = min_val;
-			max_val_cand.at<double>(0, i) = max_val;
-		}
-	}
-};
-
 class Parallel_process_find_min_max_arr : public cv::ParallelLoopBody
 {
 
 private:
-	cv::Mat img;
+	const cv::Mat &img;
 	int diff;
 	double *min_val_cand;
 	double *max_val_cand;
 public:
-	Parallel_process_find_min_max_arr(cv::Mat inputImgage, double *min_val_cand, double *max_val_cand, int diffVal)
+	Parallel_process_find_min_max_arr(const cv::Mat &inputImgage, double *min_val_cand, double *max_val_cand, int diffVal)
 		: img(inputImgage), diff(diffVal), min_val_cand(min_val_cand), max_val_cand(max_val_cand) {}
 
 	virtual void operator()(const cv::Range& range) const
@@ -665,9 +593,9 @@ class Parallel_process3_find_min_max_arr : public cv::ParallelLoopBody
 {
 
 private:
-	cv::Mat img1;
-	cv::Mat img2;
-	cv::Mat img3;
+	const cv::Mat &img1;
+	const cv::Mat &img2;
+	const cv::Mat &img3;
 	int diff;
 	double *min_val_cand1;
 	double *max_val_cand1;
@@ -676,7 +604,7 @@ private:
 	double *min_val_cand3;
 	double *max_val_cand3;
 public:
-	Parallel_process3_find_min_max_arr(cv::Mat inputImgage1, cv::Mat inputImgage2, cv::Mat inputImgage3, double *min_val_cand1, double *max_val_cand1, double *min_val_cand2, double *max_val_cand2, double *min_val_cand3, double *max_val_cand3, int diffVal)
+	Parallel_process3_find_min_max_arr(const cv::Mat &inputImgage1, const cv::Mat &inputImgage2, const cv::Mat &inputImgage3, double *min_val_cand1, double *max_val_cand1, double *min_val_cand2, double *max_val_cand2, double *min_val_cand3, double *max_val_cand3, int diffVal)
 		: img1(inputImgage1), img2(inputImgage2), img3(inputImgage3),
 		  diff(diffVal), min_val_cand1(min_val_cand1), max_val_cand1(max_val_cand1),
 		  min_val_cand2(min_val_cand2), max_val_cand2(max_val_cand2), 
@@ -714,6 +642,98 @@ public:
 	}
 };
 
+class Parallel_process_moment : public cv::ParallelLoopBody
+{
+
+private:
+	const cv::Mat &img;
+	int diff;
+	double *m10_array;
+	double *m01_array;
+	double *m00_array;
+public:
+	Parallel_process_moment(const cv::Mat &inputImgage, double *m10_array, double *m01_array, double *m00_array, int diffVal)
+		: img(inputImgage), diff(diffVal),
+		m10_array(m10_array), m01_array(m01_array), m00_array(m00_array) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+
+		//#pragma omp parallel for		
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			double local_dM01 = 0;
+			double local_dM10 = 0;
+			double local_dM00 = 0;
+			double max_val;
+			double work_load = img.rows / diff;
+			cv::Mat in(img, cv::Rect(0, (work_load)*i,
+				img.cols, work_load));
+
+
+			for (int r = i*work_load; r<work_load*(i + 1); ++r) {
+				for (int c = 0; c<in.cols; ++c) {
+					local_dM01 += (double)(in.at<uchar>(r - i*work_load, c))*r;
+				}
+			}
+			for (int r = i*work_load; r<work_load*(i + 1); ++r) {
+				for (int c = 0; c<in.cols; ++c) {
+					local_dM10 += (double)(in.at<uchar>(r - i*work_load, c))*c;
+				}
+			}
+			for (int r = i*work_load; r<work_load*(i + 1); ++r) {
+				for (int c = 0; c<in.cols; ++c) {
+					local_dM00 += (double)(in.at<uchar>(r - i*work_load, c));
+				}
+			}
+
+			m01_array[i] = local_dM01;
+			m10_array[i] = local_dM10;
+			m00_array[i] = local_dM00;
+		}
+	}
+};
+
+class Parallel_process_moment_vector : public cv::ParallelLoopBody
+{
+
+private:
+	const vector<Point> &img;
+	int diff;
+	double *m10_array;
+	double *m01_array;
+public:
+	Parallel_process_moment_vector(const vector<Point> &inputImgage, double *m10_array, double *m01_array, int diffVal)
+		: img(inputImgage), diff(diffVal),
+		m10_array(m10_array), m01_array(m01_array) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+
+		//#pragma omp parallel for		
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			double local_dM01 = 0;
+			double local_dM10 = 0;
+			double work_load = img.size() / diff;
+
+			for (int r = i*work_load; r<i*(work_load+1); ++r) {
+				//for (int c = 0; c<in.cols; ++c) {
+				local_dM01 += img[r].y;
+				local_dM10 += img[r].x;
+				//}
+			}
+
+			m01_array[i] = local_dM01/work_load;
+			m10_array[i] = local_dM10/work_load;
+		}
+	}
+};
+
 inline double remap(uchar &v, const double &min, const double &max) {
 	return (v - min) / (double)(max - min);
 }
@@ -722,13 +742,13 @@ class Parallel_process3_remap : public cv::ParallelLoopBody
 {
 
 private:
-	cv::Mat3b img;
+	const cv::Mat3b &img;
 	cv::Mat3b &retVal;
 	int MIN_b, MIN_g, MIN_r;
 	int MAX_b, MAX_g, MAX_r;
 	int diff;
 public:
-	Parallel_process3_remap(cv::Mat3b inputImgage, cv::Mat3b &retVal, int MIN_b, int MAX_b, int MIN_g, int MAX_g, int MIN_r, int MAX_r, int diffVal)
+	Parallel_process3_remap(const cv::Mat3b &inputImgage, cv::Mat3b &retVal, int MIN_b, int MAX_b, int MIN_g, int MAX_g, int MIN_r, int MAX_r, int diffVal)
 		: img(inputImgage), retVal(retVal), diff(diffVal),
 		  MIN_b(MIN_b), MAX_b(MAX_b), MIN_g(MIN_g), MAX_g(MAX_g), MIN_r(MIN_r), MAX_r(MAX_r){}
 
@@ -775,7 +795,7 @@ public:
 	}
 };
 
-inline void ParallelOtsu(cv::Mat inputImgage, cv::Mat& outImage, int type, int thread_num) {
+inline void ParallelOtsu(const cv::Mat &inputImgage, cv::Mat& outImage, int type, int thread_num) {
 	int *threshold_cand = new int[thread_num]();
 	double *var_cand = new double[thread_num]();
 	int *hist = new int[256]();

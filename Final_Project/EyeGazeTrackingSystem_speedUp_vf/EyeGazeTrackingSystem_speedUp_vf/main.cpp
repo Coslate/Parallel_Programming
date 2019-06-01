@@ -40,7 +40,7 @@ using namespace cv;
 bool outputAvgFps = true;
 
 //Multithread
-int thread_num = 8;
+int thread_num = 1;
 
 //Testing File
 char testVarOutFileName[MAX_WORD_LEN];
@@ -116,7 +116,31 @@ vector<int64> time_eye_position_detection_center_calculation;
 vector<int64> time_eye_position_detection_refresh_iris_ROI_region;
 vector<int64> time_eye_position_test;
 vector<int64> time_white_balance_parallel;
-vector<int64> time_white_balance_serial;
+//vector<int64> time_white_balance_serial;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district1;
+//vector<int64> time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur;
+//vector<int64> time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district2;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district3;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_0;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1_1;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1_2;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1_3;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1_4;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1_5;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_2;
+//vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_2_core;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_3;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_3_1;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_3_2;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_3_3;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_3_4;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_4;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_5;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_local_sum;
+vector<int64> time_eye_position_detection_eyelid_feature_detection_district5;
 
 /*Eye Gaze Testing*/
 int testNumOfPts = 16;
@@ -661,12 +685,12 @@ inline void Component_Stretching(const Mat3b &src , Mat3b &dst){
 	split( src, bgr_planes );
 	
 	/*FIND MAX PIXEL VALUE*/
-	double time_start_loc;
-	double time_end_loc;
+	//double time_start_loc;
+	//double time_end_loc;
 
-	if (do_profiling || do_profiling_white_balance) {
-		time_start_loc = getTickCount();
-	}
+	//if (do_profiling || do_profiling_white_balance) {
+	//	time_start_loc = getTickCount();
+	//}
 
     minMaxLoc( bgr_planes[0], &MIN_b, &MAX_b, &minLoc_b, &maxLoc_b);
 	minMaxLoc( bgr_planes[1], &MIN_g, &MAX_g, &minLoc_g, &maxLoc_g );
@@ -701,10 +725,10 @@ inline void Component_Stretching(const Mat3b &src , Mat3b &dst){
 		*itout = vout;
 	}
 
-	if (do_profiling || do_profiling_white_balance) {
-		time_end_loc = getTickCount();
-		time_white_balance_serial.push_back(time_end_loc - time_start_loc);
-	}
+	//if (do_profiling || do_profiling_white_balance) {
+	//	time_end_loc = getTickCount();
+	//	time_white_balance_serial.push_back(time_end_loc - time_start_loc);
+	//}
 }
 
 inline void Morphology_Operations(const Mat &src , Mat &dst , const int &operation, const int &morph_size ,  const int &morph_elem = 0){  
@@ -728,33 +752,6 @@ inline void CalcHistogram(const Mat &src , Mat &dst/*float type*/){
 	float range[] = { 0, 256 } ;
 	const float* histRange = { range };
 	calcHist( &src, 1, 0, Mat(), dst, 1, &histSize, &histRange);
-}
-
-inline void CalcHistogram(const Mat &src , Mat &dst/*float type*/ , Mat &dispimage , const Scalar &color){
-	/// Establish the number of bins
-	Mat dst_norm;
-	int histSize = 256;
-
-	/// Set the ranges ( for B,G,R) )
-	float range[] = { 0, 256 } ;
-	const float* histRange = { range };
-	calcHist( &src, 1, 0, Mat(), dst, 1, &histSize, &histRange);
-
-	
-	/// Normalize the result to [ 0, histImage.rows ]
-	int hist_w = 1024; int hist_h = 800;
-	int bin_w = cvRound( (double) hist_w/histSize );	
-	Mat histImage(hist_h , hist_w , CV_8UC3, Scalar( 0,0,0) );		
-	normalize(dst, dst_norm, 0, histImage.rows, NORM_MINMAX);
-	
-	
-	/// Draw for each channel
-	for( int i = 1; i < histSize; ++i ){
-		line( histImage, Point( bin_w*(i-1), hist_h - cvRound(dst_norm.at<float>(i-1)) ) ,
-						Point( bin_w*(i), hist_h - cvRound(dst_norm.at<float>(i)) ),
-						color, 2, 8, 0  );			
-	}
-	dispimage = histImage.clone();
 }
 
 inline void Log_Trans(const Mat&src , Mat &dst , float c){
@@ -1333,84 +1330,6 @@ inline void DrawPrabola(Mat &dst  ,Mat &bool_testing_equation_paint , float *par
 	}		
 }
 
-
-
-
-inline void ValleyPeakFieldConstruction_ver2(const int frame_number , const Mat &Eyelid){
-
-	
-	//if (frame_number == 0) {
-	//	Calculate_Avg_Intensity_Hori(Frame_Gray , avg_intensity_hori);			
-	//	memcpy(intensity_factor_hori, avg_intensity_hori, Frame_wh.rows*sizeof(double));    
-	//}
-	////------------------Noise Reduction-----------------//	
-	//Mat Noise_reduce = Mat::zeros(Frame_Gray.rows , Frame_Gray.cols , CV_8UC1);
-	//Noise_Reduce(Frame_Gray , Noise_reduce, beta , intensity_factor_hori , avg_intensity_hori);
-
-
-
-
-	Mat3b Framw_wh_HLS;
-
-	//-------------------HLS Transformation---------------------//
-	//double time_a = omp_get_wtime();
-	cvtColor(Frame_wh, Framw_wh_HLS, COLOR_BGR2HLS );	
-	//double time_b = omp_get_wtime();
-	//printf("cvtColor time = %f\n" , time_b - time_a);
-
-
-
-	//-------------------Split Three Channel---------------------//
-	vector<Mat> Hls_planes;
-	//time_a = omp_get_wtime();
-	split( Framw_wh_HLS, Hls_planes );	
-	//normalize(hls_planes[0], hls_planes[0], 0, 255, NORM_MINMAX, CV_8UC1);//H
-	//normalize(hls_planes[1], hls_planes[1], 0, 255, NORM_MINMAX, CV_8UC1);//L
-	//normalize(hls_planes[2], hls_planes[2], 0, 255, NORM_MINMAX, CV_8UC1);//S
-	//time_b = omp_get_wtime();
-	//printf("split time = %f\n" , time_b - time_a);
-
-
-	//-------------------TopHat Transformation---------------------//
-	Mat HLS_tophat;		
-	//time_a = omp_get_wtime();	
-	Morphology_Operations(Hls_planes[1] , HLS_tophat , MORPH_TOPHAT, 10,  MORPH_RECT);		
-	//Morphology_Operations(Frame_Gray , HLS_tophat , MORPH_TOPHAT, 31,  MORPH_RECT);		
-	//time_b = omp_get_wtime();
-	//printf("Morphology_Operations time = %f\n" , time_b - time_a);
-
-
-	//-------------------High Frequency Component Removal---------------------//
-	//time_a = omp_get_wtime();
-	Mat L_Tophat_Diff;		
-	absdiff(Hls_planes[1] , HLS_tophat , L_Tophat_Diff);	
-	//absdiff(Frame_Gray , HLS_tophat , L_Tophat_Diff);		
-	//time_b = omp_get_wtime();
-	//printf("absdiff time = %f\n" , time_b - time_a);
-
-
-
-	//-------------------Gaussian Blur---------------------//
-	Mat Preprocrss_Blur = L_Tophat_Diff.clone();	
-	//time_a = omp_get_wtime();
-	GaussianBlur( Preprocrss_Blur, Preprocrss_Blur, Size(21,21) , 8);		
-	//time_b = omp_get_wtime();
-	//printf("GaussianBlur time = %f\n" , time_b - time_a);
-	
-
-
-	//-------------------Log Transformation---------------------//
-	Mat Preprocrss_Blur_Log ;		
-	Mat Preprocrss_Blur_Log_Normalize;	
-	//time_a = omp_get_wtime();	
-	Log_Trans(Preprocrss_Blur , Preprocrss_Blur_Log , 0.05);
-	//time_b = omp_get_wtime();	
-	//printf("Log_Trans time = %f\n" , time_b - time_a);
-	normalize(Preprocrss_Blur_Log, Preprocrss_Blur_Log_Normalize, 0, 255, NORM_MINMAX, CV_8UC1);
-
-}
-
-
 inline void CenterCalculatUsingMoment(const vector<Point> &max_contours , int &posX , int &posY){
 	Moments oMoments = moments(max_contours);
 
@@ -1428,66 +1347,83 @@ inline void CenterCalculatUsingMoment(const Mat &Src_contours , int &posX , int 
 	double dM10 = oMoments.m10;
 	double dArea = oMoments.m00;
 	posX = dM10 / dArea;
-	posY = dM01 / dArea;       
+	posY = dM01 / dArea;
+
+	//std::cout << ">>Opencv dM10 = " << dM10 << std::endl;
+	//std::cout << ">>Opencv dM01 = " << dM01 << std::endl;
+	//std::cout << ">>Opencv dM00 = " << dArea << std::endl;
 }
 
-inline void SaturationProjectionProcess(const Mat &Src ,int &posY , int &posX , const int &size_gaussian){	
-	Mat S_openingGaussian;
-	Mat S_Otsu;	
-	Mat Contour_disp;
-	vector<Point> max_contours;
+inline void CenterCalculatUsingMomentSerial(const Mat &Src_contours, int &posX, int &posY) {
+	double dM01 = 0;
+	double dM10 = 0;
+	double dM00 = 0;
 
-	GaussianBlur( Src, S_openingGaussian, Size(size_gaussian,size_gaussian) , 0);			
-		
-	threshold(S_openingGaussian, S_Otsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+	for (int r = 0; r<Src_contours.rows; ++r) {
+		for (int c = 0; c<Src_contours.cols; ++c) {
+			dM01 += (Src_contours.at<uchar>(r, c))*(r+1);
+		}
+	}
+	for (int r = 0; r<Src_contours.rows; ++r) {
+		for (int c = 0; c<Src_contours.cols; ++c) {
+			dM10 += (Src_contours.at<uchar>(r, c))*(c + 1);
+		}
+	}
+	for (int r = 0; r<Src_contours.rows; ++r) {
+		for (int c = 0; c<Src_contours.cols; ++c) {
+			dM00 += (Src_contours.at<uchar>(r, c));
+		}
+	}
 
-	FindMAXConnextedComponent(S_Otsu , max_contours , Contour_disp);
-
-
-	//Calculate the moments of the thresholded image
-	CenterCalculatUsingMoment(max_contours , posX , posY);
-	
-	//HSVProjectionMethod(S_openingGaussian , max_y , max_x);
-	//line(Contour_disp,Point(0 , posY),Point(Contour_disp.cols-1 , posY),Scalar(0 , 0 , 0),4,8);
-	//line(Contour_disp,Point(posX , 0),Point(posX , Contour_disp.rows-1),Scalar(0 , 0 , 0),4,8);	
-	//Draw_Cross(Contour_disp,posX, posY, 20, 20, Scalar(255,255,255));
-
-	//imshow("Contour_disp" , Contour_disp);
-	//imshow("S_Otsu" , S_Otsu);
-	//imshow("S_openingGaussian" , S_openingGaussian);
+	posX = dM10 / dM00;
+	posY = dM01 / dM00;
 }
 
-inline void MinimalGrayProjectionProcess(const Mat &Src ,int &posY , int &posX , int &size_gaussian){	
-	Mat GrayGaussian;
-	Mat GrayOtsu;	
-	Mat Inv_Src =  cv::Scalar::all(255) - Src;
-	Mat Contour_disp;
-	vector<Point> max_contours;	
+inline void CenterCalculatUsingMomentParallel(const Mat &Src_contours, int &posX, int &posY, const int thread_num) {
+	double *m10_array = new double [thread_num]();
+	double *m01_array = new double [thread_num]();
+	double *m00_array = new double [thread_num]();
+	double dM10 = 0;
+	double dM01 = 0;
+	double dM00 = 0;
 
-	size_gaussian = 61*(Frame_Gray.rows/FRAMEH);
-	if(size_gaussian%2==0)
-		++size_gaussian;
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_moment(Src_contours, m10_array, m01_array, m00_array, thread_num));
 
-	GaussianBlur( Inv_Src, GrayGaussian, Size(size_gaussian,size_gaussian) , 0);			
-		
-	threshold(Inv_Src, GrayOtsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+	for (int i = 0; i < thread_num; ++i) {
+		dM10 += m10_array[i];
+		dM01 += m01_array[i];
+		dM00 += m00_array[i];
+	}
 
-	FindMAXConnextedComponent(GrayOtsu , max_contours , Contour_disp);
+	//std::cout << ">>Parallel dM10 = " << dM10 << std::endl;
+	//std::cout << ">>Parallel dM01 = " << dM01 << std::endl;
+	//std::cout << ">>Parallel dM00 = " << dM00 << std::endl;
+	posX = dM10 / dM00;
+	posY = dM01 / dM00;
 
-	//Calculate the moments of the thresholded image
-	CenterCalculatUsingMoment(max_contours , posX , posY);
-	
-	//HSVProjectionMethod(S_openingGaussian , max_y , max_x);
-	line(Contour_disp,Point(0 , posY),Point(Contour_disp.cols-1 , posY),Scalar(0 , 0 , 0),4,8);
-	line(Contour_disp,Point(posX , 0),Point(posX , Contour_disp.rows-1),Scalar(0 , 0 , 0),4,8);	
+	delete m10_array;
+	delete m01_array;
+	delete m00_array;
+}
 
-	line(Frame,Point(0 , posY),Point(Contour_disp.cols-1 , posY),Scalar(0 , 0 , 0),4,8);
-	line(Frame,Point(posX , 0),Point(posX , Contour_disp.rows-1),Scalar(0 , 0 , 0),4,8);	
-	Draw_Cross(Contour_disp,posX, posY, 20, 20, Scalar(255,255,255));
+inline void CenterCalculatUsingMomentParallel(const vector<Point> &Src_contours, int &posX, int &posY, const int thread_num) {
+	double *m10_array = new double[thread_num]();
+	double *m01_array = new double[thread_num]();
+	double dM10 = 0;
+	double dM01 = 0;
 
-	imshow("MinimalGrayContour_dispGray" , Contour_disp);
-	imshow("MinimalGrayGray_Otsu" , GrayOtsu);
-	imshow("MinimalGrayGrayGaussian" , GrayGaussian);
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_moment_vector(Src_contours, m10_array, m01_array, thread_num));
+
+	for (int i = 0; i < thread_num; ++i) {
+		dM10 += m10_array[i];
+		dM01 += m01_array[i];
+	}
+
+	posX = dM10 / thread_num;
+	posY = dM01 / thread_num;
+
+	delete m10_array;
+	delete m01_array;
 }
 
 inline bool MinimalIrisColorProcess(const Mat &Src , Point &eyeCoarseCenter , const int &size_gaussian 
@@ -1498,7 +1434,7 @@ inline bool MinimalIrisColorProcess(const Mat &Src , Point &eyeCoarseCenter , co
 	Mat GrayOtsu = Mat::zeros(Src.size(), CV_8UC1);				
 
 	//GaussianBlur( Src, GrayGaussian, Size(size_gaussian,size_gaussian) , 0);
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_gau(Src, GrayGaussian, size_gaussian, 8));				
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_gau(Src, GrayGaussian, size_gaussian, thread_num));
 	//threshold(GrayGaussian, GrayOtsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 	ParallelOtsu(GrayGaussian, GrayOtsu, cv::THRESH_BINARY, thread_num);
 
@@ -1510,50 +1446,9 @@ inline bool MinimalIrisColorProcess(const Mat &Src , Point &eyeCoarseCenter , co
 
 	irisContour_size = countNonZero(IrisContour);
 	CenterCalculatUsingMoment(IrisContoursPoints , eyeCoarseCenter.x , eyeCoarseCenter.y);
+	//CenterCalculatUsingMomentParallel(IrisContoursPoints, eyeCoarseCenter.x, eyeCoarseCenter.y, thread_num);
 	getIrisContourPoints = true;
 	return true;	
-}
-
-inline void GrayProjectionProcess(const Mat &src , Mat &dst , Mat &GaussianBlurOpening, const bool useGaussianBlur , int &minimal_y , int &minimal_x){
-	//-------------------Gaussian Blur---------------------//		
-	int size_gaussian = 27*(src.rows/FRAMEH);
-	if(size_gaussian%2==0)
-		++size_gaussian;
-
-	if(useGaussianBlur)
-		GaussianBlur( src, GaussianBlurOpening, Size(size_gaussian,size_gaussian) , 0);		
-		
-	//-------------------Log Transformation---------------------//
-	Mat src_log;
-	Mat src_log_nor;
-	//time_a = omp_get_wtime();	
-	Log_Trans(GaussianBlurOpening , src_log , 100);	
-	//time_b = omp_get_wtime();	
-	//printf("Log_Trans time = %f\n" , time_b - time_a);
-	normalize(src_log, src_log_nor, 0, 255, NORM_MINMAX, CV_8UC1);
-	
-
-	//threshold(GaussianBlurOpening, GaussianBlurOpening, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-
-
-	//-------------------Gray Projection Method---------------------//
-	//time_a = omp_get_wtime();
-	//Mat Gray_Projection_Pupil_Center;	
-	//int min_y , min_x;
-	GrayProjectionMethod(src_log  , minimal_y , minimal_x);//For displaying coarse pupil location	
-
-	line(GaussianBlurOpening,Point(0 , minimal_y),Point(GaussianBlurOpening.cols-1 , minimal_y),Scalar(255 , 255 , 100),4,8);
-	line(GaussianBlurOpening,Point(minimal_x , 0),Point(minimal_x , GaussianBlurOpening.rows-1),Scalar(255 , 255 , 100),4,8);	
-	imshow("GrayProjectionGaussianBlurOpening" ,GaussianBlurOpening );
-	imshow("GrayProjection" ,src_log_nor );
-	/*imshow("src_log" , src_log);
-	imshow("src_log_nor" , src_log_nor);
-
-	src_log.release();
-	src_log_nor.release();
-
-	src_log.refcount = 0;
-	src_log_nor.refcount = 0;*/
 }
 
 inline void  IntegralImage(const Mat &src , Mat &dst){
@@ -1574,54 +1469,6 @@ inline void  IntegralImage(const Mat &src , Mat &dst){
 		}
 	}
 }
-
-
-inline void EyelidEdgeExtraction(const Mat &src , Mat &dst){
-	dst = Mat::zeros(src.rows , src.cols , CV_8UC1);
-
-	struct node{
-		int x;
-		int y;
-		double value;
-	};
-	Size kernel_size = Size(3 , 3);
-	node* kernel = new node [kernel_size.width*kernel_size.height];
-	for(int i=0;i<kernel_size.height;++i){
-		for(int j=0;j<kernel_size.width;++j){
-			if(i!=1)
-				kernel[i*kernel_size.height+j].value = 1;
-			else
-				kernel[i*kernel_size.height+j].value = -2;
-		}
-	}
-
-	Mat tmp = Mat::zeros(src.rows , src.cols , CV_32FC1);
-	for(int i=0;i<src.rows;++i){
-		for(int j=0;j<src.cols;++j){
-			double sum = 0;
-			double count = 0;
-
-			for(int k = i-kernel_size.width/2;k<i+kernel_size.width/2+1;++k){
-				for(int l = j-kernel_size.width/2;l<j+kernel_size.width/2+1;++l){
-					if(!checkpoint(l ,k , src)){
-						continue;
-					}
-					sum+=kernel[(k-i+kernel_size.width/2)*kernel_size.height+l-( j-kernel_size.width/2)].value*(double)src.at<uchar>(k , l);
-					count+=(kernel[(k-i+kernel_size.width/2)*kernel_size.height+l-( j-kernel_size.width/2)].value);
-				}
-			}
-			if(count==0)
-				count=1;
-			sum/=count;			
-			tmp.at<float>(i , j) = sum;
-			//dst.at<uchar>(i , j) = (sum>255)?255:(sum<0)?0:sum;
-		}
-	}
-
-	normalize(tmp, dst, 0, 255, NORM_MINMAX, CV_8UC1);
-	//ImageInverse(dst , dst);
-}
-
 
 inline bool RefineEyeCornerROI( const int &roi_LeftWidth , const int &roi_LeftHeight , const int &roi_RightWidth , const int &roi_RightHeight 
 												 , Point &rectLeftCornerStartPoint , Point &rectRightCornerStartPoint
@@ -1740,12 +1587,6 @@ inline bool RefineEyeCornerROI( const int &roi_LeftWidth , const int &roi_LeftHe
 	return true;
 }
 
-inline void TplMatch( const Mat &img, const Mat &mytemplate  , Mat &result)
-{	
-  matchTemplate( img, mytemplate, result, cv::TM_CCOEFF_NORMED );
-  normalize( result, result, 0, 1, NORM_MINMAX, -1, Mat() );  
-}
-
 inline void minmax(const Mat &result , Point &matchLoc )
 {
   double minVal, maxVal;
@@ -1753,102 +1594,6 @@ inline void minmax(const Mat &result , Point &matchLoc )
 
   minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, Mat() );
   matchLoc = maxLoc;  
-}
-
-inline void ROIEyeCornerTracking(const Mat &ROI_Leftcorner , const Mat &ROI_Rightcorner , const Point &rectLeftCornerStartPoint
-													, const Point &rectRightCornerStartPoint , Point &leftDetectedCorner ,Point &rightDetectedCorner
-													, const Mat &ROI_LeftImageGray , const Mat &ROI_RightImageGray)
-{
-	//int ksize = 41;
-	//Mat ROI_LeftMedian;
-	//Mat ROI_RightMedian;
-	Mat ROI_LeftFilteredResult;
-	Mat ROI_RightFilteredResult;
-
-	//medianBlur(ROI_Leftcorner , ROI_LeftMedian , ksize);		
-	//medianBlur(ROI_Rightcorner , ROI_RightMedian , ksize);	
-	Point matchLocLeft , matchLocRight;
-	Point dispPointLeft , dispPointRight;
-
-	TplMatch( ROI_LeftImageGray, ROI_Leftcorner  , ROI_LeftFilteredResult);
-	minmax(ROI_LeftFilteredResult, leftDetectedCorner );
-	
-	TplMatch( ROI_RightImageGray, ROI_Rightcorner  , ROI_RightFilteredResult);
-	minmax(ROI_RightFilteredResult, rightDetectedCorner );
-
-	
-	/*resize(ROI_LeftFilteredResult, ROI_LeftFilteredResult, Size(100 , 100));*/
-	Draw_Cross(Frame, leftDetectedCorner.x, leftDetectedCorner.y, 10, 10, Scalar(0 , 0 , 0));
-	Draw_Cross(ROI_LeftFilteredResult, leftDetectedCorner.x, leftDetectedCorner.y, 10, 10, Scalar(0 , 0 , 0));
-	
-	Draw_Cross(Frame, rightDetectedCorner.x+Frame.cols/2, rightDetectedCorner.y, 10, 10, Scalar(0 , 0 , 0));
-	Draw_Cross(ROI_RightFilteredResult, rightDetectedCorner.x, rightDetectedCorner.y, 10, 10, Scalar(0 , 0 , 0));
-	
-	//imshow("ROI_LeftImageGray" , ROI_LeftImageGray);
-	//imshow("ROI_Leftcorner" , ROI_Leftcorner);
-	//imshow("ROI_LeftFilteredResult" ,ROI_LeftFilteredResult);
-
-	imshow("ROI_RightImageGray" , ROI_RightImageGray);
-	imshow("ROI_Rightcorner" , ROI_Rightcorner);
-	imshow("ROI_RightFilteredResult" ,ROI_RightFilteredResult);
-
-
-
-
-	//float filterKernelLeftEye[4][6] = {
-	//	{-1 , -1 , -1 , 1 ,1 ,1 },		
-	//	{-1 , -1 , 1 , 1 ,1 ,1 },		
-	//	{-1 , 1 , 1 , 1 ,1 ,1 },		
-	//	{-1 , -1 , -1 , -1 ,-1 ,-1 },		
-	//};
-
-
-	////float filterKernelLeftEye[2][3] = {
-	////	{-1 , 1, 1},
-	////	{-1 , -1 , -1}
-	////};
-
-	////float filterKernelLeftEye[8][14] = {
-	////	{-1 , -1 , -1 , -1 , -1 , -1 ,-1 ,1 ,1 ,1 , 1 , 1 , 1 , 1},
-	////	{-1 , -1 , -1 , -1 , -1 , -1 ,1 ,1 ,1 ,1 , 1 , 1 , 1 , 1},
-	////	{-1 , -1 , -1 , -1 , -1 , 1 ,1 ,1 ,1 ,1 , 1 , 1 , 1 , 1},
-	////	{-1 , -1 , -1 , -1 , 1 , 1 ,1 ,1 ,1 ,1 , 1 , 1 , 1 , 1},
-	////	{-1 , -1 , -1 , 1 , 1 , 1 ,1 ,1 ,1 ,1 , 1 , 1 , 1 , 1},
-	////	{-1 , -1 , 1 , 1 , 1 , 1 ,1 ,1 ,1 ,1 , 1 , 1 , 1 , 1},
-	////	{-1 , 1 , 1 , 1 , 1 , 1 ,1 ,1 ,1 ,1 , 1 , 1 , 1 , 1},
-	////	{-1 , -1 , -1 , -1 , -1 , -1 ,-1 ,-1 ,-1 ,-1 , -1 , -1 , -1 , -1},
-	////};
-
-	//float filterKernelRightEye[4][6] = {
-	//	{1 , 1 , 1 , -1 , -1 , -1},
-	//	{1 , 1 , 1 , 1 , -1 , -1},
-	//	{1 , 1 , 1 , 1 , 1 , -1},
-	//	{-1, -1, -1 , -1, -1,-1}
-	//};
-
-
-	//Mat filterLeftEye(4 , 6, CV_32FC1 , filterKernelLeftEye);
-	//Mat filterRightEye(4 , 6 , CV_32FC1 , filterKernelRightEye);
-	//	
-	//Point anchor = Point( -1, -1 );
-	//int delta = 0;
-	//int ddepth = -1;
-
-
-	//cv::filter2D(ROI_LeftMedian, ROI_LeftFilteredResult, ddepth , filterLeftEye, anchor, delta, BORDER_DEFAULT );
-	//cv::filter2D(ROI_RightMedian, ROI_RightFilteredResult, ddepth , filterRightEye, anchor, delta, BORDER_DEFAULT );	
-
-	//double minVal,maxVal;
-	//Point minLoc , maxLoc;
-
-	//minMaxLoc(ROI_LeftFilteredResult, &minVal, &maxVal, &minLoc, &maxLoc);
-	//
-	//Draw_Cross(ROI_LeftFilteredResult, maxLoc.x, maxLoc.y, 10, 10, Scalar(255 , 255 , 255));
-	//cv::imshow("ROI_LeftFilteredResult" ,ROI_LeftFilteredResult);
-	//cv::imshow("ROI_Leftcorner" , ROI_Leftcorner);
-	//leftDetectedCorner = maxLoc+rectLeftCornerStartPoint;
-
-	//cv::imshow("ROI_RightFilteredResult" ,ROI_RightFilteredResult);
 }
 
 //inline void ROIEyeCornerTrackingKLT(const Mat &ROI_Leftcorner , const Mat &ROI_Rightcorner , const Point &rectLeftCornerStartPoint){
@@ -2088,144 +1833,6 @@ inline void RefineEyelidFeaturePts(const vector<Point> &originalUpperFtPts , vec
 	}
 }
 
-inline void HarrFeatureFilter(const Mat &Src , Mat &Dst , const int &ksize){
-	Dst = Mat::zeros(Src.rows , Src.cols , CV_32FC1);
-	float filterKernelH[16][16] = {
-		{-1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1, -1 , -1 , -1 , -1},
-		{-1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1, -1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1,   1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1,   1 , -1 , -1 , -1},
-		{-1 , -1 ,  -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1   , 1,  1 , -1 , -1 , -1},
-		{-1 , -1 ,  -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1   , 1,  1 , -1 , -1 , -1},
-		{-1 , -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1   , 1,  1 , 1 , -1 , -1},
-		{-1 , -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1   , 1,  1 , 1 , -1 , -1},
-		{-1 , -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1   , 1,  1 , 1 , -1 , -1},
-		{-1 , -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1   , 1,  1 , 1 , -1 , -1},
-		{-1 , -1 ,  -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1   , 1,  1 , -1 , -1 , -1},
-		{-1 , -1 ,  -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1   , 1,  1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1,  1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1 ,  1,   1 , -1 , -1 , -1},
-		{-1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1, -1 , -1 , -1 , -1},
-		{-1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1 , -1, -1 , -1 , -1 , -1}
-	};
-
-	//float filterKernelH[8][8] = {
-	//	{ -1 , -1 , -1 , -1 , -1 , -1 , -1,  -1},
-	//	{ -1 , -1 ,  1 ,  1 ,  1 ,  1 , -1,  -1},
-	//	{ -1 ,  1 ,  1 ,  1 ,  1 ,  1 , 1,   -1},
-	//	{ -1 ,  1 ,  1 ,  1 ,  1 ,  1 , 1,   -1},
-	//	{ -1 ,  1 ,  1 ,  1 ,  1 ,  1 , 1,   -1},
-	//	{ -1 ,  1 ,  1 ,  1 ,  1 ,  1 , 1,   -1},
-	//	{ -1 ,  -1 ,  1 ,  1 ,  1 ,  1 , -1,  -1},	
-	//	{ -1 , -1 , -1 , -1 , -1 , -1, -1,  -1}
-	//};
-
-	//float filterKernelH[16][16] = {
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-	//	{-1 , -1 , -1 , -1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1}
-	//};
-
-	//float filterKernelH[8][8] = {
-	//	{ -1 , -1 , 1 , 1 , 1 , 1 , -1,  -1},
-	//	{ -1 , -1 , 1 , 1 , 1 , 1 , -1,  -1},
-	//	{ -1 , -1 , 1 , 1 , 1 , 1 , -1,  -1},
-	//	{ -1 , -1 , 1 , 1 , 1 , 1 , -1,  -1},
-	//	{ -1 , -1 , 1 , 1 , 1 , 1 , -1,  -1},
-	//	{ -1 , -1 , 1 , 1 , 1 , 1 , -1,  -1},
-	//	{ -1 , -1 , 1 , 1 , 1 , 1 , -1,  -1},	
-	//	{ -1 , -1 , 1 , 1 , 1 , 1 , -1,  -1}
-	//};
-
-	//float ** filterKernelH = new float *[ksize]();
-	//for(int i=0;i<ksize;++i){
-	//	filterKernelH[i] = new float [ksize]();
-	//}
-
-	//int denom = ksize/4;
-	//for(int i=0;i<ksize;++i){
-	//	for(int j=0;j<ksize;++j){
-	//		int score = j/denom;
-	//		if(score==0 || score==3){
-	//			filterKernelH[i][j] = -1;
-	//		}else if(score==1 || score==2){
-	//			filterKernelH[i][j] = 1;	
-	//		}
-	//	}
-	//}	
-
-	//filterKernelH[0][0] = 1000;
-
-	const int size = ksize;
-	Mat filterHaar(16 , 16 , CV_32FC1 ,filterKernelH);
-
-		
-	Point anchor = Point( -1, -1 );
-	int delta = 0;
-	int ddepth = -1;
-	
-	cv::filter2D(Src, Dst, ddepth , filterHaar, anchor, delta, BORDER_DEFAULT );	
-	normalize(Dst, Dst, 0, 255, NORM_MINMAX, CV_8UC1);
-
-
-}
-
-inline void MinimalGrayFilter(const Mat &Src , Mat &Dst){
-	Dst = Mat::zeros(Src.rows , Src.cols , CV_32FC1);
-
-	float filterKernelH[8][8] = {
-		{ -1 , -1 ,  1 , 1 , 1 , 1 , -1,  -1},
-		{ -1 ,  1 ,  1 ,  1 ,  1 ,  1 , 1 , -1},
-		{ -1 ,  1 ,  1 ,  1 ,  1 ,  1 , 1 , -1},
-		{ -1 ,  1 ,  1 ,  1 ,  1 ,  1 , 1 , -1},
-		{ -1 ,  1 ,  1 ,  1 ,  1 ,  1 , 1 , -1},
-		{ -1 ,  1 ,  1 ,  1 ,  1 ,  1 , 1 , -1},
-		{ -1 ,  1 ,  1 ,  1 ,  1 ,  1 , 1 , -1},	
-		{ -1 , -1 ,  1 , 1 , 1 , 1, -1,  -1}
-	};
-
-/*	float filterKernelH[16][16] = {
-		{-1 , -1 , -1 ,1 ,1 , 1 , 1 , 1 , 1 , 1 , 1, 1, 1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,1 ,1 , 1 , 1 , 1 , 1 , 1 , 1, 1, 1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,1 ,1 , 1 , 1 , 1 , 1 , 1 , 1, 1, 1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,1 ,1 , 1 , 1 , 1 , 1 , 1 , 1, 1, 1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, 1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, 1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, 1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, 1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,-1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,-1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,-1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,-1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,-1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,-1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,-1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1},
-		{-1 , -1 , -1 ,-1 , 1 , 1 , 1 , 1 , 1 , 1 , 1, 1, -1 , -1 , -1 , -1}
-	};	*/						 
-
-	Mat filterHaar(8 , 8 , CV_32FC1 ,filterKernelH);
-		
-	Point anchor = Point( -1, -1 );
-	int delta = 0;
-	int ddepth = -1;
-	
-	cv::filter2D(Src, Dst, ddepth , filterHaar, anchor, delta, BORDER_DEFAULT );	
-	normalize(Dst, Dst, 0, 255, NORM_MINMAX, CV_8UC1);
-}
-
 inline bool EyelidMaskGeneration(const float * const lowerParabola_param , const float * const upperParabola_param
 													 ,	Mat &Dst , const Point &vertexUpper , const Point &vertexLower 
 													 , float *&lowerParabolaTable , float *&upperParabolaTable)
@@ -2297,8 +1904,9 @@ inline void X_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &
 	//convertScaleAbs( Grad_X, ABS_Grad_X );
 	//normalize(ABS_Grad_X, ABS_Grad_X, 0, 255, NORM_MINMAX, CV_8UC1);//L
 	
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_scharrX(Gray_openingGaussian, ScharrX_tmp,8));		
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_convertScaleAbs(ScharrX_tmp, ConvertScaleAbsX_tmp,8));				
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_scharrX(Gray_openingGaussian, ScharrX_tmp, thread_num));
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_convertScaleAbs(ScharrX_tmp, ConvertScaleAbsX_tmp, thread_num));
+	//cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_normalize(ConvertScaleAbsX_tmp, ABS_Grad_X, thread_num));
 	normalize(ConvertScaleAbsX_tmp, ABS_Grad_X, 0, 255, NORM_MINMAX, CV_8UC1);//L
 
 	
@@ -2318,38 +1926,8 @@ inline void X_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &
 			break;
 		}
 	}
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_threBinary(ABS_Grad_X, Grad_X_Thresh_Pop, thre_populationGray, 8));
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_threBinary(ABS_Grad_X, Grad_X_Thresh_Pop, thre_populationGray, thread_num));
 	//threshold(ABS_Grad_X, Grad_X_Thresh_Pop, thre_populationGray, 255,THRESH_BINARY);
-}
-
-
-inline void X_DirectedGradientGenerationForLimbus(const Mat &Gray_openingGaussian , Mat &Grad_X_Thresh_Pop){	
-	Mat Grad_X;		
-	Mat ABS_Grad_X;
-	Mat ABS_Grad_XHisto;
-
-
-	//X Directed Gradient
-	Scharr( Gray_openingGaussian, Grad_X, CV_16S, 1, 0, 3, 0, BORDER_DEFAULT );
-	convertScaleAbs( Grad_X, ABS_Grad_X );
-	normalize(ABS_Grad_X, ABS_Grad_X, 0, 255, NORM_MINMAX, CV_8UC1);//L
-	
-	//Histogram Grad_X
-	double minVal , maxVal;
-	Point minLoc , maxLoc;
-	CalcHistogram(ABS_Grad_X , ABS_Grad_XHisto);	
-	float goal_percentGradthreshold = 0.05*FRAMEW*FRAMEH;
-	int thre_populationGray;
-
-	int sum_populationGray = 0;
-	for(int i=ABS_Grad_XHisto.rows-1;i>0;--i){
-		sum_populationGray+=ABS_Grad_XHisto.at<float>(0 , i);
-		if(sum_populationGray>goal_percentGradthreshold){
-			thre_populationGray = i;
-			break;
-		}
-	}
-	threshold(ABS_Grad_X, Grad_X_Thresh_Pop, thre_populationGray, 255,THRESH_BINARY);
 }
 
 inline void Y_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &Grad_Y_Thresh_Pop){
@@ -2363,8 +1941,9 @@ inline void Y_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &
 	//Scharr( Gray_openingGaussian, Grad_Y, CV_16S, 0, 1, 3, 0, BORDER_DEFAULT );
 	//convertScaleAbs( Grad_Y, ABS_Grad_Y );
 	//normalize(ABS_Grad_Y, ABS_Grad_Y, 0, 255, NORM_MINMAX, CV_8UC1);//L
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_scharrY(Gray_openingGaussian, ScharrY_tmp,8));		
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_convertScaleAbs(ScharrY_tmp, ConvertScaleAbsY_tmp,8));		
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_scharrY(Gray_openingGaussian, ScharrY_tmp, thread_num));
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_convertScaleAbs(ScharrY_tmp, ConvertScaleAbsY_tmp, thread_num));
+	//cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_normalize(ConvertScaleAbsY_tmp, ABS_Grad_Y, thread_num));
 	normalize(ConvertScaleAbsY_tmp, ABS_Grad_Y, 0, 255, NORM_MINMAX, CV_8UC1);//L
 		
 	//Histogram Grad_Y
@@ -2382,7 +1961,7 @@ inline void Y_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &
 			break;
 		}
 	}
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_threBinary(ABS_Grad_Y, Grad_Y_Thresh_Pop, thre_populationGray, 8));
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_threBinary(ABS_Grad_Y, Grad_Y_Thresh_Pop, thre_populationGray, thread_num));
 	//threshold(ABS_Grad_Y, Grad_Y_Thresh_Pop, thre_populationGray, 255,THRESH_BINARY);	
 }
 
@@ -2489,7 +2068,6 @@ inline void LineFilterRefinement(const vector<vector<Point> > &contours , vector
 			}
 		}
 	}
-
 }
 
 
@@ -2508,6 +2086,32 @@ inline void EyeInnerRegionGeneration(const Mat &Grad_X_Thresh_Pop , const Mat &G
 														, const int &iris_y_regionUp , const int &iris_y_regionDown
 														, const int &iris_x_regionLeft , const int &iris_x_regionRight)
 {
+	double time_stamp_in0;
+	double time_stamp_in1;
+	double time_stamp_in2;
+	double time_stamp_in3;
+	double time_stamp_in4;
+	double time_stamp_in5;
+	double time_stamp_in6;
+
+	double time_stamp_in1_1;
+	double time_stamp_in1_2;
+	double time_stamp_in1_3;
+	double time_stamp_in1_4;
+	double time_stamp_in1_5;
+
+	double time_stamp_in3_1;
+	double time_stamp_in3_2;
+	double time_stamp_in3_3;
+	double time_stamp_in3_4;
+
+	//double time_stamp_in3_core_start;
+	//double time_stamp_in3_core_end;
+
+	if (do_profiling) {
+		time_stamp_in0 = getTickCount();
+	}
+
 	Mat Grad_X_Y_And = Mat::zeros(Grad_X_Thresh_Pop.size(), CV_8UC1);	
 	Mat Grad_X_Minus_And = Mat::zeros(Grad_X_Thresh_Pop.size(), CV_8UC1);
 	Mat Grad_X_Y_And_Opening = Mat::zeros(Grad_X_Thresh_Pop.size(), CV_8UC1);
@@ -2524,7 +2128,10 @@ inline void EyeInnerRegionGeneration(const Mat &Grad_X_Thresh_Pop , const Mat &G
 	Mat ContourALL;	
 	vector<vector<Point> > contours;
 	vector<vector<Point> > refined_contours;
-	vector<Point> refinedConnectedPoints;	
+	vector<Point> refinedConnectedPoints;
+	Mat morph_cross_element1 = getStructuringElement(MORPH_CROSS, Size(2 * 5 + 1, 2 * 5 + 1), Point(5, 5));
+	Mat morph_cross_element2 = getStructuringElement(MORPH_CROSS, Size(2 * 2 + 1, 2 * 2 + 1), Point(2, 2));
+	Mat morph_cross_element3 = getStructuringElement(MORPH_CROSS, Size(2 * 8 + 1, 2 * 8 + 1), Point(8, 8));
 
 	//Morphological Operation to Find lineFilterCenter & Grad_X_Y_And_Opening_Dila	
 	/*bitwise_and(Grad_X_Thresh_Pop , Grad_Y_Thresh_Pop, Grad_X_Y_And);	
@@ -2532,30 +2139,78 @@ inline void EyeInnerRegionGeneration(const Mat &Grad_X_Thresh_Pop , const Mat &G
 	Morphology_Operations(Grad_X_Minus_And, Grad_X_Y_And_Opening , MORPH_OPEN, 5,  MORPH_CROSS);				
 	Morphology_Operations(Grad_X_Y_And_Opening, Grad_X_Y_And_Opening_Dila , MORPH_DILATE, 5,  MORPH_CROSS);		*/
 
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_bitwiseand(Grad_X_Thresh_Pop, Grad_Y_Thresh_Pop, Grad_X_Y_And,8));		
-	Grad_X_Minus_And = Grad_X_Thresh_Pop - Grad_X_Y_And;
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_er(Grad_X_Minus_And, Grad_X_Y_And_Opening_tmp , 5, MORPH_CROSS, 8));	
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_di(Grad_X_Y_And_Opening_tmp, Grad_X_Y_And_Opening, 5, MORPH_CROSS, 8));		
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_di(Grad_X_Y_And_Opening, Grad_X_Y_And_Opening_Dila, 5, MORPH_CROSS, 8));		
+	if (do_profiling) {
+		time_stamp_in1 = getTickCount();
+	}
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_bitwiseand(Grad_X_Thresh_Pop, Grad_Y_Thresh_Pop, Grad_X_Y_And, thread_num));
+	time_stamp_in1_1 = getTickCount();
+
+	//Grad_X_Minus_And = Grad_X_Thresh_Pop - Grad_X_Y_And;
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_sub(Grad_X_Thresh_Pop, Grad_X_Y_And, Grad_X_Minus_And, thread_num));
+	time_stamp_in1_2 = getTickCount();
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_er(Grad_X_Minus_And, Grad_X_Y_And_Opening_tmp , morph_cross_element1, thread_num));
+	time_stamp_in1_3 = getTickCount();
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_di(Grad_X_Y_And_Opening_tmp, Grad_X_Y_And_Opening, morph_cross_element1, thread_num));
+	time_stamp_in1_4 = getTickCount();
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_di(Grad_X_Y_And_Opening, Grad_X_Y_And_Opening_Dila, morph_cross_element1, thread_num));
+	time_stamp_in1_5 = getTickCount();
 
 	
+
+	if (do_profiling) {
+		time_stamp_in2 = getTickCount();
+	}
 	//Determine center line
 	//bitwise_and(Gray_openingGaussian_Gau_inv , Grad_X_Y_And_Opening_Dila, FilterOutNoise_Grad_X);	
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_bitwiseand(Gray_openingGaussian_Gau_inv
-								, Grad_X_Y_And_Opening_Dila, FilterOutNoise_Grad_X,8));		
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_bitwiseand(Gray_openingGaussian_Gau_inv
+								, Grad_X_Y_And_Opening_Dila, FilterOutNoise_Grad_X, thread_num));
 
+	//cv::cuda::GpuMat dst, src1, src2;
+	//src1.upload(Gray_openingGaussian_Gau_inv);
+	//src2.upload(Grad_X_Y_And_Opening_Dila);
 
+	//if (do_profiling) {
+	//	time_stamp_in3_core_start = getTickCount();
+	//}
 
+	//cv::cuda::bitwise_and(src1, src2, dst);
+
+	//if (do_profiling) {
+	//	time_stamp_in3_core_end = getTickCount();
+	//}
+
+	//dst.download(FilterOutNoise_Grad_X);
+
+	if (do_profiling) {
+		time_stamp_in3 = getTickCount();
+	}
 	//Morphology_Operations(FilterOutNoise_Grad_X, FilterOutNoise_Grad_X_Opening , MORPH_OPEN, 2,  MORPH_CROSS);		
 	//Morphology_Operations(FilterOutNoise_Grad_X_Opening, FilterOutNoise_Grad_X_Erosion , MORPH_ERODE, 2,  MORPH_CROSS);
 
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_er(FilterOutNoise_Grad_X, FilterOutNoise_Grad_X_Opening_tmp , 2, MORPH_CROSS, 8));	
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_di(FilterOutNoise_Grad_X_Opening_tmp, FilterOutNoise_Grad_X_Opening, 2, MORPH_CROSS, 8));		
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_er(FilterOutNoise_Grad_X_Opening, FilterOutNoise_Grad_X_Erosion, 2, MORPH_CROSS, 8));			
-	CenterCalculatUsingMoment(FilterOutNoise_Grad_X_Erosion , lineFilterCenter.x , lineFilterCenter.y);	
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_er(FilterOutNoise_Grad_X, FilterOutNoise_Grad_X_Opening_tmp , morph_cross_element2, thread_num));
+	time_stamp_in3_1 = getTickCount();
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_di(FilterOutNoise_Grad_X_Opening_tmp, FilterOutNoise_Grad_X_Opening, morph_cross_element2, thread_num));
+	time_stamp_in3_2 = getTickCount();
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_er(FilterOutNoise_Grad_X_Opening, FilterOutNoise_Grad_X_Erosion, morph_cross_element2, thread_num));
+	time_stamp_in3_3 = getTickCount();
+
+	//CenterCalculatUsingMoment(FilterOutNoise_Grad_X_Erosion , lineFilterCenter.x , lineFilterCenter.y);	
+	//CenterCalculatUsingMomentSerial(FilterOutNoise_Grad_X_Erosion , lineFilterCenter.x , lineFilterCenter.y);	
+	CenterCalculatUsingMomentParallel(FilterOutNoise_Grad_X_Erosion, lineFilterCenter.x, lineFilterCenter.y, thread_num);
+	time_stamp_in3_4 = getTickCount();
 	lineFilterCenter.x = (lineFilterCenter.x+eyeRegionCenter.x)/2;
 	lineFilterCenter.y = (lineFilterCenter.y+eyeRegionCenter.y)/2;	
 
+
+	if (do_profiling) {
+		time_stamp_in4 = getTickCount();
+	}
 	//Line Filter
 	FindALLContours(Grad_X_Y_And_Opening_Dila  ,/* ContourALL , */contours);
 	LineFilterRefinement(contours , refined_contours , lineFilterCenter , RefinedGradX_EyeRegion 
@@ -2573,142 +2228,37 @@ inline void EyeInnerRegionGeneration(const Mat &Grad_X_Thresh_Pop , const Mat &G
 									, iris_x_regionLeft , iris_x_regionRight);
 
 
+	if (do_profiling) {
+		time_stamp_in5 = getTickCount();
+	}
 	//Convex Hull
 	vector <vector<Point>>  hull(1);			
 	convexHull( Mat(refinedConnectedPoints), hull[0], false);		
 	drawContours( ValleyPeakField_tmp, hull, 0, Scalar(255 , 255 , 255), cv::FILLED);//Fill the range in the convex hull	
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_di(ValleyPeakField_tmp, ValleyPeakField, 8, MORPH_CROSS, 8));		
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_di(ValleyPeakField_tmp, ValleyPeakField, morph_cross_element3, thread_num));
 	//Morphology_Operations(ValleyPeakField_tmp, ValleyPeakField , MORPH_DILATE, 8,  MORPH_CROSS);			
-}
 
+	if (do_profiling) {
+		time_stamp_in6 = getTickCount();
+		time_eye_position_detection_eyelid_feature_detection_district4_0.push_back(time_stamp_in1 - time_stamp_in0);
+		time_eye_position_detection_eyelid_feature_detection_district4_1.push_back(time_stamp_in2 - time_stamp_in1);
+		time_eye_position_detection_eyelid_feature_detection_district4_2.push_back(time_stamp_in3 - time_stamp_in2);
+		//time_eye_position_detection_eyelid_feature_detection_district4_2_core.push_back(time_stamp_in3_core_end - time_stamp_in3_core_start);
+		time_eye_position_detection_eyelid_feature_detection_district4_3.push_back(time_stamp_in4 - time_stamp_in3);
+		time_eye_position_detection_eyelid_feature_detection_district4_4.push_back(time_stamp_in5 - time_stamp_in4);
+		time_eye_position_detection_eyelid_feature_detection_district4_5.push_back(time_stamp_in6 - time_stamp_in5);
+		time_eye_position_detection_eyelid_feature_detection_district4_local_sum.push_back(time_stamp_in6 - time_stamp_in0);
 
-inline void IrisMaskPreProcessing_byColorModel(const Mat &IrisContour , Mat &IrisMask	, int &irisMaskForLimbusErode_sizeUp
-																		, const vector<Point> &IrisContoursPoints
-																		, const Mat &EyelidRegion , const bool &getEyelidRegion		
-																		, const int &iris_x_regionRight , const int &iris_x_regionLeft
-																		, const float * const lowerParabolaTable , const float *const upperParabolaTable
-																		, const Point &vertex_upperEyelid , const Point &vertex_lowerEyelid
-																		, const bool &extremeUp)
-{	
-	IrisMask = Mat::zeros(IrisContour.rows , IrisContour.cols , CV_8UC1);	
-	
-	if(extremeUp){	
-		int paintYange = 1;
-		Point irisContourPointsCenter(0 , 0);
-		vector<Point> refinedIrisContoursPoints;
-		
-		//Refine irisContour Points
-		for(int i=0;i<IrisContoursPoints.size();++i){
-			if(IrisContoursPoints[i].x<iris_x_regionRight && IrisContoursPoints[i].x>iris_x_regionLeft){
-				refinedIrisContoursPoints.push_back(IrisContoursPoints[i]);
-			}
-		}
+		time_eye_position_detection_eyelid_feature_detection_district4_1_1.push_back(time_stamp_in1_1 - time_stamp_in1);
+		time_eye_position_detection_eyelid_feature_detection_district4_1_2.push_back(time_stamp_in1_2 - time_stamp_in1_1);
+		time_eye_position_detection_eyelid_feature_detection_district4_1_3.push_back(time_stamp_in1_3 - time_stamp_in1_2);
+		time_eye_position_detection_eyelid_feature_detection_district4_1_4.push_back(time_stamp_in1_4 - time_stamp_in1_3);
+		time_eye_position_detection_eyelid_feature_detection_district4_1_5.push_back(time_stamp_in1_5 - time_stamp_in1_4);
 
-		//Caculate Refined Contour Points Center
-		CenterCalculatUsingMoment(refinedIrisContoursPoints , irisContourPointsCenter.x , irisContourPointsCenter.y);
-
-		//Paint the Region
-		for(int i=irisContourPointsCenter.y - paintYange;i<irisContourPointsCenter.y+paintYange+1;++i){
-			for(int j=iris_x_regionLeft;j<iris_x_regionRight+1;++j){
-				Point paintPt(j , i);
-				if(checkpoint(paintPt , IrisMask)){
-					IrisMask.at<uchar>(i , j) = 255;
-				}
-			}
-		}
-
-		//Convex Hull
-		vector <vector<Point>>  hull(1);			
-		convexHull( Mat(refinedIrisContoursPoints), hull[0], false);		
-		drawContours( IrisMask, hull, 0, Scalar(255 , 255 , 255), cv::FILLED);//Fill the range in the convex hull	
-
-
-		//Erosion
-		int irisMaskForLimbusErode_size_UpCal = countNonZero(IrisMask)/colorUpErosionBaseSize_experiment*irisMaskForLimbusErode_sizeUp;	
-		Morphology_Operations(IrisMask, IrisMask , MORPH_ERODE, irisMaskForLimbusErode_size_UpCal,  MORPH_CROSS);	
-		
-
-		if(countNonZero(IrisMask)<50){
-			--irisMaskForLimbusErode_sizeUp;
-		}		
-
-		if(showDetail){
-			Mat TestRegion = Frame_wh.clone();
-			line(TestRegion , Point(iris_x_regionLeft , 0) , Point(iris_x_regionLeft , FRAMEH - 1) , Scalar::all(255));
-			line(TestRegion , Point(iris_x_regionRight , 0) , Point(iris_x_regionRight , FRAMEH - 1) , Scalar::all(255));
-			imshow("TestRegion" , TestRegion);
-		}	
-	}else{		
-		Mat TestColorPlusEyelidMask = Mat::zeros(480 , 640 , CV_8UC1);
-		//Plus upper eyelid and lower eyelid region to color Iris Mask contour
-		float vertexVerticalDist = (vertex_lowerEyelid.y - vertex_upperEyelid.y);
-		float shift_eyelidRegionUpper = vertexVerticalDist/8;
-		float shift_eyelidRegionLower = vertexVerticalDist/10;
-		float shift_eyelidRegionLeft = vertexVerticalDist/8;
-		float shift_eyelidRegionRight = vertexVerticalDist/18;
-		int iris_x_regionRight = -INT_MAX;
-		int iris_x_regionLeft = INT_MAX;
-		vector<Point> IrisMaskPts;
-		
-		//Find leftmost & rightmost pts of color Iris Mask constour
-		for(int i=0;i<IrisContoursPoints.size();++i){
-			if(IrisContoursPoints[i].x>iris_x_regionRight){
-				iris_x_regionRight = IrisContoursPoints[i].x;
-			}else if(IrisContoursPoints[i].x<iris_x_regionLeft){
-				iris_x_regionLeft = IrisContoursPoints[i].x;
-			}
-		}
-
-		if(showDetail){
-			line(TestColorPlusEyelidMask , Point(iris_x_regionRight , 0) , Point(iris_x_regionRight , TestColorPlusEyelidMask.rows - 1) , Scalar::all(255) , 1);
-			line(TestColorPlusEyelidMask , Point(iris_x_regionLeft , 0) , Point(iris_x_regionLeft , TestColorPlusEyelidMask.rows - 1) , Scalar::all(255) , 1);
-			if(getEyelidRegion){
-				for(int i=0;i<TestColorPlusEyelidMask.cols;++i){
-					Point upperPt(i , upperParabolaTable[i]);
-					Point lowerPt(i , lowerParabolaTable[i]);
-					if(checkpoint(lowerPt , TestColorPlusEyelidMask)){
-						TestColorPlusEyelidMask.at<uchar>(lowerPt.y , lowerPt.x) = 255;
-					}
-					if(checkpoint(upperPt , TestColorPlusEyelidMask)){
-						TestColorPlusEyelidMask.at<uchar>(upperPt.y , upperPt.x) = 255;
-					}
-				}
-			}
-		}
-
-	
-		if(getEyelidRegion){				
-			for(int i=0;i<EyelidRegion.rows;++i){
-				for(int j=0;j<EyelidRegion.cols;++j){
-					if(!(j<iris_x_regionLeft + shift_eyelidRegionLeft || j>iris_x_regionRight - shift_eyelidRegionRight 
-						|| i<upperParabolaTable[j] + shift_eyelidRegionUpper || i>lowerParabolaTable[j] - shift_eyelidRegionLower)
-						&& EyelidRegion.at<uchar>(i , j)==255){
-							IrisMaskPts.push_back(Point(j , i));
-							//TestColorPlusEyelidMask.at<uchar>(i , j) = 255;
-					}
-				}
-			}
-		}
-	
-		for(int i=0;i<IrisContoursPoints.size();++i){
-			IrisMaskPts.push_back(IrisContoursPoints[i]);
-			if(showDetail){
-				TestColorPlusEyelidMask.at<uchar>(IrisContoursPoints[i].y , IrisContoursPoints[i].x) = 255;
-			}
-		}
-		if(showDetail){
-			imshow("TestColorPlusEyelidMask" , TestColorPlusEyelidMask);
-		}
-		vector <vector<Point>>  hull(1);			
-		convexHull( Mat(IrisMaskPts), hull[0], false);		
-		drawContours( IrisMask, hull, 0, Scalar(255 , 255 , 255), cv::FILLED);//Fill the range in the convex hull	
-
-
-		int irisMaskForLimbusErode_size_Cal = countNonZero(IrisMask)/colorErosionBaseSize_experiment*irisMaskForLimbusErode_sizeUp;		
-		Morphology_Operations(IrisMask, IrisMask , MORPH_ERODE, irisMaskForLimbusErode_size_Cal,  MORPH_CROSS);		
-		if(countNonZero(IrisMask)<50){
-			--irisMaskForLimbusErode_sizeUp;
-		}
+		time_eye_position_detection_eyelid_feature_detection_district4_3_1.push_back(time_stamp_in3_1 - time_stamp_in3);
+		time_eye_position_detection_eyelid_feature_detection_district4_3_2.push_back(time_stamp_in3_2 - time_stamp_in3_1);
+		time_eye_position_detection_eyelid_feature_detection_district4_3_3.push_back(time_stamp_in3_3 - time_stamp_in3_2);
+		time_eye_position_detection_eyelid_feature_detection_district4_3_4.push_back(time_stamp_in3_4 - time_stamp_in3_3);
 	}
 }
 
@@ -2754,7 +2304,8 @@ inline void IrisMaskPreProcessing_byIntensityModel(const Mat &IrisContour , Mat 
 		}
 	}
 	int irisMaskForLimbusErode_sizeCal = countNonZero(IrisMask_cal)/intensityErosionBaseSize_experiment*irisMaskForLimbusErode_size;
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_er(IrisMask_cal, IrisMask , irisMaskForLimbusErode_sizeCal, MORPH_CROSS, 8));	
+	Mat morph_cross_element = getStructuringElement(MORPH_CROSS, Size(2 * irisMaskForLimbusErode_sizeCal + 1, 2 * irisMaskForLimbusErode_sizeCal + 1), Point(irisMaskForLimbusErode_sizeCal, irisMaskForLimbusErode_sizeCal));
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_er(IrisMask_cal, IrisMask , morph_cross_element, thread_num));
 	//Morphology_Operations(IrisMask_cal, IrisMask , MORPH_ERODE, irisMaskForLimbusErode_sizeCal,  MORPH_CROSS);	
 }
 
@@ -3145,6 +2696,7 @@ inline bool InitialCoarseCenterCDF(const Mat &Src , Point &irisCoarseCenter){
 		return false;
 	}
 	CenterCalculatUsingMoment(IrisContoursPoints , irisCoarseCenter.x , irisCoarseCenter.y);
+	//CenterCalculatUsingMomentParallel(IrisContoursPoints, irisCoarseCenter.x, irisCoarseCenter.y, thread_num);
 	return true;
 }
 
@@ -3352,19 +2904,23 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 
 
 	//-------------------High Frequency Component Removal---------------------//	
+	const int openint_size = 19;
+	const int size_gaussian = 61;
 	Mat Gray_opening = cv::Mat::zeros(Frame_Gray.size(), CV_8UC1);
 	Mat Gray_openingGaussian = cv::Mat::zeros(Frame_Gray.size(), CV_8UC1);
 	Mat Tmp_open = cv::Mat::zeros(Frame_Gray.size(), CV_8UC1);
 	Mat Tmp_gau = cv::Mat::zeros(Frame_Gray.size(), CV_8UC1);
-	const int openint_size = 19;	
-	const int size_gaussian = 61;
+	Mat morph_rect_element = getStructuringElement(MORPH_RECT, Size(2 * openint_size + 1, 2 * openint_size + 1), Point(openint_size, openint_size));
+
 	
 	if (do_profiling) {
 		time_start_in_function = getTickCount();
 	}
 
-	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_er(Frame_Gray, Tmp_open, openint_size, MORPH_RECT, thread_num));
-	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_di(Tmp_open, Gray_opening, openint_size, MORPH_RECT, thread_num));
+	//cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_er(Frame_Gray, Tmp_open, openint_size, MORPH_RECT, thread_num));
+	//cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_di(Tmp_open, Gray_opening, openint_size, MORPH_RECT, thread_num));
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_er(Frame_Gray, Tmp_open, morph_rect_element, thread_num));
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_di(Tmp_open, Gray_opening, morph_rect_element, thread_num));
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_gau(Gray_opening, Gray_openingGaussian, size_gaussian, thread_num));
 	
 	if (do_profiling) {
@@ -3399,7 +2955,7 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 		time_start_in_function = getTickCount();
 	}
 	
-	if(caculateIris_Mask_done && eyeCoarseCenterLast.y<9/16.f*FRAMEH){		
+	if(caculateIris_Mask_done && eyeCoarseCenterLast.y<9/16.f*FRAMEH){
 		getEyeCoarseCenter = MinimalIrisColorProcess(Iris_Mask , eyeCoarseCenter , size_gaussian 
 																				, IrisContour_byColor , IrisContoursPoints , getIrisContourPoints
 																				, irisContour_size);			
@@ -3465,9 +3021,43 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	Point lineFilterCenter;
 	int eyeRegionCenter_y_forEyelidDetection;
 
+	double time_stamp1;
+	double time_stamp2;
+	double time_stamp3;
+	double time_stamp4;
+	double time_stamp5;
+	//double time_stamp_1_gaussian_end = 0;
+	//double time_stamp_1_core_start = 0;
+	//double time_stamp_1_core_end = 0;
+
 	if (do_profiling) {
 		time_start_in_function = getTickCount();
 	}
+
+	//cv::cuda::GpuMat dst, src1;
+	//src1.upload(Gray_openingGaussian);
+
+	//if (do_profiling) {
+	//	time_stamp_1_core_start = getTickCount();
+	//}
+
+	//cv::Ptr<cv::cuda::Filter> filter = cv::cuda::createGaussianFilter(src1.type(), dst.type(), cv::Size(21, 21), 0);
+	//filter->apply(src1, dst);
+
+	//if (do_profiling) {
+	//	time_stamp_1_core_end = getTickCount();
+	//}
+
+	//dst.download(Gray_openingGaussian_Gau);
+
+	//if (do_profiling) {
+	//	time_stamp_1_gaussian_end = getTickCount();
+	//}
+
+
+	//if (do_profiling) {
+	//	time_stamp_1_core_end = getTickCount();
+	//}
 
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_gau(Gray_openingGaussian, Gray_openingGaussian_Gau, 21, thread_num));
 	ParallelOtsu(Gray_openingGaussian_Gau, Gray_openingGaussian_Gau_inv, cv::THRESH_BINARY_INV, thread_num);
@@ -3476,17 +3066,31 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	//threshold(Gray_openingGaussian_Gau, Gray_openingGaussianOtsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 	//Gray_openingGaussian_Gau_inv = Scalar::all(255) - Gray_openingGaussianOtsu;
 
-
+	if (do_profiling) {
+		time_stamp1 = getTickCount();
+	}
 	//eyeRegionCenter	
-	CenterCalculatUsingMoment(Gray_openingGaussian_Gau_inv , eyeRegionCenter.x , eyeRegionCenter.y);
+	//CenterCalculatUsingMoment(Gray_openingGaussian_Gau_inv , eyeRegionCenter.x , eyeRegionCenter.y);
+	//std::cout << "OpenCV memoent = (" << eyeRegionCenter.x << ", " << eyeRegionCenter.y << ")" << std::endl;
+	CenterCalculatUsingMomentParallel(Gray_openingGaussian_Gau_inv, eyeRegionCenter.x, eyeRegionCenter.y, thread_num);
+	//std::cout << "CenterCalculatUsingMomentParallel memoent = (" << eyeRegionCenter.x << ", " << eyeRegionCenter.y << ")" << std::endl;
 	
+	//waitKey(0);
 
-	
+
+	if (do_profiling) {
+		time_stamp2 = getTickCount();
+	}
 	//X Y Gradient Generation	
 	X_DirectedGradientGeneration(Gray_openingGaussian_Gau , Grad_X_Thresh_Pop);
 	Y_DirectedGradientGeneration(Gray_openingGaussian_Gau , Grad_Y_Thresh_Pop);
 
-	
+
+
+
+	if (do_profiling) {
+		time_stamp3 = getTickCount();
+	}
 	//ValleyPeakField	
 	EyeInnerRegionGeneration(Grad_X_Thresh_Pop , Grad_Y_Thresh_Pop , eyeRegionCenter , ValleyPeakField
 											, Gray_openingGaussian_Gau_inv  
@@ -3502,7 +3106,9 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 											, iris_x_regionLeft , iris_x_regionRight);	
 	
 
-	
+	if (do_profiling) {
+		time_stamp4 = getTickCount();
+	}
 	//Eyelid Detection
 	if(extremeDown || extremeRight || extremeLeft || caculateIris_Mask_done){
 		eyeRegionCenter_y_forEyelidDetection = eyeCoarseCenter.y;
@@ -3514,13 +3120,17 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	EyelidFeatureDetection(Gray_openingGaussian , feature_point_upperEyelid ,feature_point_lowerEyelid
 										, frame_number , eyeRegionCenter_y_forEyelidDetection , ValleyPeakField);	
 	
-	//if(printDebug){
-	//	printf("\n 4\n");
-	//}
 
 	if (do_profiling) {
 		time_end_in_function = getTickCount();
 		time_eye_position_detection_eyelid_feature_detection.push_back(time_end_in_function - time_start_in_function);
+		time_eye_position_detection_eyelid_feature_detection_district1.push_back(time_stamp1 - time_start_in_function);
+		//time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.push_back(time_stamp_1_gaussian_end - time_start_in_function);
+		//time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.push_back(time_stamp_1_core_end - time_stamp_1_core_start);
+		time_eye_position_detection_eyelid_feature_detection_district2.push_back(time_stamp2 - time_stamp1);
+		time_eye_position_detection_eyelid_feature_detection_district3.push_back(time_stamp3 - time_stamp2);
+		time_eye_position_detection_eyelid_feature_detection_district4.push_back(time_stamp4 - time_stamp3);
+		time_eye_position_detection_eyelid_feature_detection_district5.push_back(time_end_in_function - time_stamp4);
 	}
 	//-------------------Parabola Model Fitting---------------------//		
 	vector<Point> upper_parabola_inlier;
@@ -3654,9 +3264,15 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 				MomentCenterByGrayLevel.at<uchar>(i , j) = 0;
 		}
 	}
-
-	CenterCalculatUsingMoment(MomentCenterByGrayLevel , eyeRefinedIrisCenter.x , eyeRefinedIrisCenter.y);		
+	//std::cout << "-------------------Start------------------------" << std::endl;
+	//CenterCalculatUsingMoment(MomentCenterByGrayLevel , eyeRefinedIrisCenter.x , eyeRefinedIrisCenter.y);
+	//std::cout << "OpenCV memoent = (" << eyeRefinedIrisCenter.x << ", " << eyeRefinedIrisCenter.y << ")" << std::endl;
+	CenterCalculatUsingMomentParallel(MomentCenterByGrayLevel, eyeRefinedIrisCenter.x, eyeRefinedIrisCenter.y, thread_num);
+	//std::cout << "CenterCalculatUsingMomentParallel memoent = (" << eyeRefinedIrisCenter.x << ", " << eyeRefinedIrisCenter.y << ")" << std::endl;
+	//std::cout << "-------------------End-----------------------" << std::endl;
 		
+	//waitKey(0);
+
 	ClipFeaturePoints(refined_feature_point_Limbus , clipped_feature_point_Limbus
 								, iris_x_regionRight , iris_x_regionLeft
 								, dis_thresholdSoft_lowerEyelid , dis_thresholdSoft_upperEyelid								    
@@ -3733,12 +3349,12 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 
 					
 					float morphological_erode_refinedEyeConvexHull_size_Cal = countNonZero(FeaturePoints_LimbusFtPtsConvexHull)/eyeRefinedConvexForIrisMaskColorModelBaseSize_experiment*morphological_erode_refinedEyeConvexHull_size;
+					Mat morph_ellipse_element = getStructuringElement(MORPH_ELLIPSE, Size(2 * morphological_erode_refinedEyeConvexHull_size_Cal + 1, 2 * morphological_erode_refinedEyeConvexHull_size_Cal + 1), Point(morphological_erode_refinedEyeConvexHull_size_Cal, morphological_erode_refinedEyeConvexHull_size_Cal));
 					/*Morphology_Operations(FeaturePoints_LimbusFtPtsConvexHull, Refined_LimnusFtPtsConvexHull_Processed , MORPH_ERODE
 														, morphological_erode_refinedEyeConvexHull_size_Cal,  MORPH_ELLIPSE);*/	
 
-					cv::parallel_for_(cv::Range(0, 8), Parallel_process_er(FeaturePoints_LimbusFtPtsConvexHull
-												, Refined_LimnusFtPtsConvexHull_Processed , morphological_erode_refinedEyeConvexHull_size_Cal
-												, MORPH_ELLIPSE, 8));	
+					cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_er(FeaturePoints_LimbusFtPtsConvexHull
+												, Refined_LimnusFtPtsConvexHull_Processed , morph_ellipse_element, thread_num));
 
 						
 					//Mat Refined_LimnusFtPtsConvexHull_find = Refined_LimnusFtPtsConvexHull_Processed.clone();					
@@ -3813,11 +3429,11 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 
 		//Erosion	
 		float morphological_erode_refinedEyeConvexHull_size_Cal = countNonZero(FeaturePoints_LimbusFtPtsConvexHull)/eyeRefinedConvexForIrisMaskColorModelBaseSize_experiment*morphological_erode_IrisRegionValidTesting_size;
+		Mat morph_ellipse_element = getStructuringElement(MORPH_ELLIPSE, Size(2 * morphological_erode_refinedEyeConvexHull_size_Cal + 1, 2 * morphological_erode_refinedEyeConvexHull_size_Cal + 1), Point(morphological_erode_refinedEyeConvexHull_size_Cal, morphological_erode_refinedEyeConvexHull_size_Cal));
 		/*Morphology_Operations(FeaturePoints_LimbusFtPtsConvexHull, IrisRegionValidTesting , MORPH_ERODE
 											, morphological_erode_refinedEyeConvexHull_size_Cal,  MORPH_ELLIPSE);	*/
-		cv::parallel_for_(cv::Range(0, 8), Parallel_process_er(FeaturePoints_LimbusFtPtsConvexHull
-												, IrisRegionValidTesting , morphological_erode_refinedEyeConvexHull_size_Cal
-												, MORPH_ELLIPSE, 8));	
+		cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_er(FeaturePoints_LimbusFtPtsConvexHull
+												, IrisRegionValidTesting , morph_ellipse_element, thread_num));
 		eyeCloseDetermine_irisContourSizeThreshold_colorModelBased = countNonZero(IrisRegionValidTesting)*eyeCloseDetermine_irisContourSizeThreshold_percent;				
 	}
 
@@ -4046,7 +3662,7 @@ inline bool HistoModelValidTesting(const Mat &EyeImageForTestingIrisHistModel , 
 	//Use the Iris_hist Model to Cauclate Iris Mask for Testing
 	CalcBackProjSelfDefined(EyeImageForTestingIrisHistModel , Iris_hist , Iris_Mask , histSize , Iris_PerBin);	
 	//GaussianBlur( Iris_Mask, Iris_Mask_Gau, Size(size_gaussian,size_gaussian) , 0);			
-	cv::parallel_for_(cv::Range(0, 8), Parallel_process_gau(Iris_Mask, Iris_Mask_Gau, size_gaussian, 8));							
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_gau(Iris_Mask, Iris_Mask_Gau, size_gaussian, thread_num));
 	//threshold(Iris_Mask_Gau, Iris_Mask_Otsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 	ParallelOtsu(Iris_Mask_Gau, Iris_Mask_Otsu, cv::THRESH_BINARY, thread_num);
 
@@ -6402,30 +6018,30 @@ int main(int argc , char *argv[]){
 
 		//======Profiling======/
 		if (do_profiling) {
-			if (time_white_balance_serial.size() > 0) {
-				avg_time = std::accumulate(time_white_balance_serial.begin(), time_white_balance_serial.end(), 0);
-				avg_time = (avg_time / getTickFrequency()) / time_white_balance_serial.size();
-				file_time_fpsOut << ">> time_white_balance_serial     = " << avg_time << endl;
-			}
+			//if (time_white_balance_serial.size() > 0) {
+			//	avg_time = std::accumulate(time_white_balance_serial.begin(), time_white_balance_serial.end(), 0);
+			//	avg_time = (avg_time / getTickFrequency()) / time_white_balance_serial.size();
+			//	file_time_fpsOut << ">> time_white_balance_serial     = " << avg_time << endl;
+			//}
 			if (time_white_balance_parallel.size() > 0) {
 				avg_time = std::accumulate(time_white_balance_parallel.begin(), time_white_balance_parallel.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_white_balance_parallel.size();
-				file_time_fpsOut << ">> time_white_balance_parallel   = " << avg_time << endl;
+				file_time_fpsOut << "time_white_balance_parallel   = " << avg_time << endl;
 			}
 			if (time_cvt_color.size() > 0) {
 				avg_time = std::accumulate(time_cvt_color.begin(), time_cvt_color.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_cvt_color.size();
-				file_time_fpsOut << "time_cvt_color              = " << avg_time << endl;
+				file_time_fpsOut << "time_cvt_color                = " << avg_time << endl;
 			}
 			if (time_hist_equal.size() > 0) {
 				avg_time = std::accumulate(time_hist_equal.begin(), time_hist_equal.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_hist_equal.size();
-				file_time_fpsOut << "time_hist_equal             = " << avg_time << endl;
+				file_time_fpsOut << "time_hist_equal               = " << avg_time << endl;
 			}
 			if (time_iris_model_handling.size() > 0) {
 				avg_time = std::accumulate(time_iris_model_handling.begin(), time_iris_model_handling.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_iris_model_handling.size();
-				file_time_fpsOut << "time_iris_model_handling    = " << avg_time << endl;
+				file_time_fpsOut << "time_iris_model_handling      = " << avg_time << endl;
 			}
 			//if (time_eye_position_detection.size() > 0) {
 			//	avg_time = std::accumulate(time_eye_position_detection.begin(), time_eye_position_detection.end(), 0);
@@ -6446,6 +6062,126 @@ int main(int argc , char *argv[]){
 				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection.begin(), time_eye_position_detection_eyelid_feature_detection.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection.size();
 				file_time_fpsOut << ">> time_eye_position_detection_eyelid_feature_detection   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district1.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district1.begin(), time_eye_position_detection_eyelid_feature_detection_district1.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district1.size();
+				file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district1   = " << avg_time << endl;
+			}
+			//if (time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.size() > 0) {
+			//	avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.begin(), time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.end(), 0);
+			//	avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.size();
+			//	file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur   = " << avg_time << endl;
+			//}
+			//if (time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.size() > 0) {
+			//	avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.begin(), time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.end(), 0);
+			//	avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.size();
+			//	file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core   = " << avg_time << endl;
+			//}
+			if (time_eye_position_detection_eyelid_feature_detection_district2.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district2.begin(), time_eye_position_detection_eyelid_feature_detection_district2.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district2.size();
+				file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district2   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district3.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district3.begin(), time_eye_position_detection_eyelid_feature_detection_district3.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district3.size();
+				file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district3   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4.begin(), time_eye_position_detection_eyelid_feature_detection_district4.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4.size();
+				file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district4   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_0.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_0.begin(), time_eye_position_detection_eyelid_feature_detection_district4_0.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_0.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_0           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1_1.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_1.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_1.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_1.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_1           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1_2.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_2.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_2.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_2.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_2           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1_3.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_3.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_3.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_3.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_3           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1_4.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_4.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_4.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_4.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_4           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1_5.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_5.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_5.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_5.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_5           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_2.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_2.begin(), time_eye_position_detection_eyelid_feature_detection_district4_2.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_2.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_2           = " << avg_time << endl;
+			}
+			//if (time_eye_position_detection_eyelid_feature_detection_district4_2_core.size() > 0) {
+			//	avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_2_core.begin(), time_eye_position_detection_eyelid_feature_detection_district4_2_core.end(), 0);
+			//	avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_2_core.size();
+			//	file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_2_core    = " << avg_time << endl;
+			//}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_3.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_3_1.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_1.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_1.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_1.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_1           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_3_2.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_2.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_2.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_2.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_2           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_3_3.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_3.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_3.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_3.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_3           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_3_4.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_4.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_4.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_4.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_4           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_4.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_4.begin(), time_eye_position_detection_eyelid_feature_detection_district4_4.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_4.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_4           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_5.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_5.begin(), time_eye_position_detection_eyelid_feature_detection_district4_5.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_5.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_5           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_local_sum.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_local_sum.begin(), time_eye_position_detection_eyelid_feature_detection_district4_local_sum.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_local_sum.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_local_sum   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district5.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district5.begin(), time_eye_position_detection_eyelid_feature_detection_district5.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district5.size();
+				file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district5   = " << avg_time << endl;
 			}
 			if (time_eye_position_test.size() > 0) {
 				avg_time = std::accumulate(time_eye_position_test.begin(), time_eye_position_test.end(), 0);

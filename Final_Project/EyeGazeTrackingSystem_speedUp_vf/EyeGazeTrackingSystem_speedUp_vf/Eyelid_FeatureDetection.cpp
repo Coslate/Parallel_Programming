@@ -46,7 +46,7 @@ void EyelidFeatureDetection(const Mat &Src , vector<Point> &upperEyelid_feature 
 	for(int j=leftStartPoint.x ; j<rightStartPoint.x; j+=Eupper_sourceFeature_inter_range_phase2){
 		startPoint = Point(j , eyeRegionCenter_y);
 		
-		for(int k=0;k<Eupper_numSweep;++k){			
+		for(int k=0;k<Eupper_numSweep;++k){
 			int angle_start_upper_phase2 = -90 - Eupper_angle_range_phase2;
 			int angle_end_upper_phase2 = -90 + Eupper_angle_range_phase2;;
 			int num_line_upper_phase2 = (angle_end_upper_phase2 - angle_start_upper_phase2)/(float)Eupper_inter_angle_phase2 +1;
