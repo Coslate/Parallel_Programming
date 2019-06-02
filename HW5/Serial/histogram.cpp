@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
             ret->height = 256;
             ret->weight = 256;
             ret->size = 256 * 256;
-            ret->data = new RGB[256 * 256];
+            ret->data = new RGB[256 * 256]{};
 
             for(int i=0;i<ret->height;i++){
                 for(int j=0;j<256;j++){
@@ -208,6 +208,20 @@ int main(int argc, char *argv[])
                         ret->data[256*i+j].B = 255;
                 }
             }
+
+            std::cout<<"max = "<<max<<std::endl;
+            std::cout<<"ret->data = "<<std::endl;
+            for(int i=0;i<ret->height;i++){
+                std::cout<<std::endl;
+                for(int j=0;j<256;j++){
+                    if(j%2==0 && j!=0){
+                        std::cout<<std::endl;
+                    }
+                    std::cout<<(unsigned)ret->data[256*i+j].R<<" "<<(unsigned)ret->data[256*i+j].G<<" "<<(unsigned)ret->data[256*i+j].B<<" "<<(unsigned)ret->data[256*i+j].align<<" ";
+                }
+            }
+            std::cout<<std::endl;
+            std::cout<<"Done. "<<std::endl;
 
             std::string newfile = "hist_" + std::string(filename); 
             writebmp(newfile.c_str(), ret);
