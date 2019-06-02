@@ -704,10 +704,11 @@ private:
 	int diff;
 	double *m10_array;
 	double *m01_array;
+	double *m00_array;
 public:
-	Parallel_process_moment_vector(const vector<Point> &inputImgage, double *m10_array, double *m01_array, int diffVal)
+	Parallel_process_moment_vector(const vector<Point> &inputImgage, double *m10_array, double *m01_array, double *m00_array, int diffVal)
 		: img(inputImgage), diff(diffVal),
-		m10_array(m10_array), m01_array(m01_array) {}
+		m10_array(m10_array), m01_array(m01_array), m00_array(m00_array) {}
 
 	virtual void operator()(const cv::Range& range) const
 	{
@@ -719,17 +720,21 @@ public:
 			of parts and process simultaneously */
 			double local_dM01 = 0;
 			double local_dM10 = 0;
+			double local_dM00 = 0;
 			double work_load = img.size() / diff;
 
-			for (int r = i*work_load; r<i*(work_load+1); ++r) {
-				//for (int c = 0; c<in.cols; ++c) {
-				local_dM01 += img[r].y;
-				local_dM10 += img[r].x;
-				//}
+			for (int r = i*work_load; r<work_load*(i+1); ++r) {
+				int prev_idx = (r == 0) ? img.size() - 1 : r - 1;
+				double dxy = img[prev_idx].x * img[r].y - img[r].x * img[prev_idx].y;
+
+				local_dM01 += dxy*(img[r].y+img[prev_idx].y);
+				local_dM10 += dxy*(img[r].x+img[prev_idx].x);
+				local_dM00 += dxy;
 			}
 
-			m01_array[i] = local_dM01/work_load;
-			m10_array[i] = local_dM10/work_load;
+			m01_array[i] = local_dM01;
+			m10_array[i] = local_dM10;
+			m00_array[i] = local_dM00;
 		}
 	}
 };

@@ -1409,21 +1409,46 @@ inline void CenterCalculatUsingMomentParallel(const Mat &Src_contours, int &posX
 inline void CenterCalculatUsingMomentParallel(const vector<Point> &Src_contours, int &posX, int &posY, const int thread_num) {
 	double *m10_array = new double[thread_num]();
 	double *m01_array = new double[thread_num]();
+	double *m00_array = new double[thread_num]();
 	double dM10 = 0;
 	double dM01 = 0;
+	double dM00 = 0;
 
-	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_moment_vector(Src_contours, m10_array, m01_array, thread_num));
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_moment_vector(Src_contours, m10_array, m01_array, m00_array, thread_num));
 
 	for (int i = 0; i < thread_num; ++i) {
 		dM10 += m10_array[i];
 		dM01 += m01_array[i];
+		dM00 += m00_array[i];
 	}
 
-	posX = dM10 / thread_num;
-	posY = dM01 / thread_num;
+	if (fabs(dM00) > FLT_EPSILON)
+	{
+		double db1_2, db1_6;
+
+		if (dM00 > 0)
+		{
+			db1_2 = 0.5;
+			db1_6 = 0.16666666666666666666666666666667;
+		}
+		else
+		{
+			db1_2 = -0.5;
+			db1_6 = -0.16666666666666666666666666666667;
+		}
+
+		// spatial moments
+		dM00 = dM00 * db1_2;
+		dM10 = dM10 * db1_6;
+		dM01 = dM01 * db1_6;
+	}
+
+	posX = dM10 / dM00;
+	posY = dM01 / dM00;
 
 	delete m10_array;
 	delete m01_array;
+	delete m00_array;
 }
 
 inline bool MinimalIrisColorProcess(const Mat &Src , Point &eyeCoarseCenter , const int &size_gaussian 
@@ -1445,8 +1470,14 @@ inline bool MinimalIrisColorProcess(const Mat &Src , Point &eyeCoarseCenter , co
 	}
 
 	irisContour_size = countNonZero(IrisContour);
-	CenterCalculatUsingMoment(IrisContoursPoints , eyeCoarseCenter.x , eyeCoarseCenter.y);
-	//CenterCalculatUsingMomentParallel(IrisContoursPoints, eyeCoarseCenter.x, eyeCoarseCenter.y, thread_num);
+	//CenterCalculatUsingMoment(IrisContoursPoints , eyeCoarseCenter.x , eyeCoarseCenter.y);
+	//std::cout << "OpenCV memoent = (" << eyeCoarseCenter.x << ", " << eyeCoarseCenter.y << ")" << std::endl;
+
+	CenterCalculatUsingMomentParallel(IrisContoursPoints, eyeCoarseCenter.x, eyeCoarseCenter.y, thread_num);
+	//std::cout << "CenterCalculatUsingMomentParallel memoent = (" << eyeCoarseCenter.x << ", " << eyeCoarseCenter.y << ")" << std::endl;
+
+	//waitKey(0);
+
 	getIrisContourPoints = true;
 	return true;	
 }
@@ -2696,7 +2727,12 @@ inline bool InitialCoarseCenterCDF(const Mat &Src , Point &irisCoarseCenter){
 		return false;
 	}
 	CenterCalculatUsingMoment(IrisContoursPoints , irisCoarseCenter.x , irisCoarseCenter.y);
-	//CenterCalculatUsingMomentParallel(IrisContoursPoints, irisCoarseCenter.x, irisCoarseCenter.y, thread_num);
+	std::cout << "OpenCV memoent = (" << irisCoarseCenter.x << ", " << irisCoarseCenter.y << ")" << std::endl;
+	CenterCalculatUsingMomentParallel(IrisContoursPoints, irisCoarseCenter.x, irisCoarseCenter.y, thread_num);
+	std::cout << "CenterCalculatUsingMomentParallel memoent = (" << irisCoarseCenter.x << ", " << irisCoarseCenter.y << ")" << std::endl;
+
+	waitKey(0);
+
 	return true;
 }
 
@@ -2954,7 +2990,7 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	if (do_profiling) {
 		time_start_in_function = getTickCount();
 	}
-	
+
 	if(caculateIris_Mask_done && eyeCoarseCenterLast.y<9/16.f*FRAMEH){
 		getEyeCoarseCenter = MinimalIrisColorProcess(Iris_Mask , eyeCoarseCenter , size_gaussian 
 																				, IrisContour_byColor , IrisContoursPoints , getIrisContourPoints
