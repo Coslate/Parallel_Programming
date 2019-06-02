@@ -464,23 +464,30 @@ int main(int argc, char *argv[]){
             ret->height = 256;
             ret->weight = 256;
             ret->size = 256 * 256;
-            ret->data = new RGB[256 * 256]{};
+            ret->data = new RGB[256 * 256];
 
             for(int i=0;i<ret->height;i++){
                 for(int j=0;j<256;j++){
                     if(R[j]*256/max > i)
                         ret->data[256*i+j].R = 255;
+                    else
+                        ret->data[256*i+j].R = 0;
                     if(G[j]*256/max > i)
                         ret->data[256*i+j].G = 255;
+                    else
+                        ret->data[256*i+j].G = 0;
                     if(B[j]*256/max > i)
                         ret->data[256*i+j].B = 255;
+                    else
+                        ret->data[256*i+j].B = 0;
+
+                    ret->data[256*i+j].align = 0;
                 }
             }
 
             std::cout<<"max = "<<max<<std::endl;
             std::cout<<"ret->data = "<<std::endl;
             for(int i=0;i<ret->height;i++){
-                std::cout<<std::endl;
                 for(int j=0;j<256;j++){
                     if(j%2==0 && j!=0){
                         std::cout<<std::endl;
