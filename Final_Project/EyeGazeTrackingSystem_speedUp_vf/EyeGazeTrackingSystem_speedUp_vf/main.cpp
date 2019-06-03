@@ -1338,6 +1338,11 @@ inline void CenterCalculatUsingMoment(const vector<Point> &max_contours , int &p
 	double dArea = oMoments.m00;
 	posX = dM10 / dArea;
 	posY = dM01 / dArea;       
+
+	//std::cout << ">>Opencv dM10 = " << dM10 << std::endl;
+	//std::cout << ">>Opencv dM01 = " << dM01 << std::endl;
+	//std::cout << ">>Opencv dM00 = " << dArea << std::endl;
+
 }
 
 inline void CenterCalculatUsingMoment(const Mat &Src_contours , int &posX , int &posY){
@@ -1386,8 +1391,19 @@ inline void CenterCalculatUsingMomentParallel(const Mat &Src_contours, int &posX
 	double dM10 = 0;
 	double dM01 = 0;
 	double dM00 = 0;
+	int *start_loc = new int[thread_num]();
+	int *end_loc = new int[thread_num]();
+	int avg_rows = Src_contours.rows / thread_num;
+	int extra_rows = Src_contours.rows % thread_num;
 
-	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_moment(Src_contours, m10_array, m01_array, m00_array, thread_num));
+	for (int i = 0; i<thread_num; ++i) {
+		int my_rank_rows = (i<(extra_rows)) ? (avg_rows + 1) : avg_rows;
+		start_loc[i] = (i == 0) ? 0 : end_loc[i - 1] + 1;
+		end_loc[i] = start_loc[i] + (my_rank_rows - 1);
+	}
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_moment(Src_contours, m10_array, m01_array, m00_array, start_loc, end_loc, thread_num));//this can handle the case that image.rows is not divisible by thread_num
+	//cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_moment(Src_contours, m10_array, m01_array, m00_array, thread_num));
 
 	for (int i = 0; i < thread_num; ++i) {
 		dM10 += m10_array[i];
@@ -1413,8 +1429,18 @@ inline void CenterCalculatUsingMomentParallel(const vector<Point> &Src_contours,
 	double dM10 = 0;
 	double dM01 = 0;
 	double dM00 = 0;
+	int *start_loc = new int[thread_num]();
+	int *end_loc = new int[thread_num]();
+	int avg_rows = Src_contours.size() / thread_num;
+	int extra_rows = Src_contours.size() % thread_num;
 
-	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_moment_vector(Src_contours, m10_array, m01_array, m00_array, thread_num));
+	for (int i = 0; i<thread_num; ++i) {
+		int my_rank_rows = (i<(extra_rows)) ? (avg_rows + 1) : avg_rows;
+		start_loc[i] = (i == 0) ? 0 : end_loc[i - 1] + 1;
+		end_loc[i] = start_loc[i] + (my_rank_rows - 1);
+	}
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_moment_vector(Src_contours, m10_array, m01_array, m00_array, start_loc, end_loc, Src_contours.size(), thread_num));
 
 	for (int i = 0; i < thread_num; ++i) {
 		dM10 += m10_array[i];
@@ -1443,12 +1469,18 @@ inline void CenterCalculatUsingMomentParallel(const vector<Point> &Src_contours,
 		dM01 = dM01 * db1_6;
 	}
 
+	//std::cout << ">>Parallel dM10 = " << dM10 << std::endl;
+	//std::cout << ">>Parallel dM01 = " << dM01 << std::endl;
+	//std::cout << ">>Parallel dM00 = " << dM00 << std::endl;
+
 	posX = dM10 / dM00;
 	posY = dM01 / dM00;
 
 	delete m10_array;
 	delete m01_array;
 	delete m00_array;
+	delete start_loc;
+	delete end_loc;
 }
 
 inline bool MinimalIrisColorProcess(const Mat &Src , Point &eyeCoarseCenter , const int &size_gaussian 
@@ -2726,12 +2758,12 @@ inline bool InitialCoarseCenterCDF(const Mat &Src , Point &irisCoarseCenter){
 	if(!FindMAXConnextedComponent(Src_Binary , IrisContoursPoints , IrisContour)){
 		return false;
 	}
-	CenterCalculatUsingMoment(IrisContoursPoints , irisCoarseCenter.x , irisCoarseCenter.y);
-	std::cout << "OpenCV memoent = (" << irisCoarseCenter.x << ", " << irisCoarseCenter.y << ")" << std::endl;
+	//CenterCalculatUsingMoment(IrisContoursPoints , irisCoarseCenter.x , irisCoarseCenter.y);
+	//std::cout << "OpenCV memoent = (" << irisCoarseCenter.x << ", " << irisCoarseCenter.y << ")" << std::endl;
 	CenterCalculatUsingMomentParallel(IrisContoursPoints, irisCoarseCenter.x, irisCoarseCenter.y, thread_num);
-	std::cout << "CenterCalculatUsingMomentParallel memoent = (" << irisCoarseCenter.x << ", " << irisCoarseCenter.y << ")" << std::endl;
+	//std::cout << "CenterCalculatUsingMomentParallel memoent = (" << irisCoarseCenter.x << ", " << irisCoarseCenter.y << ")" << std::endl;
 
-	waitKey(0);
+	//waitKey(0);
 
 	return true;
 }
