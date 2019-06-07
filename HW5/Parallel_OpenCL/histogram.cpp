@@ -14,6 +14,7 @@
 #include <CL/cl.h>
 #endif
 
+#define LOG 1
 /**********************************************************************
  *	Handle errors function
  *********************************************************************/
@@ -318,15 +319,36 @@ int main(int argc, char *argv[]){
 
     //-------------------Build kernel------------------------------//
     LoadProgram(context, "./histogram.cl", kernel_program);
+
+    //char options[] = "-cl-unsafe-math-optimizations -cl-mad-enable";
+#if LOG
+    time_t t;
+	srand((unsigned) time(&t));
+	int some_rand_num = rand() % 100 + 200; // 200 to 299
+    const unsigned MAX_INFO_SIZE = 0x10000;
+    char options[MAX_INFO_SIZE];
+	sprintf(options, "-cl-nv-maxrregcount=%d -cl-nv-verbose", some_rand_num); // randomn number is added to avoid empty log
+    size_t log_size;
+    char *log;
+
+    cl_int err_t = clBuildProgram(kernel_program, 1, &device_id, options, NULL, NULL);
+    clGetProgramBuildInfo(kernel_program, device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_size);
+    log = (char*) malloc(log_size+1);
+    clGetProgramBuildInfo(kernel_program, device_id, CL_PROGRAM_BUILD_LOG, MAX_INFO_SIZE, log, NULL);
+    log[log_size] = '\0';
+
+    std::cout<<"log = "<<log<<std::endl;
+    std::cout<<"err_t = "<<err_t<<std::endl;
+#else
     cl_int err_t = clBuildProgram(kernel_program, 1, &device_id, NULL, NULL, NULL);
+#endif
+
     if(err_t != CL_SUCCESS){
         size_t len;
         clGetProgramBuildInfo(kernel_program, device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
         char *log = new char[len];
         clGetProgramBuildInfo(kernel_program, device_id, CL_PROGRAM_BUILD_LOG, len, log, NULL);
-
         std::cout<<"log = "<<log<<std::endl;
-
     }
 
     cl_kernel kernel_obj = clCreateKernel(kernel_program, "histogram", &ret_code);
@@ -477,6 +499,7 @@ int main(int argc, char *argv[]){
                 }
             }
 
+            /*
             std::cout<<"max = "<<max<<std::endl;
             std::cout<<"ret->data = "<<std::endl;
             for(int i=0;i<ret->height;i++){
@@ -490,6 +513,7 @@ int main(int argc, char *argv[]){
             }
             std::cout<<std::endl;
             std::cout<<"Done. "<<std::endl;
+            */
 
             std::string newfile = "hist_" + std::string(filename); 
             writebmp(newfile.c_str(), ret);
