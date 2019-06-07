@@ -35,8 +35,6 @@ class Parallel_process_gau : public cv::ParallelLoopBody
                            img.cols, img.rows/diff));		
                 cv::Mat out(retVal, cv::Rect(0, (retVal.rows/diff)*i, 
                                     retVal.cols, retVal.rows/diff));
-
-
 				GaussianBlur( in, out, Size(size,size) , 0);
             }
         }
@@ -73,7 +71,8 @@ class Parallel_process_er : public cv::ParallelLoopBody
                                     retVal.cols, retVal.rows/diff));
 				//Morphology_Operations(in, tmp , MORPH_OPEN, openint_size,  MORPH_RECT);						
 				/// Apply the specified morphology operation
-				morphologyEx( in, out, MORPH_ERODE, element ,Point(-1,-1), 1,BORDER_DEFAULT);  				
+				//morphologyEx( in, out, MORPH_ERODE, element ,Point(-1,-1), 1,BORDER_DEFAULT);  				
+				erode(in, out, element, Point(-1, -1), 1, BORDER_DEFAULT);
             }
         }
 };
@@ -109,8 +108,8 @@ class Parallel_process_di : public cv::ParallelLoopBody
                                     retVal.cols, retVal.rows/diff));
 				//Morphology_Operations(in, tmp , MORPH_OPEN, openint_size,  MORPH_RECT);						
 				/// Apply the specified morphology operation				
-				morphologyEx( in, out, MORPH_DILATE, element ,Point(-1,-1), 1,BORDER_DEFAULT);  
-							
+				//morphologyEx( in, out, MORPH_DILATE, element ,Point(-1,-1), 1,BORDER_DEFAULT);  
+				dilate(in, out, element, Point(-1, -1), 1, BORDER_DEFAULT);
             }
         }
 };
@@ -459,6 +458,139 @@ public:
 	}
 };
 
+class Parallel_process_hist_pure : public cv::ParallelLoopBody
+{
+
+private:
+	const Mat &img;
+	int diff;
+	int *hist;
+	std::mutex &mtx;
+
+public:
+	Parallel_process_hist_pure(const cv::Mat &inputImgage, int *hist, std::mutex &mtx, int diffVal)
+		: img(inputImgage), diff(diffVal), hist(hist), mtx(mtx) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			cv::Mat in(img, cv::Rect(0, (img.rows / diff)*i,
+				img.cols, img.rows / diff));
+			int *local_hist = new int[256]();
+
+			for (int r = 0; r<in.rows; ++r) {
+				for (int c = 0; c<in.cols; ++c) {
+					int temp = in.at<uchar>(r, c);
+					local_hist[temp]++;
+				}
+			}
+
+			mtx.lock();
+			for (int k = 0; k < 256; ++k) {
+				hist[k] += local_hist[k]; 
+			}
+			mtx.unlock();
+		}
+	}
+};
+
+class Parallel_process_hist_and_cumulative_pure : public cv::ParallelLoopBody
+{
+
+private:
+	const Mat &img;
+	int diff;
+	int *cu_hist;
+	std::mutex &mtx;
+
+public:
+	Parallel_process_hist_and_cumulative_pure(const cv::Mat &inputImgage, int *cu_hist, std::mutex &mtx, int diffVal)
+		: img(inputImgage), diff(diffVal), cu_hist(cu_hist), mtx(mtx) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			cv::Mat in(img, cv::Rect(0, (img.rows / diff)*i,
+				img.cols, img.rows / diff));
+			int *local_hist    = new int[256]();
+			int *local_cu_hist = new int[256]();
+			double curr = 0;
+
+			for (int r = 0; r < in.rows; ++r) {
+				for (int c = 0; c < in.cols; ++c) {
+					int temp = in.at<uchar>(r, c);
+					local_hist[temp]++;
+				}
+			}
+
+			for (int k = 0; k < 256; ++k) {
+				curr += local_hist[k];
+				local_cu_hist[k] += curr;
+			}
+
+			//double time_start = getTickCount();
+			mtx.lock();
+			for (int k = 0; k < 256; ++k) {
+				cu_hist[k] += local_cu_hist[k];
+			}
+			mtx.unlock();
+			//double time_end = getTickCount();
+			//std::cout << "serial_time = " << (time_end - time_start) / getTickFrequency() << std::endl;
+			//waitKey(0);
+		}
+	}
+};
+
+class Parallel_process_hist_equalization : public cv::ParallelLoopBody
+{
+
+private:
+	const Mat &img;
+	Mat& retVal;
+	int diff;
+	int *cu_hist;
+	double total_size;
+	std::mutex &mtx;
+
+public:
+	Parallel_process_hist_equalization(const cv::Mat &inputImgage, cv::Mat &outputImgage, int *cu_hist, double total_size, std::mutex &mtx, int diffVal)
+		: img(inputImgage), retVal(outputImgage), diff(diffVal), cu_hist(cu_hist), total_size(total_size), mtx(mtx) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			cv::Mat in(img, cv::Rect(0, (img.rows / diff)*i,
+				img.cols, img.rows / diff));
+			cv::Mat out(retVal, cv::Rect(0, (retVal.rows / diff)*i,
+				retVal.cols, retVal.rows / diff));
+
+			//std::cout << "total_size = " << total_size << std::endl;
+			//for (int r = 0; r < out.rows; ++r) {
+			//	for (int c = 0; c < out.cols; ++c) {
+			//		out.at<uchar>(r, c) = round((double)cu_hist[in.at<uchar>(r, c)] * 255 / total_size);
+			//	}
+			//}
+
+			cv::Mat_<uchar>::iterator it = in.begin<uchar>();
+			cv::Mat_<uchar>::const_iterator itend = in.end<uchar>();
+			cv::Mat_<uchar>::iterator itout = out.begin<uchar>();
+
+			for (; it != itend; ++it, ++itout) {
+				*itout = (((double)cu_hist[*it]) * 255) / total_size;
+			}
+		}
+	}
+};
+
 class Parallel_process_cal_thresh : public cv::ParallelLoopBody
 {
 
@@ -792,20 +924,18 @@ public:
 				retVal.cols, retVal.rows / diff));
 
 
-			cv::Mat_<cv::Vec3b>::const_iterator it = in.begin();
+			cv::Mat_<cv::Vec3b>::iterator it = in.begin();
 			cv::Mat_<cv::Vec3b>::const_iterator itend = in.end();
 			cv::Mat_<cv::Vec3b>::iterator itout = out.begin();
 
 			for (; it != itend; ++it, ++itout) {
-				Vec3b vi = *it;
-
 				double R_new;
 				double G_new;
 				double B_new;
 
-				R_new = remap(vi.val[2], MIN_r, MAX_r);
-				G_new = remap(vi.val[1], MIN_g, MAX_g);
-				B_new = remap(vi.val[0], MIN_b, MAX_b);
+				R_new = remap((*it).val[2], MIN_r, MAX_r);
+				G_new = remap((*it).val[1], MIN_g, MAX_g);
+				B_new = remap((*it).val[0], MIN_b, MAX_b);
 
 				cv::Vec3b vout;
 
@@ -814,6 +944,79 @@ public:
 				vout.val[2] = R_new * 255;
 
 				*itout = vout;
+			}
+		}
+	}
+};
+
+class Parallel_cvtColor : public cv::ParallelLoopBody
+{
+
+private:
+	const cv::Mat3b &img;
+	cv::Mat &retVal;
+	int type;
+	int diff;
+public:
+	Parallel_cvtColor(const cv::Mat3b &inputImgage, cv::Mat &retVal, int type, int diffVal)
+		: img(inputImgage), retVal(retVal), diff(diffVal), type(type){}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+
+		//#pragma omp parallel for		
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			cv::Mat3b in(img, cv::Rect(0, (img.rows / diff)*i,
+				img.cols, img.rows / diff));
+			cv::Mat out(retVal, cv::Rect(0, (retVal.rows / diff)*i,
+				retVal.cols, retVal.rows / diff));
+
+			cvtColor(in, out, COLOR_BGRA2GRAY);
+		}
+	}
+};
+
+class Parallel_cvtColor_my_ver : public cv::ParallelLoopBody
+{
+
+private:
+	const cv::Mat3b &img;
+	cv::Mat &retVal;
+	int type;
+	int diff;
+public:
+	Parallel_cvtColor_my_ver(const cv::Mat3b &inputImgage, cv::Mat &retVal, int type, int diffVal)
+		: img(inputImgage), retVal(retVal), diff(diffVal), type(type) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+
+		//#pragma omp parallel for		
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			cv::Mat3b in(img, cv::Rect(0, (img.rows / diff)*i,
+				img.cols, img.rows / diff));
+			cv::Mat out(retVal, cv::Rect(0, (retVal.rows / diff)*i,
+				retVal.cols, retVal.rows / diff));
+
+			//cvtColor(in, out, COLOR_BGRA2GRAY);
+			cv::Mat_<cv::Vec3b>::iterator it = in.begin();
+			cv::Mat_<cv::Vec3b>::const_iterator itend = in.end();
+			cv::Mat_<uchar>::iterator itout = out.begin<uchar>();
+
+			for (; it != itend; ++it, ++itout) {
+				//Vec3b vi = *it;
+
+				//double R = vi.val[2];
+				//double G = vi.val[1];
+				//double B = vi.val[0];
+
+				*itout = 0.299*(*it).val[2]+0.587*(*it).val[1]+0.114*(*it).val[0];
 			}
 		}
 	}
@@ -840,8 +1043,18 @@ inline void ParallelOtsu(const cv::Mat &inputImgage, cv::Mat& outImage, int type
 
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_apply_threshold(inputImgage, outImage, threshold_otsu, type, thread_num));
 
-	delete [] var_cand;
-	delete [] threshold_cand;
+	delete var_cand;
+	delete threshold_cand;
+}
+
+inline void ParallelHistEqual(const cv::Mat &inputImgage, cv::Mat& outImage, int thread_num) {
+	int *cu_hist = new int[256]();
+	std::mutex mtx;
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_hist_and_cumulative_pure(inputImgage, cu_hist, mtx, thread_num));
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_hist_equalization(inputImgage, outImage, cu_hist, inputImgage.rows*inputImgage.cols, mtx, thread_num));
+
+	delete cu_hist;
 }
 
 void SerialHist(cv::Mat inputImgage, cv::Mat& outImage, int *hist) {
