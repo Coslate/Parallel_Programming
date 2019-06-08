@@ -421,7 +421,7 @@ int main(int argc, char *argv[]){
             size_t local_work_size[3] = {32, 32, 1};
             int num_groups_x = (img->weight+local_work_size[0]-1)/local_work_size[0];
             int num_groups_y = (img->height+local_work_size[1]-1)/local_work_size[1];
-            size_t global_work_size[3] = {num_groups_x * local_work_size[0], num_groups_y * local_work_size[1], 4};
+            size_t global_work_size[3] = {num_groups_x * local_work_size[0], num_groups_y * local_work_size[1], 3};
 
             HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_obj, 3, NULL, global_work_size, local_work_size, 0, NULL, NULL));
 
