@@ -1,7 +1,6 @@
 __kernel void histogram(__global unsigned char *orig_img_d, __global unsigned int *hist_calc_d, const int height, const int width){
     int thread_id_x       = get_global_id(0);
     int thread_id_y       = get_global_id(1);
-    int thread_id_z       = get_global_id(2);
 
     if(thread_id_x < width && thread_id_y < height){
         atomic_inc(&hist_calc_d[orig_img_d[(thread_id_y * width + thread_id_x)*4]]);
@@ -13,7 +12,6 @@ __kernel void histogram(__global unsigned char *orig_img_d, __global unsigned in
 __kernel void histogram_tile(__global unsigned char *orig_img_d, __global unsigned int *hist_calc_tile_d, const int height, const int width){
     int thread_id_x       = get_global_id(0);
     int thread_id_y       = get_global_id(1);
-    int thread_id_z       = get_global_id(2);
 
     int local_size        = (int)get_local_size(0) * (int)get_local_size(1);
     int group_indx        = (get_group_id(1) * get_num_groups(0) + get_group_id(0)) * 768;

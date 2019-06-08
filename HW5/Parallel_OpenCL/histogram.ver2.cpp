@@ -454,6 +454,7 @@ int main(int argc, char *argv[]){
 
             //HistogramSerial(img,R,G,B);
 
+            /*
             std::cout<<"R = "<<std::endl;
             for(int j=0;j<256;++j){
                 if(j%10==0 && j!=0){
@@ -489,6 +490,7 @@ int main(int argc, char *argv[]){
             }
             std::cout<<std::endl;
             std::cout<<"Done. "<<std::endl;
+            */
 
             int max = 0;
             for(int i=0;i<256;i++){
@@ -535,7 +537,9 @@ int main(int argc, char *argv[]){
             writebmp(newfile.c_str(), ret);
 
             free(hist_calc_h);
+            free(hist_calc_tile_h);
             HANDLE_ERROR(clReleaseMemObject(hist_calc_d));
+            HANDLE_ERROR(clReleaseMemObject(hist_calc_tile_d));
             HANDLE_ERROR(clReleaseMemObject(orig_img_d));
         }
     }else{
