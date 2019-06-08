@@ -418,12 +418,12 @@ int main(int argc, char *argv[]){
             clSetKernelArg(kernel_obj, 3, sizeof(uint32_t), &img->weight);
 
             //-------------------Execute kernel function--------------//
-            size_t local_work_size[2] = {32, 32};
+            size_t local_work_size[3] = {32, 32, 1};
             int num_groups_x = (img->weight+local_work_size[0]-1)/local_work_size[0];
             int num_groups_y = (img->height+local_work_size[1]-1)/local_work_size[1];
-            size_t global_work_size[2] = {num_groups_x * local_work_size[0], num_groups_y * local_work_size[1]};
+            size_t global_work_size[3] = {num_groups_x * local_work_size[0], num_groups_y * local_work_size[1], 3};
 
-            HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_obj, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL));
+            HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_obj, 3, NULL, global_work_size, local_work_size, 0, NULL, NULL));
 
             //-------------------Read the result back to host--------//
             HANDLE_ERROR(clEnqueueReadBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 3, hist_calc_h, 0, NULL, NULL));

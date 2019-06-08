@@ -351,7 +351,8 @@ int main(int argc, char *argv[]){
         std::cout<<"log = "<<log<<std::endl;
     }
 
-    cl_kernel kernel_obj = clCreateKernel(kernel_program, "histogram", &ret_code);
+    cl_kernel kernel_tile_obj = clCreateKernel(kernel_program, "histogram_tile", &ret_code);
+    cl_kernel kernel_obj      = clCreateKernel(kernel_program, "histogram_merge", &ret_code);
     HANDLE_ERROR(ret_code);
 
 
@@ -367,19 +368,33 @@ int main(int argc, char *argv[]){
 
             std::cout << img->weight << ":" << img->height << "\n";
 
+            //------------------Kernel work group/item setting------------------//
+            size_t local_work_size_tile[2] = {32, 32};
+            int num_groups_x_tile = (img->weight+local_work_size_tile[0]-1)/local_work_size_tile[0];
+            int num_groups_y_tile = (img->height+local_work_size_tile[1]-1)/local_work_size_tile[1];
+            int total_groups_tile = num_groups_x_tile * num_groups_y_tile;
+            size_t global_work_size_tile[2] = {num_groups_x_tile * local_work_size_tile[0], num_groups_y_tile * local_work_size_tile[1]};
+
+            size_t local_work_size[1] = {256};
+            size_t global_work_size[1] = {256 * 3};
+
             //------------------Memory allocation on host------------------//
-            uint32_t *hist_calc_h = (uint32_t*) malloc (sizeof(uint32_t) * 256 * 3);
-            memset(hist_calc_h, 0, sizeof(uint32_t) * 256 * 3);
+            uint32_t *hist_calc_h           = (uint32_t*) malloc (sizeof(uint32_t) * 256 * 3);
+            uint32_t *hist_calc_tile_h      = (uint32_t*) malloc (sizeof(uint32_t) * 256 * 3 * total_groups_tile);
+            memset(hist_calc_h     , 0, sizeof(uint32_t) * 256 * 3);
+            memset(hist_calc_tile_h, 0, sizeof(uint32_t) * 256 * 3 * total_groups_tile);
 
             //------------------Memory allocation on device------------------//
             cl_mem orig_img_d = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(uint8_t) * 4 * img->size, NULL, &ret_code);
             HANDLE_ERROR(ret_code);
-            cl_mem hist_calc_d = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint32_t) * 256 * 3, NULL, &ret_code);
+            cl_mem hist_calc_d      = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint32_t) * 256 * 3, NULL, &ret_code);
+            cl_mem hist_calc_tile_d = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint32_t) * 256 * 3 * total_groups_tile, NULL, &ret_code);
             HANDLE_ERROR(ret_code);
             
             //------------------Memory host to device------------------//
             HANDLE_ERROR(clEnqueueWriteBuffer(command_queue, orig_img_d, CL_TRUE, 0, sizeof(uint8_t) * 4 * img->size, img->data, 0, NULL, NULL));
             HANDLE_ERROR(clEnqueueWriteBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 3, hist_calc_h, 0, NULL, NULL));
+            HANDLE_ERROR(clEnqueueWriteBuffer(command_queue, hist_calc_tile_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 3 * total_groups_tile, hist_calc_tile_h, 0, NULL, NULL));
 
             //debug
             /*
@@ -412,18 +427,19 @@ int main(int argc, char *argv[]){
 
 
             //-------------------Set kernel arguments-----------------//
-            clSetKernelArg(kernel_obj, 0, sizeof(cl_mem), &orig_img_d);
-            clSetKernelArg(kernel_obj, 1, sizeof(cl_mem), &hist_calc_d);
-            clSetKernelArg(kernel_obj, 2, sizeof(uint32_t), &img->height);
-            clSetKernelArg(kernel_obj, 3, sizeof(uint32_t), &img->weight);
+            clSetKernelArg(kernel_tile_obj, 0, sizeof(cl_mem), &orig_img_d);
+            clSetKernelArg(kernel_tile_obj, 1, sizeof(cl_mem), &hist_calc_tile_d);
+            clSetKernelArg(kernel_tile_obj, 2, sizeof(uint32_t), &img->height);
+            clSetKernelArg(kernel_tile_obj, 3, sizeof(uint32_t), &img->weight);           
+
+            clSetKernelArg(kernel_obj, 0, sizeof(cl_mem)  , &hist_calc_tile_d);
+            clSetKernelArg(kernel_obj, 1, sizeof(cl_mem)  , &hist_calc_d);
+            clSetKernelArg(kernel_obj, 2, sizeof(uint32_t), &total_groups_tile);
 
             //-------------------Execute kernel function--------------//
-            size_t local_work_size[2] = {32, 32};
-            int num_groups_x = (img->weight+local_work_size[0]-1)/local_work_size[0];
-            int num_groups_y = (img->height+local_work_size[1]-1)/local_work_size[1];
-            size_t global_work_size[2] = {num_groups_x * local_work_size[0], num_groups_y * local_work_size[1]};
+            HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_tile_obj, 2, NULL, global_work_size_tile, local_work_size_tile, 0, NULL, NULL));
+            HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_obj, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL));
 
-            HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_obj, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL));
 
             //-------------------Read the result back to host--------//
             HANDLE_ERROR(clEnqueueReadBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 3, hist_calc_h, 0, NULL, NULL));
@@ -438,7 +454,6 @@ int main(int argc, char *argv[]){
 
             //HistogramSerial(img,R,G,B);
 
-            /*
             std::cout<<"R = "<<std::endl;
             for(int j=0;j<256;++j){
                 if(j%10==0 && j!=0){
@@ -474,7 +489,6 @@ int main(int argc, char *argv[]){
             }
             std::cout<<std::endl;
             std::cout<<"Done. "<<std::endl;
-            */
 
             int max = 0;
             for(int i=0;i<256;i++){
@@ -529,6 +543,7 @@ int main(int argc, char *argv[]){
     }
 
     HANDLE_ERROR(clReleaseKernel(kernel_obj));
+    HANDLE_ERROR(clReleaseKernel(kernel_tile_obj));
     HANDLE_ERROR(clReleaseProgram(kernel_program));
     HANDLE_ERROR(clReleaseCommandQueue(command_queue));
     HANDLE_ERROR(clReleaseContext(context));
