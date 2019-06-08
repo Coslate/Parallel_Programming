@@ -14,7 +14,7 @@
 #include <CL/cl.h>
 #endif
 
-#define LOG 1
+#define LOG 0
 /**********************************************************************
  *	Handle errors function
  *********************************************************************/
@@ -368,18 +368,18 @@ int main(int argc, char *argv[]){
             std::cout << img->weight << ":" << img->height << "\n";
 
             //------------------Memory allocation on host------------------//
-            uint32_t *hist_calc_h = (uint32_t*) malloc (sizeof(uint32_t) * 256 * 4);
-            memset(hist_calc_h, 0, sizeof(uint32_t) * 256 * 4);
+            uint32_t *hist_calc_h = (uint32_t*) malloc (sizeof(uint32_t) * 256 * 3);
+            memset(hist_calc_h, 0, sizeof(uint32_t) * 256 * 3);
 
             //------------------Memory allocation on device------------------//
-            cl_mem orig_img_d = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(uint8_t) * 4 * img->size, NULL, &ret_code); 
+            cl_mem orig_img_d = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(uint8_t) * 4 * img->size, NULL, &ret_code);
             HANDLE_ERROR(ret_code);
-            cl_mem hist_calc_d = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint32_t) * 256 * 4, NULL, &ret_code); 
+            cl_mem hist_calc_d = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint32_t) * 256 * 3, NULL, &ret_code);
             HANDLE_ERROR(ret_code);
             
             //------------------Memory host to device------------------//
             HANDLE_ERROR(clEnqueueWriteBuffer(command_queue, orig_img_d, CL_TRUE, 0, sizeof(uint8_t) * 4 * img->size, img->data, 0, NULL, NULL));
-            HANDLE_ERROR(clEnqueueWriteBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 4, hist_calc_h, 0, NULL, NULL));
+            HANDLE_ERROR(clEnqueueWriteBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 3, hist_calc_h, 0, NULL, NULL));
 
             //debug
             /*
@@ -426,7 +426,7 @@ int main(int argc, char *argv[]){
             HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_obj, 3, NULL, global_work_size, local_work_size, 0, NULL, NULL));
 
             //-------------------Read the result back to host--------//
-            HANDLE_ERROR(clEnqueueReadBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 4, hist_calc_h, 0, NULL, NULL));
+            HANDLE_ERROR(clEnqueueReadBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 3, hist_calc_h, 0, NULL, NULL));
 
             uint32_t R[256];
             uint32_t G[256];
