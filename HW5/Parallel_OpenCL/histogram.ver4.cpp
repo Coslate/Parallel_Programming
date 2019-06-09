@@ -409,10 +409,13 @@ int main(int argc, char *argv[]){
         printf("Usage: ./hist <img.bmp> [img2.bmp ...]\n");
     }
 
+    /*
     clReleaseKernel(kernel_obj);
     clReleaseKernel(kernel_ret_obj);
+    clReleaseKernel(kernel_max_obj);
     clReleaseProgram(kernel_program);
     clReleaseCommandQueue(command_queue);
     clReleaseContext(context);
+    */
     return EXIT_SUCCESS;
 }
