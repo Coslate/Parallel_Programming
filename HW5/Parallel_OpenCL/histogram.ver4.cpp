@@ -146,10 +146,45 @@ Image *readbmp(const char *filename)
     ret->size = w * h;
     ret->data = new RGB[w * h];
 
-    #pragma unroll (4)
-    for (int i = 0; i < ret->size; i++)
+    uint32_t residue   = ret->size%32;
+    for (int k = 0; k < residue; ++k){
+        bmp.read((char *)&ret->data[k], depth / 8);
+    }
+
+    for (int i = residue; i < ret->size; i+=32)
     {
         bmp.read((char *)&ret->data[i], depth / 8);
+        bmp.read((char *)&ret->data[i+1], depth / 8);
+        bmp.read((char *)&ret->data[i+2], depth / 8);
+        bmp.read((char *)&ret->data[i+3], depth / 8);
+        bmp.read((char *)&ret->data[i+4], depth / 8);
+        bmp.read((char *)&ret->data[i+5], depth / 8);
+        bmp.read((char *)&ret->data[i+6], depth / 8);
+        bmp.read((char *)&ret->data[i+7], depth / 8);
+        bmp.read((char *)&ret->data[i+8], depth / 8);
+        bmp.read((char *)&ret->data[i+9], depth / 8);
+        bmp.read((char *)&ret->data[i+10], depth / 8);
+        bmp.read((char *)&ret->data[i+11], depth / 8);
+        bmp.read((char *)&ret->data[i+12], depth / 8);
+        bmp.read((char *)&ret->data[i+13], depth / 8);
+        bmp.read((char *)&ret->data[i+14], depth / 8);
+        bmp.read((char *)&ret->data[i+15], depth / 8);
+        bmp.read((char *)&ret->data[i+16], depth / 8);
+        bmp.read((char *)&ret->data[i+17], depth / 8);
+        bmp.read((char *)&ret->data[i+18], depth / 8);
+        bmp.read((char *)&ret->data[i+19], depth / 8);
+        bmp.read((char *)&ret->data[i+20], depth / 8);
+        bmp.read((char *)&ret->data[i+21], depth / 8);
+        bmp.read((char *)&ret->data[i+22], depth / 8);
+        bmp.read((char *)&ret->data[i+23], depth / 8);
+        bmp.read((char *)&ret->data[i+24], depth / 8);
+        bmp.read((char *)&ret->data[i+25], depth / 8);
+        bmp.read((char *)&ret->data[i+26], depth / 8);
+        bmp.read((char *)&ret->data[i+27], depth / 8);
+        bmp.read((char *)&ret->data[i+28], depth / 8);
+        bmp.read((char *)&ret->data[i+29], depth / 8);
+        bmp.read((char *)&ret->data[i+30], depth / 8);
+        bmp.read((char *)&ret->data[i+31], depth / 8);
     }
     return ret;
 }
@@ -308,7 +343,6 @@ int main(int argc, char *argv[]){
     {
         int many_img = argc - 1;
 
-        #pragma unroll (4)
         for (int i = 0; i < many_img; i++)
         {
             filename = argv[i + 1];
