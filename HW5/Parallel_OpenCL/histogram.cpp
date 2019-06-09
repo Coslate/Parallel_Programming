@@ -146,9 +146,45 @@ Image *readbmp(const char *filename)
     ret->size = w * h;
     ret->data = new RGB[w * h];
 
-    for (int i = 0; i < ret->size; i++)
+    uint32_t residue   = ret->size%32;
+    for (int k = 0; k < residue; ++k){
+        bmp.read((char *)&ret->data[k], depth / 8);
+    }
+
+    for (int i = residue; i < ret->size; i+=32)
     {
         bmp.read((char *)&ret->data[i], depth / 8);
+        bmp.read((char *)&ret->data[i+1], depth / 8);
+        bmp.read((char *)&ret->data[i+2], depth / 8);
+        bmp.read((char *)&ret->data[i+3], depth / 8);
+        bmp.read((char *)&ret->data[i+4], depth / 8);
+        bmp.read((char *)&ret->data[i+5], depth / 8);
+        bmp.read((char *)&ret->data[i+6], depth / 8);
+        bmp.read((char *)&ret->data[i+7], depth / 8);
+        bmp.read((char *)&ret->data[i+8], depth / 8);
+        bmp.read((char *)&ret->data[i+9], depth / 8);
+        bmp.read((char *)&ret->data[i+10], depth / 8);
+        bmp.read((char *)&ret->data[i+11], depth / 8);
+        bmp.read((char *)&ret->data[i+12], depth / 8);
+        bmp.read((char *)&ret->data[i+13], depth / 8);
+        bmp.read((char *)&ret->data[i+14], depth / 8);
+        bmp.read((char *)&ret->data[i+15], depth / 8);
+        bmp.read((char *)&ret->data[i+16], depth / 8);
+        bmp.read((char *)&ret->data[i+17], depth / 8);
+        bmp.read((char *)&ret->data[i+18], depth / 8);
+        bmp.read((char *)&ret->data[i+19], depth / 8);
+        bmp.read((char *)&ret->data[i+20], depth / 8);
+        bmp.read((char *)&ret->data[i+21], depth / 8);
+        bmp.read((char *)&ret->data[i+22], depth / 8);
+        bmp.read((char *)&ret->data[i+23], depth / 8);
+        bmp.read((char *)&ret->data[i+24], depth / 8);
+        bmp.read((char *)&ret->data[i+25], depth / 8);
+        bmp.read((char *)&ret->data[i+26], depth / 8);
+        bmp.read((char *)&ret->data[i+27], depth / 8);
+        bmp.read((char *)&ret->data[i+28], depth / 8);
+        bmp.read((char *)&ret->data[i+29], depth / 8);
+        bmp.read((char *)&ret->data[i+30], depth / 8);
+        bmp.read((char *)&ret->data[i+31], depth / 8);
     }
     return ret;
 }
@@ -226,19 +262,6 @@ inline void LoadProgram(cl_context context, const char *file_name, cl_program &p
     // create program from buffer
     program = clCreateProgramWithSource(context, 1, (const char**) &program_buffer, &program_size, &ret_code);
     free(program_buffer);
-}
-
-void HistogramSerial(Image *img,uint32_t R[256],uint32_t G[256],uint32_t B[256]){
-    std::fill(R, R+256, 0);
-    std::fill(G, G+256, 0);
-    std::fill(B, B+256, 0);
-
-    for (int i = 0; i < img->size; i++){
-        RGB &pixel = img->data[i];
-        R[pixel.R]++;
-        G[pixel.G]++;
-        B[pixel.B]++;
-    }
 }
 
 int main(int argc, char *argv[]){
@@ -352,10 +375,142 @@ int main(int argc, char *argv[]){
             memcpy(B, &hist_calc_h[512], 256*sizeof(uint32_t));
 
             int max = 0;
-            for(int i=0;i<256;i++){
+            int residue_max = 256%32;
+
+            for(int k=0;k<residue_max;++k){
+                max = R[k] > max ? R[k] : max;
+                max = G[k] > max ? G[k] : max;
+                max = B[k] > max ? B[k] : max;
+            }
+
+            for(int i=residue_max;i<256;i+=32){
                 max = R[i] > max ? R[i] : max;
                 max = G[i] > max ? G[i] : max;
                 max = B[i] > max ? B[i] : max;
+
+                max = R[i+1] > max ? R[i+1] : max;
+                max = G[i+1] > max ? G[i+1] : max;
+                max = B[i+1] > max ? B[i+1] : max;
+
+                max = R[i+2] > max ? R[i+2] : max;
+                max = G[i+2] > max ? G[i+2] : max;
+                max = B[i+2] > max ? B[i+2] : max;
+
+                max = R[i+3] > max ? R[i+3] : max;
+                max = G[i+3] > max ? G[i+3] : max;
+                max = B[i+3] > max ? B[i+3] : max;
+
+                max = R[i+4] > max ? R[i+4] : max;
+                max = G[i+4] > max ? G[i+4] : max;
+                max = B[i+4] > max ? B[i+4] : max;
+
+                max = R[i+5] > max ? R[i+5] : max;
+                max = G[i+5] > max ? G[i+5] : max;
+                max = B[i+5] > max ? B[i+5] : max;
+
+                max = R[i+6] > max ? R[i+6] : max;
+                max = G[i+6] > max ? G[i+6] : max;
+                max = B[i+6] > max ? B[i+6] : max;
+
+                max = R[i+7] > max ? R[i+7] : max;
+                max = G[i+7] > max ? G[i+7] : max;
+                max = B[i+7] > max ? B[i+7] : max;
+
+                max = R[i+8] > max ? R[i+8] : max;
+                max = G[i+8] > max ? G[i+8] : max;
+                max = B[i+8] > max ? B[i+8] : max;
+
+                max = R[i+9] > max ? R[i+9] : max;
+                max = G[i+9] > max ? G[i+9] : max;
+                max = B[i+9] > max ? B[i+9] : max;
+
+                max = R[i+10] > max ? R[i+10] : max;
+                max = G[i+10] > max ? G[i+10] : max;
+                max = B[i+10] > max ? B[i+10] : max;
+
+                max = R[i+11] > max ? R[i+11] : max;
+                max = G[i+11] > max ? G[i+11] : max;
+                max = B[i+11] > max ? B[i+11] : max;
+
+                max = R[i+12] > max ? R[i+12] : max;
+                max = G[i+12] > max ? G[i+12] : max;
+                max = B[i+12] > max ? B[i+12] : max;
+
+                max = R[i+13] > max ? R[i+13] : max;
+                max = G[i+13] > max ? G[i+13] : max;
+                max = B[i+13] > max ? B[i+13] : max;
+
+                max = R[i+14] > max ? R[i+14] : max;
+                max = G[i+14] > max ? G[i+14] : max;
+                max = B[i+14] > max ? B[i+14] : max;
+
+                max = R[i+15] > max ? R[i+15] : max;
+                max = G[i+15] > max ? G[i+15] : max;
+                max = B[i+15] > max ? B[i+15] : max;
+
+                max = R[i+16] > max ? R[i+16] : max;
+                max = G[i+16] > max ? G[i+16] : max;
+                max = B[i+16] > max ? B[i+16] : max;
+
+                max = R[i+17] > max ? R[i+17] : max;
+                max = G[i+17] > max ? G[i+17] : max;
+                max = B[i+17] > max ? B[i+17] : max;
+
+                max = R[i+18] > max ? R[i+18] : max;
+                max = G[i+18] > max ? G[i+18] : max;
+                max = B[i+18] > max ? B[i+18] : max;
+
+                max = R[i+19] > max ? R[i+19] : max;
+                max = G[i+19] > max ? G[i+19] : max;
+                max = B[i+19] > max ? B[i+19] : max;
+
+                max = R[i+20] > max ? R[i+20] : max;
+                max = G[i+20] > max ? G[i+20] : max;
+                max = B[i+20] > max ? B[i+20] : max;
+
+                max = R[i+21] > max ? R[i+21] : max;
+                max = G[i+21] > max ? G[i+21] : max;
+                max = B[i+21] > max ? B[i+21] : max;
+
+                max = R[i+22] > max ? R[i+22] : max;
+                max = G[i+22] > max ? G[i+22] : max;
+                max = B[i+22] > max ? B[i+22] : max;
+
+                max = R[i+23] > max ? R[i+23] : max;
+                max = G[i+23] > max ? G[i+23] : max;
+                max = B[i+23] > max ? B[i+23] : max;
+
+                max = R[i+24] > max ? R[i+24] : max;
+                max = G[i+24] > max ? G[i+24] : max;
+                max = B[i+24] > max ? B[i+24] : max;
+
+                max = R[i+25] > max ? R[i+25] : max;
+                max = G[i+25] > max ? G[i+25] : max;
+                max = B[i+25] > max ? B[i+25] : max;
+
+                max = R[i+26] > max ? R[i+26] : max;
+                max = G[i+26] > max ? G[i+26] : max;
+                max = B[i+26] > max ? B[i+26] : max;
+
+                max = R[i+27] > max ? R[i+27] : max;
+                max = G[i+27] > max ? G[i+27] : max;
+                max = B[i+27] > max ? B[i+27] : max;
+
+                max = R[i+28] > max ? R[i+28] : max;
+                max = G[i+28] > max ? G[i+28] : max;
+                max = B[i+28] > max ? B[i+28] : max;
+
+                max = R[i+29] > max ? R[i+29] : max;
+                max = G[i+29] > max ? G[i+29] : max;
+                max = B[i+29] > max ? B[i+29] : max;
+
+                max = R[i+30] > max ? R[i+30] : max;
+                max = G[i+30] > max ? G[i+30] : max;
+                max = B[i+30] > max ? B[i+30] : max;
+
+                max = R[i+31] > max ? R[i+31] : max;
+                max = G[i+31] > max ? G[i+31] : max;
+                max = B[i+31] > max ? B[i+31] : max;
             }
 
             Image *ret = new Image();
@@ -365,14 +520,622 @@ int main(int argc, char *argv[]){
             ret->size = 65536;
             ret->data = new RGB[65536]{};
 
-            for(int i=0;i<ret->height;i++){
-                for(int j=0;j<256;j++){
+            int i_residue = 256%8;
+            for(int i=0;i<i_residue;++i){
+                int j_residue = 256%8;
+                for(int j=0;j<j_residue;++j){
                     if(R[j]*256/max > i)
                         ret->data[256*i+j].R = 255;
                     if(G[j]*256/max > i)
                         ret->data[256*i+j].G = 255;
                     if(B[j]*256/max > i)
                         ret->data[256*i+j].B = 255;
+                }
+
+                for(int j=j_residue;j<256;j+=8){
+                    if(R[j]*256/max > i)
+                        ret->data[256*i+j].R = 255;
+                    if(G[j]*256/max > i)
+                        ret->data[256*i+j].G = 255;
+                    if(B[j]*256/max > i)
+                        ret->data[256*i+j].B = 255;
+
+                    if(R[j+1]*256/max > i)
+                        ret->data[256*i+j+1].R = 255;
+                    if(G[j+1]*256/max > i)
+                        ret->data[256*i+j+1].G = 255;
+                    if(B[j+1]*256/max > i)
+                        ret->data[256*i+j+1].B = 255;
+
+                    if(R[j+2]*256/max > i)
+                        ret->data[256*i+j+2].R = 255;
+                    if(G[j+2]*256/max > i)
+                        ret->data[256*i+j+2].G = 255;
+                    if(B[j+2]*256/max > i)
+                        ret->data[256*i+j+2].B = 255;
+
+                    if(R[j+3]*256/max > i)
+                        ret->data[256*i+j+3].R = 255;
+                    if(G[j+3]*256/max > i)
+                        ret->data[256*i+j+3].G = 255;
+                    if(B[j+3]*256/max > i)
+                        ret->data[256*i+j+3].B = 255;
+
+                    if(R[j+4]*256/max > i)
+                        ret->data[256*i+j+4].R = 255;
+                    if(G[j+4]*256/max > i)
+                        ret->data[256*i+j+4].G = 255;
+                    if(B[j+4]*256/max > i)
+                        ret->data[256*i+j+4].B = 255;
+
+                    if(R[j+5]*256/max > i)
+                        ret->data[256*i+j+5].R = 255;
+                    if(G[j+5]*256/max > i)
+                        ret->data[256*i+j+5].G = 255;
+                    if(B[j+5]*256/max > i)
+                        ret->data[256*i+j+5].B = 255;
+
+                    if(R[j+6]*256/max > i)
+                        ret->data[256*i+j+6].R = 255;
+                    if(G[j+6]*256/max > i)
+                        ret->data[256*i+j+6].G = 255;
+                    if(B[j+6]*256/max > i)
+                        ret->data[256*i+j+6].B = 255;
+
+                    if(R[j+7]*256/max > i)
+                        ret->data[256*i+j+7].R = 255;
+                    if(G[j+7]*256/max > i)
+                        ret->data[256*i+j+7].G = 255;
+                    if(B[j+7]*256/max > i)
+                        ret->data[256*i+j+7].B = 255;
+                }
+            }
+
+            for(int i=i_residue;i<ret->height;i+=8){
+
+                //-----------i+0------------------//
+                int j_residue = 256%8;
+                for(int j=0;j<j_residue;++j){
+                    if(R[j]*256/max > i)
+                        ret->data[256*i+j].R = 255;
+                    if(G[j]*256/max > i)
+                        ret->data[256*i+j].G = 255;
+                    if(B[j]*256/max > i)
+                        ret->data[256*i+j].B = 255;
+                }
+
+                for(int j=j_residue;j<256;j+=8){
+                    if(R[j]*256/max > i)
+                        ret->data[256*i+j].R = 255;
+                    if(G[j]*256/max > i)
+                        ret->data[256*i+j].G = 255;
+                    if(B[j]*256/max > i)
+                        ret->data[256*i+j].B = 255;
+
+                    if(R[j+1]*256/max > i)
+                        ret->data[256*i+j+1].R = 255;
+                    if(G[j+1]*256/max > i)
+                        ret->data[256*i+j+1].G = 255;
+                    if(B[j+1]*256/max > i)
+                        ret->data[256*i+j+1].B = 255;
+
+                    if(R[j+2]*256/max > i)
+                        ret->data[256*i+j+2].R = 255;
+                    if(G[j+2]*256/max > i)
+                        ret->data[256*i+j+2].G = 255;
+                    if(B[j+2]*256/max > i)
+                        ret->data[256*i+j+2].B = 255;
+
+                    if(R[j+3]*256/max > i)
+                        ret->data[256*i+j+3].R = 255;
+                    if(G[j+3]*256/max > i)
+                        ret->data[256*i+j+3].G = 255;
+                    if(B[j+3]*256/max > i)
+                        ret->data[256*i+j+3].B = 255;
+
+                    if(R[j+4]*256/max > i)
+                        ret->data[256*i+j+4].R = 255;
+                    if(G[j+4]*256/max > i)
+                        ret->data[256*i+j+4].G = 255;
+                    if(B[j+4]*256/max > i)
+                        ret->data[256*i+j+4].B = 255;
+
+                    if(R[j+5]*256/max > i)
+                        ret->data[256*i+j+5].R = 255;
+                    if(G[j+5]*256/max > i)
+                        ret->data[256*i+j+5].G = 255;
+                    if(B[j+5]*256/max > i)
+                        ret->data[256*i+j+5].B = 255;
+
+                    if(R[j+6]*256/max > i)
+                        ret->data[256*i+j+6].R = 255;
+                    if(G[j+6]*256/max > i)
+                        ret->data[256*i+j+6].G = 255;
+                    if(B[j+6]*256/max > i)
+                        ret->data[256*i+j+6].B = 255;
+
+                    if(R[j+7]*256/max > i)
+                        ret->data[256*i+j+7].R = 255;
+                    if(G[j+7]*256/max > i)
+                        ret->data[256*i+j+7].G = 255;
+                    if(B[j+7]*256/max > i)
+                        ret->data[256*i+j+7].B = 255;
+                }
+
+                //-----------i+1------------------//
+                for(int j=0;j<j_residue;++j){
+                    if(R[j]*256/max > i+1)
+                        ret->data[256*(i+1)+j].R = 255;
+                    if(G[j]*256/max > i+1)
+                        ret->data[256*(i+1)+j].G = 255;
+                    if(B[j]*256/max > i+1)
+                        ret->data[256*(i+1)+j].B = 255;
+                }
+
+                for(int j=j_residue;j<256;j+=8){
+                    if(R[j]*256/max > i+1)
+                        ret->data[256*(i+1)+j].R = 255;
+                    if(G[j]*256/max > i+1)
+                        ret->data[256*(i+1)+j].G = 255;
+                    if(B[j]*256/max > i+1)
+                        ret->data[256*(i+1)+j].B = 255;
+
+                    if(R[j+1]*256/max > i+1)
+                        ret->data[256*(i+1)+j+1].R = 255;
+                    if(G[j+1]*256/max > i+1)
+                        ret->data[256*(i+1)+j+1].G = 255;
+                    if(B[j+1]*256/max > i+1)
+                        ret->data[256*(i+1)+j+1].B = 255;
+
+                    if(R[j+2]*256/max > i+1)
+                        ret->data[256*(i+1)+j+2].R = 255;
+                    if(G[j+2]*256/max > i+1)
+                        ret->data[256*(i+1)+j+2].G = 255;
+                    if(B[j+2]*256/max > i+1)
+                        ret->data[256*(i+1)+j+2].B = 255;
+
+                    if(R[j+3]*256/max > i+1)
+                        ret->data[256*(i+1)+j+3].R = 255;
+                    if(G[j+3]*256/max > i+1)
+                        ret->data[256*(i+1)+j+3].G = 255;
+                    if(B[j+3]*256/max > i+1)
+                        ret->data[256*(i+1)+j+3].B = 255;
+
+                    if(R[j+4]*256/max > i+1)
+                        ret->data[256*(i+1)+j+4].R = 255;
+                    if(G[j+4]*256/max > i+1)
+                        ret->data[256*(i+1)+j+4].G = 255;
+                    if(B[j+4]*256/max > i+1)
+                        ret->data[256*(i+1)+j+4].B = 255;
+
+                    if(R[j+5]*256/max > i+1)
+                        ret->data[256*(i+1)+j+5].R = 255;
+                    if(G[j+5]*256/max > i+1)
+                        ret->data[256*(i+1)+j+5].G = 255;
+                    if(B[j+5]*256/max > i+1)
+                        ret->data[256*(i+1)+j+5].B = 255;
+
+                    if(R[j+6]*256/max > i+1)
+                        ret->data[256*(i+1)+j+6].R = 255;
+                    if(G[j+6]*256/max > i+1)
+                        ret->data[256*(i+1)+j+6].G = 255;
+                    if(B[j+6]*256/max > i+1)
+                        ret->data[256*(i+1)+j+6].B = 255;
+
+                    if(R[j+7]*256/max > i+1)
+                        ret->data[256*(i+1)+j+7].R = 255;
+                    if(G[j+7]*256/max > i+1)
+                        ret->data[256*(i+1)+j+7].G = 255;
+                    if(B[j+7]*256/max > i+1)
+                        ret->data[256*(i+1)+j+7].B = 255;
+                }
+
+                //-----------i+2------------------//
+                for(int j=0;j<j_residue;++j){
+                    if(R[j]*256/max > i+2)
+                        ret->data[256*(i+2)+j].R = 255;
+                    if(G[j]*256/max > i+2)
+                        ret->data[256*(i+2)+j].G = 255;
+                    if(B[j]*256/max > i+2)
+                        ret->data[256*(i+2)+j].B = 255;
+                }
+
+                for(int j=j_residue;j<256;j+=8){
+                    if(R[j]*256/max > i+2)
+                        ret->data[256*(i+2)+j].R = 255;
+                    if(G[j]*256/max > i+2)
+                        ret->data[256*(i+2)+j].G = 255;
+                    if(B[j]*256/max > i+2)
+                        ret->data[256*(i+2)+j].B = 255;
+
+                    if(R[j+1]*256/max > i+2)
+                        ret->data[256*(i+2)+j+1].R = 255;
+                    if(G[j+1]*256/max > i+2)
+                        ret->data[256*(i+2)+j+1].G = 255;
+                    if(B[j+1]*256/max > i+2)
+                        ret->data[256*(i+2)+j+1].B = 255;
+
+                    if(R[j+2]*256/max > i+2)
+                        ret->data[256*(i+2)+j+2].R = 255;
+                    if(G[j+2]*256/max > i+2)
+                        ret->data[256*(i+2)+j+2].G = 255;
+                    if(B[j+2]*256/max > i+2)
+                        ret->data[256*(i+2)+j+2].B = 255;
+
+                    if(R[j+3]*256/max > i+2)
+                        ret->data[256*(i+2)+j+3].R = 255;
+                    if(G[j+3]*256/max > i+2)
+                        ret->data[256*(i+2)+j+3].G = 255;
+                    if(B[j+3]*256/max > i+2)
+                        ret->data[256*(i+2)+j+3].B = 255;
+
+                    if(R[j+4]*256/max > i+2)
+                        ret->data[256*(i+2)+j+4].R = 255;
+                    if(G[j+4]*256/max > i+2)
+                        ret->data[256*(i+2)+j+4].G = 255;
+                    if(B[j+4]*256/max > i+2)
+                        ret->data[256*(i+2)+j+4].B = 255;
+
+                    if(R[j+5]*256/max > i+2)
+                        ret->data[256*(i+2)+j+5].R = 255;
+                    if(G[j+5]*256/max > i+2)
+                        ret->data[256*(i+2)+j+5].G = 255;
+                    if(B[j+5]*256/max > i+2)
+                        ret->data[256*(i+2)+j+5].B = 255;
+
+                    if(R[j+6]*256/max > i+2)
+                        ret->data[256*(i+2)+j+6].R = 255;
+                    if(G[j+6]*256/max > i+2)
+                        ret->data[256*(i+2)+j+6].G = 255;
+                    if(B[j+6]*256/max > i+2)
+                        ret->data[256*(i+2)+j+6].B = 255;
+
+                    if(R[j+7]*256/max > i+2)
+                        ret->data[256*(i+2)+j+7].R = 255;
+                    if(G[j+7]*256/max > i+2)
+                        ret->data[256*(i+2)+j+7].G = 255;
+                    if(B[j+7]*256/max > i+2)
+                        ret->data[256*(i+2)+j+7].B = 255;
+                }
+
+                //-----------i+3------------------//
+                for(int j=0;j<j_residue;++j){
+                    if(R[j]*256/max > i+3)
+                        ret->data[256*(i+3)+j].R = 255;
+                    if(G[j]*256/max > i+3)
+                        ret->data[256*(i+3)+j].G = 255;
+                    if(B[j]*256/max > i+3)
+                        ret->data[256*(i+3)+j].B = 255;
+                }
+
+                for(int j=j_residue;j<256;j+=8){
+                    if(R[j]*256/max > i+3)
+                        ret->data[256*(i+3)+j].R = 255;
+                    if(G[j]*256/max > i+3)
+                        ret->data[256*(i+3)+j].G = 255;
+                    if(B[j]*256/max > i+3)
+                        ret->data[256*(i+3)+j].B = 255;
+
+                    if(R[j+1]*256/max > i+3)
+                        ret->data[256*(i+3)+j+1].R = 255;
+                    if(G[j+1]*256/max > i+3)
+                        ret->data[256*(i+3)+j+1].G = 255;
+                    if(B[j+1]*256/max > i+3)
+                        ret->data[256*(i+3)+j+1].B = 255;
+
+                    if(R[j+2]*256/max > i+3)
+                        ret->data[256*(i+3)+j+2].R = 255;
+                    if(G[j+2]*256/max > i+3)
+                        ret->data[256*(i+3)+j+2].G = 255;
+                    if(B[j+2]*256/max > i+3)
+                        ret->data[256*(i+3)+j+2].B = 255;
+
+                    if(R[j+3]*256/max > i+3)
+                        ret->data[256*(i+3)+j+3].R = 255;
+                    if(G[j+3]*256/max > i+3)
+                        ret->data[256*(i+3)+j+3].G = 255;
+                    if(B[j+3]*256/max > i+3)
+                        ret->data[256*(i+3)+j+3].B = 255;
+
+                    if(R[j+4]*256/max > i+3)
+                        ret->data[256*(i+3)+j+4].R = 255;
+                    if(G[j+4]*256/max > i+3)
+                        ret->data[256*(i+3)+j+4].G = 255;
+                    if(B[j+4]*256/max > i+3)
+                        ret->data[256*(i+3)+j+4].B = 255;
+
+                    if(R[j+5]*256/max > i+3)
+                        ret->data[256*(i+3)+j+5].R = 255;
+                    if(G[j+5]*256/max > i+3)
+                        ret->data[256*(i+3)+j+5].G = 255;
+                    if(B[j+5]*256/max > i+3)
+                        ret->data[256*(i+3)+j+5].B = 255;
+
+                    if(R[j+6]*256/max > i+3)
+                        ret->data[256*(i+3)+j+6].R = 255;
+                    if(G[j+6]*256/max > i+3)
+                        ret->data[256*(i+3)+j+6].G = 255;
+                    if(B[j+6]*256/max > i+3)
+                        ret->data[256*(i+3)+j+6].B = 255;
+
+                    if(R[j+7]*256/max > i+3)
+                        ret->data[256*(i+3)+j+7].R = 255;
+                    if(G[j+7]*256/max > i+3)
+                        ret->data[256*(i+3)+j+7].G = 255;
+                    if(B[j+7]*256/max > i+3)
+                        ret->data[256*(i+3)+j+7].B = 255;
+                }
+
+                //-----------i+4------------------//
+                for(int j=0;j<j_residue;++j){
+                    if(R[j]*256/max > i+4)
+                        ret->data[256*(i+4)+j].R = 255;
+                    if(G[j]*256/max > i+4)
+                        ret->data[256*(i+4)+j].G = 255;
+                    if(B[j]*256/max > i+4)
+                        ret->data[256*(i+4)+j].B = 255;
+                }
+
+                for(int j=j_residue;j<256;j+=8){
+                    if(R[j]*256/max > i+4)
+                        ret->data[256*(i+4)+j].R = 255;
+                    if(G[j]*256/max > i+4)
+                        ret->data[256*(i+4)+j].G = 255;
+                    if(B[j]*256/max > i+4)
+                        ret->data[256*(i+4)+j].B = 255;
+
+                    if(R[j+1]*256/max > i+4)
+                        ret->data[256*(i+4)+j+1].R = 255;
+                    if(G[j+1]*256/max > i+4)
+                        ret->data[256*(i+4)+j+1].G = 255;
+                    if(B[j+1]*256/max > i+4)
+                        ret->data[256*(i+4)+j+1].B = 255;
+
+                    if(R[j+2]*256/max > i+4)
+                        ret->data[256*(i+4)+j+2].R = 255;
+                    if(G[j+2]*256/max > i+4)
+                        ret->data[256*(i+4)+j+2].G = 255;
+                    if(B[j+2]*256/max > i+4)
+                        ret->data[256*(i+4)+j+2].B = 255;
+
+                    if(R[j+3]*256/max > i+4)
+                        ret->data[256*(i+4)+j+3].R = 255;
+                    if(G[j+3]*256/max > i+4)
+                        ret->data[256*(i+4)+j+3].G = 255;
+                    if(B[j+3]*256/max > i+4)
+                        ret->data[256*(i+4)+j+3].B = 255;
+
+                    if(R[j+4]*256/max > i+4)
+                        ret->data[256*(i+4)+j+4].R = 255;
+                    if(G[j+4]*256/max > i+4)
+                        ret->data[256*(i+4)+j+4].G = 255;
+                    if(B[j+4]*256/max > i+4)
+                        ret->data[256*(i+4)+j+4].B = 255;
+
+                    if(R[j+5]*256/max > i+4)
+                        ret->data[256*(i+4)+j+5].R = 255;
+                    if(G[j+5]*256/max > i+4)
+                        ret->data[256*(i+4)+j+5].G = 255;
+                    if(B[j+5]*256/max > i+4)
+                        ret->data[256*(i+4)+j+5].B = 255;
+
+                    if(R[j+6]*256/max > i+4)
+                        ret->data[256*(i+4)+j+6].R = 255;
+                    if(G[j+6]*256/max > i+4)
+                        ret->data[256*(i+4)+j+6].G = 255;
+                    if(B[j+6]*256/max > i+4)
+                        ret->data[256*(i+4)+j+6].B = 255;
+
+                    if(R[j+7]*256/max > i+4)
+                        ret->data[256*(i+4)+j+7].R = 255;
+                    if(G[j+7]*256/max > i+4)
+                        ret->data[256*(i+4)+j+7].G = 255;
+                    if(B[j+7]*256/max > i+4)
+                        ret->data[256*(i+4)+j+7].B = 255;
+                }
+
+                //-----------i+5------------------//
+                for(int j=0;j<j_residue;++j){
+                    if(R[j]*256/max > i+5)
+                        ret->data[256*(i+5)+j].R = 255;
+                    if(G[j]*256/max > i+5)
+                        ret->data[256*(i+5)+j].G = 255;
+                    if(B[j]*256/max > i+5)
+                        ret->data[256*(i+5)+j].B = 255;
+                }
+
+                for(int j=j_residue;j<256;j+=8){
+                    if(R[j]*256/max > i+5)
+                        ret->data[256*(i+5)+j].R = 255;
+                    if(G[j]*256/max > i+5)
+                        ret->data[256*(i+5)+j].G = 255;
+                    if(B[j]*256/max > i+5)
+                        ret->data[256*(i+5)+j].B = 255;
+
+                    if(R[j+1]*256/max > i+5)
+                        ret->data[256*(i+5)+j+1].R = 255;
+                    if(G[j+1]*256/max > i+5)
+                        ret->data[256*(i+5)+j+1].G = 255;
+                    if(B[j+1]*256/max > i+5)
+                        ret->data[256*(i+5)+j+1].B = 255;
+
+                    if(R[j+2]*256/max > i+5)
+                        ret->data[256*(i+5)+j+2].R = 255;
+                    if(G[j+2]*256/max > i+5)
+                        ret->data[256*(i+5)+j+2].G = 255;
+                    if(B[j+2]*256/max > i+5)
+                        ret->data[256*(i+5)+j+2].B = 255;
+
+                    if(R[j+3]*256/max > i+5)
+                        ret->data[256*(i+5)+j+3].R = 255;
+                    if(G[j+3]*256/max > i+5)
+                        ret->data[256*(i+5)+j+3].G = 255;
+                    if(B[j+3]*256/max > i+5)
+                        ret->data[256*(i+5)+j+3].B = 255;
+
+                    if(R[j+4]*256/max > i+5)
+                        ret->data[256*(i+5)+j+4].R = 255;
+                    if(G[j+4]*256/max > i+5)
+                        ret->data[256*(i+5)+j+4].G = 255;
+                    if(B[j+4]*256/max > i+5)
+                        ret->data[256*(i+5)+j+4].B = 255;
+
+                    if(R[j+5]*256/max > i+5)
+                        ret->data[256*(i+5)+j+5].R = 255;
+                    if(G[j+5]*256/max > i+5)
+                        ret->data[256*(i+5)+j+5].G = 255;
+                    if(B[j+5]*256/max > i+5)
+                        ret->data[256*(i+5)+j+5].B = 255;
+
+                    if(R[j+6]*256/max > i+5)
+                        ret->data[256*(i+5)+j+6].R = 255;
+                    if(G[j+6]*256/max > i+5)
+                        ret->data[256*(i+5)+j+6].G = 255;
+                    if(B[j+6]*256/max > i+5)
+                        ret->data[256*(i+5)+j+6].B = 255;
+
+                    if(R[j+7]*256/max > i+5)
+                        ret->data[256*(i+5)+j+7].R = 255;
+                    if(G[j+7]*256/max > i+5)
+                        ret->data[256*(i+5)+j+7].G = 255;
+                    if(B[j+7]*256/max > i+5)
+                        ret->data[256*(i+5)+j+7].B = 255;
+                }
+
+                //-----------i+6------------------//
+                for(int j=0;j<j_residue;++j){
+                    if(R[j]*256/max > i+6)
+                        ret->data[256*(i+6)+j].R = 255;
+                    if(G[j]*256/max > i+6)
+                        ret->data[256*(i+6)+j].G = 255;
+                    if(B[j]*256/max > i+6)
+                        ret->data[256*(i+6)+j].B = 255;
+                }
+
+                for(int j=j_residue;j<256;j+=8){
+                    if(R[j]*256/max > i+6)
+                        ret->data[256*(i+6)+j].R = 255;
+                    if(G[j]*256/max > i+6)
+                        ret->data[256*(i+6)+j].G = 255;
+                    if(B[j]*256/max > i+6)
+                        ret->data[256*(i+6)+j].B = 255;
+
+                    if(R[j+1]*256/max > i+6)
+                        ret->data[256*(i+6)+j+1].R = 255;
+                    if(G[j+1]*256/max > i+6)
+                        ret->data[256*(i+6)+j+1].G = 255;
+                    if(B[j+1]*256/max > i+6)
+                        ret->data[256*(i+6)+j+1].B = 255;
+
+                    if(R[j+2]*256/max > i+6)
+                        ret->data[256*(i+6)+j+2].R = 255;
+                    if(G[j+2]*256/max > i+6)
+                        ret->data[256*(i+6)+j+2].G = 255;
+                    if(B[j+2]*256/max > i+6)
+                        ret->data[256*(i+6)+j+2].B = 255;
+
+                    if(R[j+3]*256/max > i+6)
+                        ret->data[256*(i+6)+j+3].R = 255;
+                    if(G[j+3]*256/max > i+6)
+                        ret->data[256*(i+6)+j+3].G = 255;
+                    if(B[j+3]*256/max > i+6)
+                        ret->data[256*(i+6)+j+3].B = 255;
+
+                    if(R[j+4]*256/max > i+6)
+                        ret->data[256*(i+6)+j+4].R = 255;
+                    if(G[j+4]*256/max > i+6)
+                        ret->data[256*(i+6)+j+4].G = 255;
+                    if(B[j+4]*256/max > i+6)
+                        ret->data[256*(i+6)+j+4].B = 255;
+
+                    if(R[j+5]*256/max > i+6)
+                        ret->data[256*(i+6)+j+5].R = 255;
+                    if(G[j+5]*256/max > i+6)
+                        ret->data[256*(i+6)+j+5].G = 255;
+                    if(B[j+5]*256/max > i+6)
+                        ret->data[256*(i+6)+j+5].B = 255;
+
+                    if(R[j+6]*256/max > i+6)
+                        ret->data[256*(i+6)+j+6].R = 255;
+                    if(G[j+6]*256/max > i+6)
+                        ret->data[256*(i+6)+j+6].G = 255;
+                    if(B[j+6]*256/max > i+6)
+                        ret->data[256*(i+6)+j+6].B = 255;
+
+                    if(R[j+7]*256/max > i+6)
+                        ret->data[256*(i+6)+j+7].R = 255;
+                    if(G[j+7]*256/max > i+6)
+                        ret->data[256*(i+6)+j+7].G = 255;
+                    if(B[j+7]*256/max > i+6)
+                        ret->data[256*(i+6)+j+7].B = 255;
+                }
+
+                //-----------i+7------------------//
+                for(int j=0;j<j_residue;++j){
+                    if(R[j]*256/max > i+7)
+                        ret->data[256*(i+7)+j].R = 255;
+                    if(G[j]*256/max > i+7)
+                        ret->data[256*(i+7)+j].G = 255;
+                    if(B[j]*256/max > i+7)
+                        ret->data[256*(i+7)+j].B = 255;
+                }
+
+                for(int j=j_residue;j<256;j+=8){
+                    if(R[j]*256/max > i+7)
+                        ret->data[256*(i+7)+j].R = 255;
+                    if(G[j]*256/max > i+7)
+                        ret->data[256*(i+7)+j].G = 255;
+                    if(B[j]*256/max > i+7)
+                        ret->data[256*(i+7)+j].B = 255;
+
+                    if(R[j+1]*256/max > i+7)
+                        ret->data[256*(i+7)+j+1].R = 255;
+                    if(G[j+1]*256/max > i+7)
+                        ret->data[256*(i+7)+j+1].G = 255;
+                    if(B[j+1]*256/max > i+7)
+                        ret->data[256*(i+7)+j+1].B = 255;
+
+                    if(R[j+2]*256/max > i+7)
+                        ret->data[256*(i+7)+j+2].R = 255;
+                    if(G[j+2]*256/max > i+7)
+                        ret->data[256*(i+7)+j+2].G = 255;
+                    if(B[j+2]*256/max > i+7)
+                        ret->data[256*(i+7)+j+2].B = 255;
+
+                    if(R[j+3]*256/max > i+7)
+                        ret->data[256*(i+7)+j+3].R = 255;
+                    if(G[j+3]*256/max > i+7)
+                        ret->data[256*(i+7)+j+3].G = 255;
+                    if(B[j+3]*256/max > i+7)
+                        ret->data[256*(i+7)+j+3].B = 255;
+
+                    if(R[j+4]*256/max > i+7)
+                        ret->data[256*(i+7)+j+4].R = 255;
+                    if(G[j+4]*256/max > i+7)
+                        ret->data[256*(i+7)+j+4].G = 255;
+                    if(B[j+4]*256/max > i+7)
+                        ret->data[256*(i+7)+j+4].B = 255;
+
+                    if(R[j+5]*256/max > i+7)
+                        ret->data[256*(i+7)+j+5].R = 255;
+                    if(G[j+5]*256/max > i+7)
+                        ret->data[256*(i+7)+j+5].G = 255;
+                    if(B[j+5]*256/max > i+7)
+                        ret->data[256*(i+7)+j+5].B = 255;
+
+                    if(R[j+6]*256/max > i+7)
+                        ret->data[256*(i+7)+j+6].R = 255;
+                    if(G[j+6]*256/max > i+7)
+                        ret->data[256*(i+7)+j+6].G = 255;
+                    if(B[j+6]*256/max > i+7)
+                        ret->data[256*(i+7)+j+6].B = 255;
+
+                    if(R[j+7]*256/max > i+7)
+                        ret->data[256*(i+7)+j+7].R = 255;
+                    if(G[j+7]*256/max > i+7)
+                        ret->data[256*(i+7)+j+7].G = 255;
+                    if(B[j+7]*256/max > i+7)
+                        ret->data[256*(i+7)+j+7].B = 255;
                 }
             }
 
