@@ -264,19 +264,6 @@ inline void LoadProgram(cl_context context, const char *file_name, cl_program &p
     free(program_buffer);
 }
 
-void HistogramSerial(Image *img,uint32_t R[256],uint32_t G[256],uint32_t B[256]){
-    std::fill(R, R+256, 0);
-    std::fill(G, G+256, 0);
-    std::fill(B, B+256, 0);
-
-    for (int i = 0; i < img->size; i++){
-        RGB &pixel = img->data[i];
-        R[pixel.R]++;
-        G[pixel.G]++;
-        B[pixel.B]++;
-    }
-}
-
 int main(int argc, char *argv[]){
     cl_uint             plat_num        = 0;
     cl_platform_id      plat_id         = 0;
