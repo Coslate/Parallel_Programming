@@ -3,7 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include <iostream>
+#include <ios>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -145,6 +145,8 @@ Image *readbmp(const char *filename)
     ret->weight = w;
     ret->size = w * h;
     ret->data = new RGB[w * h];
+
+    #pragma unroll (4)
     for (int i = 0; i < ret->size; i++)
     {
         bmp.read((char *)&ret->data[i], depth / 8);
@@ -224,7 +226,6 @@ inline void LoadProgram(cl_context context, const char *file_name, cl_program &p
 
     // create program from buffer
     program = clCreateProgramWithSource(context, 1, (const char**) &program_buffer, &program_size, &ret_code);
-    HANDLE_ERROR(ret_code);
     free(program_buffer);
 }
 
@@ -262,65 +263,18 @@ int main(int argc, char *argv[]){
 
 
     //-------------------Get platform & device---------------------//
-    HANDLE_ERROR(clGetPlatformIDs(1, &plat_id, &plat_num));
-    HANDLE_ERROR(clGetDeviceIDs(plat_id, CL_DEVICE_TYPE_GPU, 1, &device_id, &device_num));
-    
-    /*
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_NAME, 0, NULL, &device_num_b));
-    device_name = (char*) malloc(device_num_b);
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_NAME, device_num_b, device_name, &device_num_b));
+    clGetPlatformIDs(1, &plat_id, &plat_num);
+    clGetDeviceIDs(plat_id, CL_DEVICE_TYPE_GPU, 1, &device_id, &device_num);
 
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_VERSION, 0, NULL, &value_b));
-    device_version = (char*) malloc(value_b);
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_VERSION, value_b, device_version, NULL));
-
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DRIVER_VERSION, 0, NULL, &value_b));
-    driver_version = (char*) malloc(value_b);
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DRIVER_VERSION, value_b, driver_version, NULL));
-
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &value_b));
-    opencl_version = (char*) malloc(value_b);
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_OPENCL_C_VERSION, value_b, opencl_version, NULL));
-
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, sizeof(maxWorkItemDimension), &maxWorkItemDimension, NULL));
-
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(maxComputeUnits), &maxComputeUnits, NULL));
-
-    maxWorkItemSize = new size_t[maxWorkItemDimension]();
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_MAX_WORK_ITEM_SIZES, maxWorkItemDimension*sizeof(size_t), maxWorkItemSize, NULL));
-
-    HANDLE_ERROR(clGetDeviceInfo(device_id, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(maxWorkGroupSize), &maxWorkGroupSize, NULL));
-    */
-
-    /*
-    std::cout<<"plat_num         = "<<plat_num<<std::endl;
-    std::cout<<"plat_id          = "<<plat_id<<std::endl;
-    std::cout<<"device_num       = "<<device_num<<std::endl;
-    std::cout<<"device_num_b     = "<<device_num_b<<std::endl;
-    std::cout<<"device_id        = "<<device_id<<std::endl;
-    std::cout<<"device_name      = "<<device_name<<std::endl;
-    std::cout<<"device_version   = "<<device_version<<std::endl;
-    std::cout<<"driver_version   = "<<driver_version<<std::endl;
-    std::cout<<"opencl_version   = "<<opencl_version<<std::endl;
-    std::cout<<"max_compite_units= "<<maxComputeUnits<<std::endl;
-    std::cout<<"max_work_item_dimension = "<<maxWorkItemDimension<<std::endl;
-    for(int i=0;i<3;++i){
-        std::cout<<"max_work_item_size["<<i<<"] = "<<maxWorkItemSize[i]<<std::endl;
-    }
-    std::cout<<"max_work_group_size = "<<maxWorkGroupSize<<std::endl;
-    */
     //-------------------Create context-----------------------------//
     context = clCreateContext(NULL, 1, &device_id, NULL, NULL, &ret_code);
-    HANDLE_ERROR(ret_code);
 
     //-------------------Create a command queue---------------------//
     cl_command_queue command_queue = clCreateCommandQueueWithProperties(context, device_id, NULL, &ret_code);
-    HANDLE_ERROR(ret_code);
 
     //-------------------Build kernel------------------------------//
     LoadProgram(context, "./histogram.cl", kernel_program);
 
-    //char options[] = "-cl-unsafe-math-optimizations -cl-mad-enable";
 #if LOG
     time_t t;
 	srand((unsigned) time(&t));
@@ -343,18 +297,9 @@ int main(int argc, char *argv[]){
     cl_int err_t = clBuildProgram(kernel_program, 1, &device_id, NULL, NULL, NULL);
 #endif
 
-    if(err_t != CL_SUCCESS){
-        size_t len;
-        clGetProgramBuildInfo(kernel_program, device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
-        char *log = new char[len];
-        clGetProgramBuildInfo(kernel_program, device_id, CL_PROGRAM_BUILD_LOG, len, log, NULL);
-        std::cout<<"log = "<<log<<std::endl;
-    }
-
     cl_kernel kernel_obj     = clCreateKernel(kernel_program, "histogram", &ret_code);
     cl_kernel kernel_ret_obj = clCreateKernel(kernel_program, "present_result", &ret_code);
     cl_kernel kernel_max_obj = clCreateKernel(kernel_program, "find_hist_max", &ret_code);
-    HANDLE_ERROR(ret_code);
 
 
      //------------------Processing multiple images------------------//
@@ -362,6 +307,8 @@ int main(int argc, char *argv[]){
     if (argc >= 2)
     {
         int many_img = argc - 1;
+
+        #pragma unroll (4)
         for (int i = 0; i < many_img; i++)
         {
             filename = argv[i + 1];
@@ -386,13 +333,11 @@ int main(int argc, char *argv[]){
             //------------------Memory allocation on device------------------//
             cl_mem orig_img_d      = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(uint8_t) * 4 * img->size, NULL, &ret_code);
             cl_mem ret_img_d       = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(uint8_t) * 262144, NULL, &ret_code);
-            HANDLE_ERROR(ret_code);
             cl_mem hist_calc_d     = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint32_t) * 769, NULL, &ret_code);
-            HANDLE_ERROR(ret_code);
             
             //------------------Memory host to device------------------//
-            HANDLE_ERROR(clEnqueueWriteBuffer(command_queue, orig_img_d, CL_TRUE, 0, sizeof(uint8_t) * 4 * img->size, img->data, 0, NULL, NULL));
-            HANDLE_ERROR(clEnqueueWriteBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 769, hist_calc_h, 0, NULL, NULL));
+            clEnqueueWriteBuffer(command_queue, orig_img_d, CL_TRUE, 0, sizeof(uint8_t) * 4 * img->size, img->data, 0, NULL, NULL);
+            clEnqueueWriteBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 769, hist_calc_h, 0, NULL, NULL);
 
 
             //-------------------Set kernel arguments-----------------//
@@ -403,96 +348,18 @@ int main(int argc, char *argv[]){
 
             clSetKernelArg(kernel_max_obj, 0, sizeof(cl_mem), &hist_calc_d);
             //-------------------Execute kernel-histogram function--------------//
-            HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_obj, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL));
+            clEnqueueNDRangeKernel(command_queue, kernel_obj, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL);
 
             //-------------------Execute kernel-find_hist_max function--------------//
-            HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_max_obj, 1, NULL, global_work_size_max, local_work_size_max, 0, NULL, NULL));
+            clEnqueueNDRangeKernel(command_queue, kernel_max_obj, 1, NULL, global_work_size_max, local_work_size_max, 0, NULL, NULL);
             
             //-------------------Read the result back to host--------//
-            /*
-            HANDLE_ERROR(clEnqueueReadBuffer(command_queue, hist_calc_d, CL_TRUE, 0, sizeof(uint32_t) * 256 * 3, hist_calc_h, 0, NULL, NULL));
-
-            uint32_t R[256];
-            uint32_t G[256];
-            uint32_t B[256];
-
-            memcpy(R, &hist_calc_h[0], 256*sizeof(uint32_t));
-            memcpy(G, &hist_calc_h[256], 256*sizeof(uint32_t));
-            memcpy(B, &hist_calc_h[512], 256*sizeof(uint32_t));
-            */
-
-
-            //HistogramSerial(img,R,G,B);
-
-            /*
-            std::cout<<"R = "<<std::endl;
-            for(int j=0;j<256;++j){
-                if(j%10==0 && j!=0){
-                    std::cout<<std::endl;
-                    std::cout<<R[j]<<" ";
-                }else{
-                    std::cout<<R[j]<<" ";
-                }
-            }
-            std::cout<<std::endl;
-            std::cout<<"Done. "<<std::endl;
-
-            std::cout<<"G = "<<std::endl;
-            for(int j=0;j<256;++j){
-                if(j%10==0 && j!=0){
-                    std::cout<<std::endl;
-                    std::cout<<G[j]<<" ";
-                }else{
-                    std::cout<<G[j]<<" ";
-                }
-            }
-            std::cout<<std::endl;
-            std::cout<<"Done. "<<std::endl;
-
-            std::cout<<"B = "<<std::endl;
-            for(int j=0;j<256;++j){
-                if(j%10==0 && j!=0){
-                    std::cout<<std::endl;
-                    std::cout<<B[j]<<" ";
-                }else{
-                    std::cout<<B[j]<<" ";
-                }
-            }
-            std::cout<<std::endl;
-            std::cout<<"Done. "<<std::endl;
-            */
-
-            /*
-            int max = 0;
-            for(int i=0;i<256;i++){
-                max = R[i] > max ? R[i] : max;
-                max = G[i] > max ? G[i] : max;
-                max = B[i] > max ? B[i] : max;
-            }
-            */
-
             Image *ret = new Image();
             ret->type = 1;
             ret->height = 256;
             ret->weight = 256;
             ret->size = 65536;
             ret->data = new RGB[65536]{};
-
-            /*
-            for(int i=0;i<ret->height;i++){
-                for(int j=0;j<256;j++){
-                    if(R[j]*256/max > i)
-                        ret->data[256*i+j].R = 255;
-                    if(G[j]*256/max > i)
-                        ret->data[256*i+j].G = 255;
-                    if(B[j]*256/max > i)
-                        ret->data[256*i+j].B = 255;
-                }
-            }
-            */
-
-            //-------------------Memory host to device------------------//
-            //HANDLE_ERROR(clEnqueueWriteBuffer(command_queue, ret_img_d, CL_TRUE, 0, sizeof(uint8_t) * 4 * 65536, ret->data, 0, NULL, NULL));
 
             //-------------------Set kernel arguments-----------------//
             clSetKernelArg(kernel_ret_obj, 0, sizeof(cl_mem), &ret_img_d);
@@ -504,44 +371,27 @@ int main(int argc, char *argv[]){
             global_work_size[0] = 256;
             global_work_size[1] = 256;
 
-            HANDLE_ERROR(clEnqueueNDRangeKernel(command_queue, kernel_ret_obj, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL));
+            clEnqueueNDRangeKernel(command_queue, kernel_ret_obj, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL);
 
             //-------------------Read the result back to host--------//
-            HANDLE_ERROR(clEnqueueReadBuffer(command_queue, ret_img_d, CL_TRUE, 0, sizeof(uint8_t) * 262144, ret->data, 0, NULL, NULL));
-
-
-            /*
-            std::cout<<"max = "<<max<<std::endl;
-            std::cout<<"ret->data = "<<std::endl;
-            for(int i=0;i<ret->height;i++){
-                std::cout<<std::endl;
-                for(int j=0;j<256;j++){
-                    if(j%2==0 && j!=0){
-                        std::cout<<std::endl;
-                    }
-                    std::cout<<(unsigned)ret->data[256*i+j].R<<" "<<(unsigned)ret->data[256*i+j].G<<" "<<(unsigned)ret->data[256*i+j].B<<" "<<(unsigned)ret->data[256*i+j].align<<" ";
-                }
-            }
-            std::cout<<std::endl;
-            std::cout<<"Done. "<<std::endl;
-            */
+            clEnqueueReadBuffer(command_queue, ret_img_d, CL_TRUE, 0, sizeof(uint8_t) * 262144, ret->data, 0, NULL, NULL);
 
             std::string newfile = "hist_" + std::string(filename); 
             writebmp(newfile.c_str(), ret);
 
             free(hist_calc_h);
-            HANDLE_ERROR(clReleaseMemObject(hist_calc_d));
-            HANDLE_ERROR(clReleaseMemObject(orig_img_d));
-            HANDLE_ERROR(clReleaseMemObject(ret_img_d));
+            clReleaseMemObject(hist_calc_d);
+            clReleaseMemObject(orig_img_d);
+            clReleaseMemObject(ret_img_d);
         }
     }else{
         printf("Usage: ./hist <img.bmp> [img2.bmp ...]\n");
     }
 
-    HANDLE_ERROR(clReleaseKernel(kernel_obj));
-    HANDLE_ERROR(clReleaseKernel(kernel_ret_obj));
-    HANDLE_ERROR(clReleaseProgram(kernel_program));
-    HANDLE_ERROR(clReleaseCommandQueue(command_queue));
-    HANDLE_ERROR(clReleaseContext(context));
+    clReleaseKernel(kernel_obj);
+    clReleaseKernel(kernel_ret_obj);
+    clReleaseProgram(kernel_program);
+    clReleaseCommandQueue(command_queue);
+    clReleaseContext(context);
     return EXIT_SUCCESS;
 }

@@ -146,7 +146,6 @@ Image *readbmp(const char *filename)
     ret->size = w * h;
     ret->data = new RGB[w * h];
 
-    #pragma unroll
     for (int i = 0; i < ret->size; i++)
     {
         bmp.read((char *)&ret->data[i], depth / 8);
@@ -307,6 +306,7 @@ int main(int argc, char *argv[]){
     if (argc >= 2)
     {
         int many_img = argc - 1;
+
         for (int i = 0; i < many_img; i++)
         {
             filename = argv[i + 1];
@@ -352,7 +352,6 @@ int main(int argc, char *argv[]){
             memcpy(B, &hist_calc_h[512], 256*sizeof(uint32_t));
 
             int max = 0;
-            #pragma unroll
             for(int i=0;i<256;i++){
                 max = R[i] > max ? R[i] : max;
                 max = G[i] > max ? G[i] : max;
@@ -366,7 +365,6 @@ int main(int argc, char *argv[]){
             ret->size = 65536;
             ret->data = new RGB[65536]{};
 
-            #pragma unroll
             for(int i=0;i<ret->height;i++){
                 for(int j=0;j<256;j++){
                     if(R[j]*256/max > i)
