@@ -146,12 +146,12 @@ Image *readbmp(const char *filename)
     ret->size = w * h;
     ret->data = new RGB[w * h];
 
-    uint32_t residue   = ret->size%32;
+    uint32_t residue   = ret->size%64;
     for (int k = 0; k < residue; ++k){
         bmp.read((char *)&ret->data[k], depth / 8);
     }
 
-    for (int i = residue; i < ret->size; i+=32)
+    for (int i = residue; i < ret->size; i+=64)
     {
         bmp.read((char *)&ret->data[i], depth / 8);
         bmp.read((char *)&ret->data[i+1], depth / 8);
@@ -185,6 +185,38 @@ Image *readbmp(const char *filename)
         bmp.read((char *)&ret->data[i+29], depth / 8);
         bmp.read((char *)&ret->data[i+30], depth / 8);
         bmp.read((char *)&ret->data[i+31], depth / 8);
+        bmp.read((char *)&ret->data[i+32], depth / 8);
+        bmp.read((char *)&ret->data[i+33], depth / 8);
+        bmp.read((char *)&ret->data[i+34], depth / 8);
+        bmp.read((char *)&ret->data[i+35], depth / 8);
+        bmp.read((char *)&ret->data[i+36], depth / 8);
+        bmp.read((char *)&ret->data[i+37], depth / 8);
+        bmp.read((char *)&ret->data[i+38], depth / 8);
+        bmp.read((char *)&ret->data[i+39], depth / 8);
+        bmp.read((char *)&ret->data[i+40], depth / 8);
+        bmp.read((char *)&ret->data[i+41], depth / 8);
+        bmp.read((char *)&ret->data[i+42], depth / 8);
+        bmp.read((char *)&ret->data[i+43], depth / 8);
+        bmp.read((char *)&ret->data[i+44], depth / 8);
+        bmp.read((char *)&ret->data[i+45], depth / 8);
+        bmp.read((char *)&ret->data[i+46], depth / 8);
+        bmp.read((char *)&ret->data[i+47], depth / 8);
+        bmp.read((char *)&ret->data[i+48], depth / 8);
+        bmp.read((char *)&ret->data[i+49], depth / 8);
+        bmp.read((char *)&ret->data[i+50], depth / 8);
+        bmp.read((char *)&ret->data[i+51], depth / 8);
+        bmp.read((char *)&ret->data[i+52], depth / 8);
+        bmp.read((char *)&ret->data[i+53], depth / 8);
+        bmp.read((char *)&ret->data[i+54], depth / 8);
+        bmp.read((char *)&ret->data[i+55], depth / 8);
+        bmp.read((char *)&ret->data[i+56], depth / 8);
+        bmp.read((char *)&ret->data[i+57], depth / 8);
+        bmp.read((char *)&ret->data[i+58], depth / 8);
+        bmp.read((char *)&ret->data[i+59], depth / 8);
+        bmp.read((char *)&ret->data[i+60], depth / 8);
+        bmp.read((char *)&ret->data[i+61], depth / 8);
+        bmp.read((char *)&ret->data[i+62], depth / 8);
+        bmp.read((char *)&ret->data[i+63], depth / 8);        
     }
     return ret;
 }
