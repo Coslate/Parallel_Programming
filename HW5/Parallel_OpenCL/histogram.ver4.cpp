@@ -347,9 +347,20 @@ int main(int argc, char *argv[]){
             size_t local_work_size_max[1] = {256};
             size_t global_work_size_max[1] = {768};
             
+            size_t local_work_size_ret[2]  = {32, 32};
+            size_t global_work_size_ret[2] = {256, 256};
+
             //------------------Memory allocation on host------------------//
             uint32_t *hist_calc_h = (uint32_t*) malloc (sizeof(uint32_t) * 769);//the last one is for max value storage
             memset(hist_calc_h, 0, sizeof(uint32_t) * 769);
+
+            //Read the result back to host
+            Image *ret = new Image();
+            ret->type = 1;
+            ret->height = 256;
+            ret->weight = 256;
+            ret->size = 65536;
+            ret->data = new RGB[65536]{};
 
             //------------------Memory allocation on device------------------//
             cl_mem orig_img_d      = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(uint8_t) * 4 * img->size, NULL, &ret_code);
@@ -368,31 +379,18 @@ int main(int argc, char *argv[]){
             clSetKernelArg(kernel_obj, 3, sizeof(uint32_t), &img->weight);
 
             clSetKernelArg(kernel_max_obj, 0, sizeof(cl_mem), &hist_calc_d);
+
+            clSetKernelArg(kernel_ret_obj, 0, sizeof(cl_mem), &ret_img_d);
+            clSetKernelArg(kernel_ret_obj, 1, sizeof(cl_mem), &hist_calc_d);
+
             //-------------------Execute kernel-histogram function--------------//
             clEnqueueNDRangeKernel(command_queue, kernel_obj, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL);
 
             //-------------------Execute kernel-find_hist_max function--------------//
             clEnqueueNDRangeKernel(command_queue, kernel_max_obj, 1, NULL, global_work_size_max, local_work_size_max, 0, NULL, NULL);
             
-            //-------------------Read the result back to host--------//
-            Image *ret = new Image();
-            ret->type = 1;
-            ret->height = 256;
-            ret->weight = 256;
-            ret->size = 65536;
-            ret->data = new RGB[65536]{};
-
-            //-------------------Set kernel arguments-----------------//
-            clSetKernelArg(kernel_ret_obj, 0, sizeof(cl_mem), &ret_img_d);
-            clSetKernelArg(kernel_ret_obj, 1, sizeof(cl_mem), &hist_calc_d);
-
             //-------------------Execute kernel function--------------//
-            local_work_size[0] = 32;
-            local_work_size[1] = 32;
-            global_work_size[0] = 256;
-            global_work_size[1] = 256;
-
-            clEnqueueNDRangeKernel(command_queue, kernel_ret_obj, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL);
+            clEnqueueNDRangeKernel(command_queue, kernel_ret_obj, 2, NULL, global_work_size_ret, local_work_size_ret, 0, NULL, NULL);
 
             //-------------------Read the result back to host--------//
             clEnqueueReadBuffer(command_queue, ret_img_d, CL_TRUE, 0, sizeof(uint8_t) * 262144, ret->data, 0, NULL, NULL);
