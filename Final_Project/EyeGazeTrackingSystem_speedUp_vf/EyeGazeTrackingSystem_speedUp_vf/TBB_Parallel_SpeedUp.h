@@ -238,10 +238,52 @@ class Parallel_process_convertScaleAbs : public cv::ParallelLoopBody
                 cv::Mat out(retVal, cv::Rect(0, (retVal.rows/diff)*i, 
                                     retVal.cols, retVal.rows/diff));
 
-				convertScaleAbs( in, out );										
+				convertScaleAbs( in, out );
             }
         }
 };
+class Parallel_process_convertScaleAbs_findMinMax : public cv::ParallelLoopBody
+{
+
+private:
+	const Mat &img;
+	Mat& retVal;
+	int diff;
+	double *min_val_cand;
+	double *max_val_cand;
+
+public:
+	Parallel_process_convertScaleAbs_findMinMax(const cv::Mat &inputImgage, cv::Mat& outImage,
+		double *min_val_cand, double *max_val_cand, int diffVal)
+		: img(inputImgage), retVal(outImage), min_val_cand(min_val_cand), max_val_cand(max_val_cand), 
+		diff(diffVal) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+
+		//#pragma omp parallel for		
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+
+			cv::Mat in(img, cv::Rect(0, (img.rows / diff)*i,
+				img.cols, img.rows / diff));
+			cv::Mat out(retVal, cv::Rect(0, (retVal.rows / diff)*i,
+				retVal.cols, retVal.rows / diff));
+
+			double min_val;
+			double max_val;
+
+			convertScaleAbs(in, out);
+			minMaxLoc(out, &min_val, &max_val, NULL, NULL);
+
+			min_val_cand[i] = min_val;
+			max_val_cand[i] = max_val;
+		}
+	}
+};
+
 class Parallel_process_normalize : public cv::ParallelLoopBody
     {
 
@@ -1095,5 +1137,45 @@ void SerialOtsu(cv::Mat inputImgage, int *hist, int total_hist_sum, int &thresho
 		}
 	}
 }
+
+class Parallel_process_converto_min_max : public cv::ParallelLoopBody
+{
+
+private:
+	const Mat &img;
+	Mat& retVal;
+	int diff;
+	double min_val_src;
+	double max_val_src;
+	double min_to_val;
+	double max_to_val;
+
+public:
+	Parallel_process_converto_min_max(const cv::Mat &inputImgage, cv::Mat &outputImgage, double min_val_src, double max_val_src, double min_to_val, double max_to_val, int diffVal)
+		: img(inputImgage), retVal(outputImgage), diff(diffVal), min_val_src(min_val_src), max_val_src(max_val_src),
+		  min_to_val(min_to_val), max_to_val(max_to_val){}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			cv::Mat in(img, cv::Rect(0, (img.rows / diff)*i,
+				img.cols, img.rows / diff));
+			cv::Mat out(retVal, cv::Rect(0, (retVal.rows / diff)*i,
+				retVal.cols, retVal.rows / diff));
+
+
+			cv::Mat_<uchar>::iterator it = in.begin<uchar>();
+			cv::Mat_<uchar>::const_iterator itend = in.end<uchar>();
+			cv::Mat_<uchar>::iterator itout = out.begin<uchar>();
+
+			for (; it != itend; ++it, ++itout) {
+				*itout = ((double)((*it) - min_val_src)*(max_to_val - min_to_val) / (max_val_src - min_val_src)) + min_to_val;
+			}
+		}
+	}
+};
 
 #endif

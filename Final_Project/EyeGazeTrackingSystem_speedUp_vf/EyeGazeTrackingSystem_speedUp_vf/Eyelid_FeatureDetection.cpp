@@ -103,6 +103,7 @@ void EyelidFeatureDetection(const Mat &Src , vector<Point> &upperEyelid_feature 
 				for(int i=0;i<num_line_upper_phase2;++i){
 					if(check_line_halting_upper_phase2[i]==false){
 						finish_upper_phase2 = false;
+						break;
 					}
 				}
 			}//end while			
@@ -170,6 +171,7 @@ void EyelidFeatureDetection(const Mat &Src , vector<Point> &upperEyelid_feature 
 				for(int i=0;i<num_line_lower_phase2;++i){
 					if(check_line_halting_lower_phase2[i]==false){
 						finish_lower_phase2 = false;
+						break;
 					}
 				}
 			}//end while			

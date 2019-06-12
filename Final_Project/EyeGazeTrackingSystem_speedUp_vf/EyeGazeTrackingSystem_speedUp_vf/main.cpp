@@ -30,6 +30,7 @@
 #include <mutex>
 #include <tbb/parallel_for_each.h>
 #include <tbb/task_scheduler_init.h>
+//#include <tbb/tbb.h>
 
 
 
@@ -1958,10 +1959,15 @@ inline void X_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &
 	Mat ConvertScaleAbsX_tmp = Mat::zeros(Gray_openingGaussian.size()  ,CV_8UC1);
 	Mat ABS_Grad_XHisto;
 	int *hist = new int[256]();
+	//int *cu_hist = new int[256]();
 	std::mutex mtx;
 	float goal_percentGradthreshold = 0.1*FRAMEW*FRAMEH;
 	int thre_populationGray;
 	int sum_populationGray = 0;
+	double *min_val_cand = new double[thread_num];
+	double *max_val_cand = new double[thread_num];
+	double min_val = FLT_MAX;
+	double max_val = -FLT_MAX;
 
 	//X Directed Gradient
 	//Scharr( Gray_openingGaussian, Grad_X, CV_16S, 1, 0, 3, 0, BORDER_DEFAULT );
@@ -1969,15 +1975,28 @@ inline void X_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &
 	//normalize(ABS_Grad_X, ABS_Grad_X, 0, 255, NORM_MINMAX, CV_8UC1);//L
 	
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_scharrX(Gray_openingGaussian, ScharrX_tmp, thread_num));
-	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_convertScaleAbs(ScharrX_tmp, ConvertScaleAbsX_tmp, thread_num));
+	//cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_convertScaleAbs(ScharrX_tmp, ConvertScaleAbsX_tmp, thread_num));
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_convertScaleAbs_findMinMax(ScharrX_tmp, ConvertScaleAbsX_tmp, min_val_cand, max_val_cand, thread_num));
+	for (int i = 0; i < thread_num; ++i) {
+		if (min_val > min_val_cand[i]) {
+			min_val = min_val_cand[i];
+		}
+		if (max_val < max_val_cand[i]) {
+			max_val = max_val_cand[i];
+		}
+	}
+
+
 	//cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_normalize(ConvertScaleAbsX_tmp, ABS_Grad_X, thread_num));
-	normalize(ConvertScaleAbsX_tmp, ABS_Grad_X, 0, 255, NORM_MINMAX, CV_8UC1);//L
+	//normalize(ConvertScaleAbsX_tmp, ABS_Grad_X, 0, 255, NORM_MINMAX, CV_8UC1);//L
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_converto_min_max(ConvertScaleAbsX_tmp, ABS_Grad_X, min_val, max_val, 0, 255, thread_num));
 
 	
 	
 	//Histogram Grad_X
 	//CalcHistogram(ABS_Grad_X , ABS_Grad_XHisto);	
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_hist_pure(ABS_Grad_X, hist, mtx, thread_num));
+	//cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_hist_and_cumulative_pure(ABS_Grad_X, cu_hist, mtx, thread_num));
 
 
 	//for(int i=ABS_Grad_XHisto.rows-1;i>0;--i){
@@ -1996,9 +2015,21 @@ inline void X_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &
 		}
 	}
 
+	//for(int i=0;i<256;++i){
+	//	if(cu_hist[i]>0.9*FRAMEH*FRAMEH){
+	//		thre_populationGray = i-1;
+	//		break;
+	//	}
+	//}
+
+
+
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_threBinary(ABS_Grad_X, Grad_X_Thresh_Pop, thre_populationGray, thread_num));
 	//threshold(ABS_Grad_X, Grad_X_Thresh_Pop, thre_populationGray, 255,THRESH_BINARY);
 	delete hist;
+	//delete cu_hist;
+	delete min_val_cand;
+	delete max_val_cand;
 }
 
 inline void Y_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &Grad_Y_Thresh_Pop){
@@ -2012,15 +2043,30 @@ inline void Y_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &
 	float goal_percentGradthreshold = 0.1*FRAMEW*FRAMEH;
 	int thre_populationGray;
 	int sum_populationGray = 0;
+	double *min_val_cand = new double[thread_num];
+	double *max_val_cand = new double[thread_num];
+	double min_val = FLT_MAX;
+	double max_val = -FLT_MAX;
 
 	//Y Directed Gradient
 	//Scharr( Gray_openingGaussian, Grad_Y, CV_16S, 0, 1, 3, 0, BORDER_DEFAULT );
 	//convertScaleAbs( Grad_Y, ABS_Grad_Y );
 	//normalize(ABS_Grad_Y, ABS_Grad_Y, 0, 255, NORM_MINMAX, CV_8UC1);//L
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_scharrY(Gray_openingGaussian, ScharrY_tmp, thread_num));
-	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_convertScaleAbs(ScharrY_tmp, ConvertScaleAbsY_tmp, thread_num));
+	//cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_convertScaleAbs(ScharrY_tmp, ConvertScaleAbsY_tmp, thread_num));
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_convertScaleAbs_findMinMax(ScharrY_tmp, ConvertScaleAbsY_tmp, min_val_cand, max_val_cand, thread_num));
+	for (int i = 0; i < thread_num; ++i) {
+		if (min_val > min_val_cand[i]) {
+			min_val = min_val_cand[i];
+		}
+		if (max_val < max_val_cand[i]) {
+			max_val = max_val_cand[i];
+		}
+	}
+
 	//cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_normalize(ConvertScaleAbsY_tmp, ABS_Grad_Y, thread_num));
-	normalize(ConvertScaleAbsY_tmp, ABS_Grad_Y, 0, 255, NORM_MINMAX, CV_8UC1);//L
+	//normalize(ConvertScaleAbsY_tmp, ABS_Grad_Y, 0, 255, NORM_MINMAX, CV_8UC1);//L
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_converto_min_max(ConvertScaleAbsY_tmp, ABS_Grad_Y, min_val, max_val, 0, 255, thread_num));
 		
 	//Histogram Grad_Y
 	//CalcHistogram(ABS_Grad_Y , ABS_Grad_YHisto);	
@@ -2044,6 +2090,8 @@ inline void Y_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_threBinary(ABS_Grad_Y, Grad_Y_Thresh_Pop, thre_populationGray, thread_num));
 	//threshold(ABS_Grad_Y, Grad_Y_Thresh_Pop, thre_populationGray, 255,THRESH_BINARY);	
 	delete hist;
+	delete min_val_cand;
+	delete max_val_cand;
 }
 
 //inline void ConvexHullProcedureFindBounding(const Size &imageSize , const vector<vector<Point> >gradsPts , int &boundary_return
@@ -2523,12 +2571,32 @@ inline void FindValley(const vector<float> &input , vector<int> &findout , const
 }
 
 
+//inline void Derivative_1D(const vector<float> &input , vector<float> &deriv_out , const int &scale){
+//	for(int i=0;i<input.size();++i){
+//		if(i+scale>input.size()-1)break;
+//		float sumofDeriv = 0;
+//		for(int j=i+1;j<i+scale+1;++j){
+//			sumofDeriv+=fabs(input[i] - input[j]);
+//		}
+//		sumofDeriv/=scale;
+//		deriv_out.push_back(sumofDeriv);
+//	}
+//}
+
 inline void Derivative_1D(const vector<float> &input , vector<float> &deriv_out , const int &scale){
 	for(int i=0;i<input.size();++i){
-		if(i+scale>input.size()-1)break;
+		//if(i+scale>input.size()-1)break;
 		float sumofDeriv = 0;
-		for(int j=i+1;j<i+scale+1;++j){
-			sumofDeriv+=fabs(input[i] - input[j]);
+
+		if (i + scale > input.size() - 1) {
+			for (int j = i + 1; j<input.size(); ++j) {
+				sumofDeriv += fabs(input[i] - input[j]);
+			}
+		}
+		else {
+			for (int j = i + 1; j < i + scale + 1; ++j) {
+				sumofDeriv += fabs(input[i] - input[j]);
+			}
 		}
 		sumofDeriv/=scale;
 		deriv_out.push_back(sumofDeriv);
@@ -2592,7 +2660,7 @@ inline bool GeneralProjectionFunction_Ver2(const Mat &Src , Point &eyeCoarseCent
 	//}
 
 	//FindPeaks
-	//FindPeaks(vec_Deriv_GPFh_y , find_hy_Derivpeak , 100);	
+	//FindPeaks(vec_Deriv_GPFh_y , find_hy_Derivpeak , 100);
 	FindPeaks_ver2(vec_Deriv_GPFh_y , find_hy_Derivpeak , 100);
 	
 
@@ -2688,7 +2756,9 @@ inline bool GeneralProjectionFunction_Ver2(const Mat &Src , Point &eyeCoarseCent
 			}
 		}else{
 			iris_x_regionLeft = vx_LeftDeriv_peakDataAndPos[leftPeakDeriv_vx.size()-1].number;		
-		}		
+		}	
+
+		delete vx_LeftDeriv_peakDataAndPos;
 	}
 
 
@@ -2718,8 +2788,11 @@ inline bool GeneralProjectionFunction_Ver2(const Mat &Src , Point &eyeCoarseCent
 		}else{			
 			iris_x_regionRight = vx_RightDeriv_peakDataAndPos[rightPeakDeriv_vx.size()-1].number;	
 		}
+
+		delete vx_RightDeriv_peakDataAndPos;
 	}	
 
+	delete hy_Deriv_peakDataAndPos;
 	return true;
 }
 
@@ -2740,37 +2813,63 @@ inline bool InitialCoarseCenterCDF(const Mat &Src , Point &irisCoarseCenter){
 	Mat Hist_CDF = Mat::zeros(1 , histBins , CV_32FC1);	
 	Mat IrisContour;
 
-	//Probability Density Function (PDF)
-	CalcHistogram(Src , Src_Hist);		
-	reduce(Src_Hist, Hist_Sum, 0 ,  cv::REDUCE_SUM);//SUM
-	for(int i=0;i<Src_Hist.rows;++i){		
-		Src_Hist.at<float>(i , 0) /= Hist_Sum.at<float>(0 , 0);
-	}
-	
-	//Cumulative Density Function (CDF)
-	for(int i=0;i<Hist_CDF.cols;++i){
-		cumulativeNumber+=Src_Hist.at<float>(i , 0);
-		Hist_CDF.at<float>(0 , i)=cumulativeNumber;
-	}
-	
-	for(int i=0;i<Src.rows;++i){
-		for(int j=0;j<Src.cols;++j){
-			int intensity = Src.at<uchar>(i , j);
-			if(Hist_CDF.at<float>(0 , intensity)<0.05){
-				Src_Binary.at<uchar>(i , j) = 255;
-			}
+	int *cu_hist = new int[256]();
+	std::mutex mtx;
+	int thresh_cdf;
+	int total_size = Src.rows * Src.cols;
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_hist_and_cumulative_pure(Src, cu_hist, mtx, thread_num));
+
+	for (int k = 0; k < 256; ++k) {
+		if (cu_hist[k] / (double)total_size > 0.05) {
+			thresh_cdf = k;
+			break;
 		}
 	}
-		
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_apply_threshold(Src, Src_Binary, thresh_cdf-1, cv::THRESH_BINARY_INV, thread_num));
+
+	//Probability Density Function (PDF)
+	//CalcHistogram(Src , Src_Hist);		
+	//reduce(Src_Hist, Hist_Sum, 0 ,  cv::REDUCE_SUM);//SUM
+	//for(int i=0;i<Src_Hist.rows;++i){		
+	//	Src_Hist.at<float>(i , 0) /= Hist_Sum.at<float>(0 , 0);
+	//}
+	//
+	////Cumulative Density Function (CDF)
+	//for(int i=0;i<Hist_CDF.cols;++i){
+	//	cumulativeNumber+=Src_Hist.at<float>(i , 0);
+	//	Hist_CDF.at<float>(0 , i)=cumulativeNumber;
+	//}
+	//
+	//int thresh_cdf_serial = -FLT_MAX;
+	//for(int i=0;i<Src.rows;++i){
+	//	for(int j=0;j<Src.cols;++j){
+	//		int intensity = Src.at<uchar>(i , j);
+	//		if(Hist_CDF.at<float>(0 , intensity)<0.05){
+	//			if (intensity > thresh_cdf_serial) {
+	//				thresh_cdf_serial = intensity;
+	//			}
+	//			Src_Binary.at<uchar>(i , j) = 255;
+	//		}
+	//	}
+	//}
+
+	//std::cout << "thresh_cdf_serial = " << thresh_cdf_serial << std::endl;
 	
+	//double time_1 = getTickCount();
 	if(!FindMAXConnextedComponent(Src_Binary , IrisContoursPoints , IrisContour)){
 		return false;
 	}
+	//double time_2 = getTickCount();
+	//std::cout << "FindMAXConnectedComponent takes time = " << (double)(time_2 - time_1) / getTickFrequency() << std::endl;
 	//CenterCalculatUsingMoment(IrisContoursPoints , irisCoarseCenter.x , irisCoarseCenter.y);
 	//std::cout << "OpenCV memoent = (" << irisCoarseCenter.x << ", " << irisCoarseCenter.y << ")" << std::endl;
 	CenterCalculatUsingMomentParallel(IrisContoursPoints, irisCoarseCenter.x, irisCoarseCenter.y, thread_num);
 	//std::cout << "CenterCalculatUsingMomentParallel memoent = (" << irisCoarseCenter.x << ", " << irisCoarseCenter.y << ")" << std::endl;
 
+	//imshow("Src", Src);
+	//imshow("Src_Binary", Src_Binary);
 	//waitKey(0);
 
 	return true;
@@ -3160,6 +3259,11 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	time_stamp2 = getTickCount();
 
 	//X Y Gradient Generation	
+	//std::thread thread1(X_DirectedGradientGeneration, std::ref(Gray_openingGaussian_Gau), std::ref(Grad_X_Thresh_Pop));
+	//std::thread thread2(Y_DirectedGradientGeneration, std::ref(Gray_openingGaussian_Gau), std::ref(Grad_Y_Thresh_Pop));
+
+	//thread1.join();
+	//thread2.join();
 	X_DirectedGradientGeneration(Gray_openingGaussian_Gau , Grad_X_Thresh_Pop);
 	Y_DirectedGradientGeneration(Gray_openingGaussian_Gau , Grad_Y_Thresh_Pop);
 
@@ -3224,6 +3328,15 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	
 	time_start_in_function = getTickCount();
 
+	//std::thread thread1(Parabola_Fitting_RANSACUp, std::ref(Frame_Gray), std::ref(feature_point_lowerEyelid), std::ref(lower_parabola_param)
+	//												, std::ref(lower_parabola_inlier) , std::ref(lower_parabola_inlierSoft)
+	//												, std::ref(lower_parabola_outlier) , std::ref(vertexParabolaLower) , std::ref(dis_thresholdSoft_lowerEyelid));
+
+	//std::thread thread2(Parabola_Fitting_RANSACDown, std::ref(Frame_Gray), std::ref(feature_point_upperEyelid), std::ref(upper_parabola_param)
+	//												, std::ref(upper_parabola_inlier), std::ref(upper_parabola_inlierSoft)
+	//												, std::ref(upper_parabola_outlier), std::ref(vertexParabolaUpper), std::ref(dis_thresholdSoft_upperEyelid));
+	//thread1.join();
+	//thread2.join();
 	Parabola_Fitting_RANSACUp(Frame_Gray , feature_point_lowerEyelid , lower_parabola_param
 												, lower_parabola_inlier , lower_parabola_inlierSoft 
 												, lower_parabola_outlier , vertexParabolaLower , dis_thresholdSoft_lowerEyelid);	
@@ -3238,7 +3351,8 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 																	, EyelidRegion , vertexParabolaUpper , vertexParabolaLower
 																	, lowerParabolaTable , upperParabolaTable);
 
-	
+	time_end_in_function = getTickCount();
+
 	if(countForColorModelHistValidTesting==0){
 		vertexParabolaUpperFirstFrame = vertexParabolaUpper;
 		vertexParabolaLowerFirstFrame = vertexParabolaLower;		
@@ -3249,7 +3363,6 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	//	printf("\n 5\n");
 	//}
 
-	time_end_in_function = getTickCount();
 	time_eye_position_detection_parabola_model_fitting.push_back(time_end_in_function - time_start_in_function);
 
 	//-------------------Limbus Feature Detection---------------------//	
@@ -3583,6 +3696,38 @@ inline void IrisModelGeneration(const Mat &IrisROI , Mat &Iris_hist , int channe
 				 Iris_hist, 2, histSize, ranges,
 				 true, // the histogram is uniform
 				 false );
+
+
+	//-------------------Show Histogram Info------------------------//
+	//std::cout << "IrisROI.rows = " << IrisROI.rows << std::endl;
+	//std::cout << "IrisROI.cols = " << IrisROI.cols << std::endl;
+
+	//for (int i = 0; i < Iris_hist.rows; ++i) {
+	//	std::cout << std::endl;
+	//	for (int j = 0; j < Iris_hist.cols; ++j) {
+	//		std::cout << Iris_hist.at<float>(i, j) <<" ";
+	//	}
+	//}
+
+	//int scale = 100;
+	//double maxVal = 0;
+	//minMaxLoc(Iris_hist, 0, &maxVal, 0, 0);
+	//Mat histImg = Mat::zeros(Iris_hist.cols*scale, Iris_hist.rows * scale, CV_8UC3);
+	//for (int h = 0; h < Iris_hist.rows; h++)
+	//	for (int s = 0; s < Iris_hist.cols; s++)
+	//	{
+	//		float binVal = Iris_hist.at<float>(h, s);
+	//		int intensity = cvRound(binVal * 255 / maxVal);
+	//		rectangle(histImg, Point(h*scale, s*scale),
+	//			Point((h + 1)*scale - 1, (s + 1)*scale - 1),
+	//			Scalar::all(intensity),
+	//			CV_FILLED);
+	//	}
+
+	//namedWindow("H-S Histogram", 1);
+	//imshow("H-S Histogram", histImg);
+	//waitKey(0);
+
 }
 
 inline void CalcBackProjSelfDefined(const Mat &Src , const MatND &HistModel , Mat &outMask , const int histSize[] 
@@ -3599,14 +3744,14 @@ inline void CalcBackProjSelfDefined(const Mat &Src , const MatND &HistModel , Ma
 					maxVal=HistModel.at<float>(i , j);			
 		}
 	}
-	
+
 	for(int i=0;i<Src_HSV.rows;++i){
 		for(int j=0;j<Src_HSV.cols;++j){
 			int pos_x = Src_HSV.at<Vec3b>(i , j)[1]/(float)Hist_PerBin[1];//S
 			int pos_y = Src_HSV.at<Vec3b>(i , j)[0]/(float)Hist_PerBin[0];//H			
 			outMask.at<uchar>(i , j) = HistModel.at<float>(pos_y , pos_x)/maxVal*255;				
 		}
-	}	
+	}
 }
 
 inline cv::Mat colorReduce(const cv::Mat &image, int div=64) {
@@ -3737,7 +3882,7 @@ inline bool HistoModelValidTesting(const Mat &EyeImageForTestingIrisHistModel , 
 				}
 			}
 		}
-	}	
+	}
 	irisRate = pixel_in_iris/(float)pixel_in_others;
 	
 
@@ -3784,7 +3929,7 @@ inline void IrisModelHandeling(bool &gotIrisROI , bool &irisDynamicMaskGeneratio
 	if(gotIrisROI){		
 		IrisModelGeneration(Iris_ROI_forModel , Iris_hist_cal ,channels , histSize , ranges);		
 		gotIrisROI = false;		
-		readIrisModel = false;	
+		readIrisModel = false;
 		checkIrisColorModel = true;
 	}
 
@@ -5515,13 +5660,11 @@ int main(int argc , char *argv[]){
 				//imshow("Histogram_Eq", Histogram_Eq);
 				//waitKey(0);
 				//============Iris Model & Mask Generation============/	
-				time_start = getTickCount();
-
-				if(countForColorModelHistValidTesting==0){
+				if (countForColorModelHistValidTesting % 5 == 0) {
 					EyeImageForTestingIrisHistModel = Frame_wh.clone();
 				}
 
-				
+				time_start = getTickCount();
 				IrisModelHandeling(gotIrisROI , irisDynamicMaskGeneration , readIrisModel
 											  , writeIrisModel , IrisHisto_output_fileName 
 											  , Iris_ROI_forModel  ,  Frame_wh , Iris_hist , Iris_Mask

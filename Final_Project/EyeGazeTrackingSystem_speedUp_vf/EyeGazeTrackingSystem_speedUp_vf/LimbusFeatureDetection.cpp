@@ -380,7 +380,7 @@ void LimbusFeatureDetection(const Mat &in , vector<Point> &feature , const int f
 
 		delete	check_line_halting_part1;
 		delete	check_line_halting_part2;
-		delete   count_line_halting_part1;
+		delete  count_line_halting_part1;
 		delete	count_line_halting_part2;	
 
 	}//end while	
