@@ -5,7 +5,9 @@
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\OpenCV-4.1.0\source\opencv\build\include;D:\OpenCV-4.1.0\source\opencv\sources\include\opencv2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\OpenCV-4.1.0\my_build_TBB_CUDA\install\include\opencv2;D:\OpenCV-4.1.0\my_build_TBB_CUDA\install\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>D:\OpenCV-4.1.0\my_build_TBB_CUDA\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
