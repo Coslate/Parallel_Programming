@@ -105,44 +105,52 @@ bool   do_profiling = true;
 bool   do_profiling_white_balance = false;
 double avg_time     = 0;
 double t            = 0;
-vector<int64> time_image_preprocessing_white_balance;
-vector<int64> time_image_preprocessing_cvt_color;
-vector<int64> time_image_preprocessing_hist_equal;
-vector<int64> time_image_preprocessing_high_freq_removal;
-vector<int64> time_iris_model_handling;
-vector<int64> time_eye_position_detection;
+vector<double> time_image_preprocessing_white_balance;
+vector<double> time_image_preprocessing_cvt_color;
+vector<double> time_image_preprocessing_hist_equal;
+vector<double> time_image_preprocessing_high_freq_removal;
+vector<double> time_iris_model_calculate_h_s_histogram;
+vector<double> time_iris_model_valid_testing;
+vector<double> time_eye_position_detection;
 //vector<int64> time_eye_position_detection_high_freq_removal;
-vector<int64> time_eye_position_detection_coarse_iris_location_color;
-vector<int64> time_eye_position_detection_coarse_iris_location_cdf;
-vector<int64> time_eye_position_detection_coarse_iris_location;
-vector<int64> time_eye_position_detection_eyelid_feature_detection;
-vector<int64> time_eye_position_detection_parabola_model_fitting;
-vector<int64> time_eye_position_detection_limbus_feature_detection;
-vector<int64> time_eye_position_detection_center_calculation;
-vector<int64> time_eye_position_detection_refresh_iris_ROI_region;
-vector<int64> time_eye_position_test;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district1;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district2;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district3;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_0;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1_1;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1_2;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1_3;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1_4;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_1_5;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_2;
+vector<double> time_eye_position_detection_coarse_iris_location_color;
+vector<double> time_eye_position_detection_coarse_iris_location_color_serial;
+vector<double> time_eye_position_detection_coarse_iris_location_cdf;
+vector<double> time_eye_position_detection_coarse_iris_location_cdf_serial;
+vector<double> time_eye_position_detection_iris_region_extraction;
+vector<double> time_eye_position_detection_eyelid_feature_detection;
+vector<double> time_eye_position_detection_parabola_model_fitting;
+vector<double> time_eye_position_detection_limbus_feature_detection;
+vector<double> time_eye_position_detection_limbus_feature_detection_serial;
+vector<double> time_eye_position_detection_center_calculation;
+vector<double> time_eye_position_detection_refresh_iris_min_area_region;
+vector<double> time_eye_position_detection_refresh_min_area_region;
+vector<double> time_eye_position_detection_refresh_iris_ROI_region;
+vector<double> time_eye_position_test;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district1;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district2;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district3;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_0;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_1;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_1_1;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_1_2;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_1_3;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_1_4;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_1_5;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_2;
 //vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_2_core;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_3;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_3_1;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_3_2;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_3_3;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_3_4;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_4;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_5;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district4_local_sum;
-vector<int64> time_eye_position_detection_eyelid_feature_detection_district5;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_3;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_3_1;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_3_2;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_3_3;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_3_4;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_4;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_5;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district4_local_sum;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district5;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district5_core;
+vector<double> time_eye_position_detection_eyelid_feature_detection_district5_merge;
 
 /*Eye Gaze Testing*/
 int testNumOfPts = 16;
@@ -438,8 +446,8 @@ inline void Parallel_MinMax_Process1(const Mat &src1, double &min_1, double &max
 			}
 		}
 
-		delete min_val_cand;
-		delete max_val_cand;
+		delete [] min_val_cand;
+		delete [] max_val_cand;
 	}else {
 		minMaxLoc(src1, &min_1, &max_1, NULL, NULL);
 	}
@@ -486,10 +494,10 @@ inline void Parallel_MinMax_Process2(const Mat &src1, const Mat&src2, double &mi
 				max_2 = max_val_cand2[i];
 			}
 		}
-		delete min_val_cand1;
-		delete max_val_cand1;
-		delete min_val_cand2;
-		delete max_val_cand2;
+		delete [] min_val_cand1;
+		delete [] max_val_cand1;
+		delete [] min_val_cand2;
+		delete [] max_val_cand2;
 	}
 	else {
 		minMaxLoc(src1, &min_1, &max_1, NULL, NULL);
@@ -549,12 +557,12 @@ inline void Parallel_MinMax_Process3(const Mat &src1, const Mat&src2, const Mat&
 				max_3 = max_val_cand3[i];
 			}
 		}
-		delete min_val_cand1;
-		delete max_val_cand1;
-		delete min_val_cand2;
-		delete max_val_cand2;
-		delete min_val_cand3;
-		delete max_val_cand3;
+		delete [] min_val_cand1;
+		delete [] max_val_cand1;
+		delete [] min_val_cand2;
+		delete [] max_val_cand2;
+		delete [] min_val_cand3;
+		delete [] max_val_cand3;
 	}
 	else {
 		minMaxLoc(src1, &min_1, &max_1, NULL, NULL);
@@ -581,6 +589,7 @@ inline void Parallel_MinMax_Process3_ver2(const Mat3b &src, Mat3b &out, const Ma
 	/*FIND MAX PIXEL VALUE*/
 	cv::parallel_for_(cv::Range(0, remain_threads), Parallel_process3_find_min_max_arr(src1, src2, src3, min_val_cand1, max_val_cand1, min_val_cand2, max_val_cand2, min_val_cand3, max_val_cand3, remain_threads));
 
+	//double time_start1 = getTickCount();
 	for (int i = 0; i < remain_threads; ++i) {
 		if (MIN_b > min_val_cand1[i]) {
 			MIN_b = min_val_cand1[i];
@@ -601,13 +610,14 @@ inline void Parallel_MinMax_Process3_ver2(const Mat3b &src, Mat3b &out, const Ma
 			MAX_r = max_val_cand3[i];
 		}
 	}
+	//std::cout << "white_serial = " << (getTickCount() - time_start1) / getTickFrequency() << std::endl;
 
-	delete min_val_cand1;
-	delete max_val_cand1;
-	delete min_val_cand2;
-	delete max_val_cand2;
-	delete min_val_cand3;
-	delete max_val_cand3;
+	delete [] min_val_cand1;
+	delete [] max_val_cand1;
+	delete [] min_val_cand2;
+	delete [] max_val_cand2;
+	delete [] min_val_cand3;
+	delete [] max_val_cand3;
 
 	//std::cout << "=================Parallel : ===============" << std::endl;
 	//std::cout << "min_b = " << MIN_b << ", max_b = " << MAX_b << std::endl;
@@ -1413,9 +1423,9 @@ inline void CenterCalculatUsingMomentParallel(const Mat &Src_contours, int &posX
 	posX = dM10 / dM00;
 	posY = dM01 / dM00;
 
-	delete m10_array;
-	delete m01_array;
-	delete m00_array;
+	delete [] m10_array;
+	delete [] m01_array;
+	delete [] m00_array;
 }
 
 inline void CenterCalculatUsingMomentParallel(const vector<Point> &Src_contours, int &posX, int &posY, const int thread_num) {
@@ -1472,11 +1482,11 @@ inline void CenterCalculatUsingMomentParallel(const vector<Point> &Src_contours,
 	posX = dM10 / dM00;
 	posY = dM01 / dM00;
 
-	delete m10_array;
-	delete m01_array;
-	delete m00_array;
-	delete start_loc;
-	delete end_loc;
+	delete [] m10_array;
+	delete [] m01_array;
+	delete [] m00_array;
+	delete [] start_loc;
+	delete [] end_loc;
 }
 
 inline bool MinimalIrisColorProcess(const Mat &Src , Point &eyeCoarseCenter , const int &size_gaussian 
@@ -1491,13 +1501,14 @@ inline bool MinimalIrisColorProcess(const Mat &Src , Point &eyeCoarseCenter , co
 	//threshold(GrayGaussian, GrayOtsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 	ParallelOtsu(GrayGaussian, GrayOtsu, cv::THRESH_BINARY, thread_num);
 
-	
+	double time_start1 = getTickCount();
 	if(!FindMAXConnextedComponent(GrayOtsu , IrisContoursPoints , IrisContour)){
 		getIrisContourPoints = false;
 		return false;
 	}
 
 	irisContour_size = countNonZero(IrisContour);
+	time_eye_position_detection_coarse_iris_location_color_serial.push_back(getTickCount() - time_start1);
 	//CenterCalculatUsingMoment(IrisContoursPoints , eyeCoarseCenter.x , eyeCoarseCenter.y);
 	//std::cout << "OpenCV memoent = (" << eyeCoarseCenter.x << ", " << eyeCoarseCenter.y << ")" << std::endl;
 
@@ -2026,10 +2037,10 @@ inline void X_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &
 
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_threBinary(ABS_Grad_X, Grad_X_Thresh_Pop, thre_populationGray, thread_num));
 	//threshold(ABS_Grad_X, Grad_X_Thresh_Pop, thre_populationGray, 255,THRESH_BINARY);
-	delete hist;
+	delete [] hist;
 	//delete cu_hist;
-	delete min_val_cand;
-	delete max_val_cand;
+	delete [] min_val_cand;
+	delete [] max_val_cand;
 }
 
 inline void Y_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &Grad_Y_Thresh_Pop){
@@ -2089,9 +2100,9 @@ inline void Y_DirectedGradientGeneration(const Mat &Gray_openingGaussian , Mat &
 
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_threBinary(ABS_Grad_Y, Grad_Y_Thresh_Pop, thre_populationGray, thread_num));
 	//threshold(ABS_Grad_Y, Grad_Y_Thresh_Pop, thre_populationGray, 255,THRESH_BINARY);	
-	delete hist;
-	delete min_val_cand;
-	delete max_val_cand;
+	delete [] hist;
+	delete [] min_val_cand;
+	delete [] max_val_cand;
 }
 
 //inline void ConvexHullProcedureFindBounding(const Size &imageSize , const vector<vector<Point> >gradsPts , int &boundary_return
@@ -2610,6 +2621,7 @@ inline bool GeneralProjectionFunction_Ver2(const Mat &Src , Point &eyeCoarseCent
 																 , vector<int> &leftPeakDeriv_vx , vector<int> &rightPeakDeriv_vx
 																 , vector<float> &vec_Deriv_GPFv_x)
 {
+	double time_start1 = getTickCount();
 	Mat IPFh_y;	
 	Mat IPFv_x;
 	Mat VPFh_y;
@@ -2723,7 +2735,7 @@ inline bool GeneralProjectionFunction_Ver2(const Mat &Src , Point &eyeCoarseCent
 	//FindPeaks	
 	FindPeaks_ver2(vec_Deriv_GPFv_x , find_vx_Derivpeak , 100);
 
-
+	time_eye_position_detection_iris_region_extraction.push_back(getTickCount() - time_start1);
 	//==========================Get Coarse Eye Region Mask============================/	
 	for(int i=0;i<find_vx_Derivpeak.size();++i){
 		if(find_vx_Derivpeak[i]<eyeCoarseCenter.x){
@@ -2758,7 +2770,7 @@ inline bool GeneralProjectionFunction_Ver2(const Mat &Src , Point &eyeCoarseCent
 			iris_x_regionLeft = vx_LeftDeriv_peakDataAndPos[leftPeakDeriv_vx.size()-1].number;		
 		}	
 
-		delete vx_LeftDeriv_peakDataAndPos;
+		delete [] vx_LeftDeriv_peakDataAndPos;
 	}
 
 
@@ -2789,10 +2801,10 @@ inline bool GeneralProjectionFunction_Ver2(const Mat &Src , Point &eyeCoarseCent
 			iris_x_regionRight = vx_RightDeriv_peakDataAndPos[rightPeakDeriv_vx.size()-1].number;	
 		}
 
-		delete vx_RightDeriv_peakDataAndPos;
+		delete [] vx_RightDeriv_peakDataAndPos;
 	}	
 
-	delete hy_Deriv_peakDataAndPos;
+	delete [] hy_Deriv_peakDataAndPos;
 	return true;
 }
 
@@ -2820,12 +2832,14 @@ inline bool InitialCoarseCenterCDF(const Mat &Src , Point &irisCoarseCenter){
 
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_hist_and_cumulative_pure(Src, cu_hist, mtx, thread_num));
 
+	double time_serial_start1 = getTickCount();
 	for (int k = 0; k < 256; ++k) {
 		if (cu_hist[k] / (double)total_size > 0.05) {
 			thresh_cdf = k;
 			break;
 		}
 	}
+	double time_serial_end1 = getTickCount();
 
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_apply_threshold(Src, Src_Binary, thresh_cdf-1, cv::THRESH_BINARY_INV, thread_num));
 
@@ -2857,11 +2871,12 @@ inline bool InitialCoarseCenterCDF(const Mat &Src , Point &irisCoarseCenter){
 
 	//std::cout << "thresh_cdf_serial = " << thresh_cdf_serial << std::endl;
 	
-	//double time_1 = getTickCount();
+	double time_serial_start2 = getTickCount();
 	if(!FindMAXConnextedComponent(Src_Binary , IrisContoursPoints , IrisContour)){
 		return false;
 	}
-	//double time_2 = getTickCount();
+	double time_serial_end2 = getTickCount();
+	time_eye_position_detection_coarse_iris_location_cdf_serial.push_back((time_serial_end2 - time_serial_start2)+(time_serial_end1 - time_serial_start1));
 	//std::cout << "FindMAXConnectedComponent takes time = " << (double)(time_2 - time_1) / getTickFrequency() << std::endl;
 	//CenterCalculatUsingMoment(IrisContoursPoints , irisCoarseCenter.x , irisCoarseCenter.y);
 	//std::cout << "OpenCV memoent = (" << irisCoarseCenter.x << ", " << irisCoarseCenter.y << ")" << std::endl;
@@ -3129,9 +3144,6 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	double time_end_coarse_center_color = 0;
 
 	time_start_in_function = getTickCount();
-
-
-
 	if(caculateIris_Mask_done && eyeCoarseCenterLast.y<9/16.f*FRAMEH){
 		time_start_coarse_center_color = getTickCount();
 		getEyeCoarseCenter = MinimalIrisColorProcess(Iris_Mask , eyeCoarseCenter , size_gaussian 
@@ -3145,7 +3157,7 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 		time_end_coarse_center_cdf = getTickCount();
 		time_eye_position_detection_coarse_iris_location_cdf.push_back(time_end_coarse_center_cdf - time_start_coarse_center_cdf);
 	}
-
+	time_end_in_function = getTickCount();
 
 	if(getEyeCoarseCenter){		
 		getIrisContour_byIntensity = GeneralProjectionFunction_Ver2(Gray_openingGaussian , eyeCoarseCenter
@@ -3169,9 +3181,6 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 		eyeCoarseCenterBigMotion = true;
 	}
 	eyeCoarseCenterLast = eyeCoarseCenter;
-
-	time_end_in_function = getTickCount();
-	time_eye_position_detection_coarse_iris_location.push_back(time_end_in_function - time_start_in_function);
 	//-------------------Determine Whether EyeCoarseCenter in Extreme Region---------------------//		
 	DetermineWhetherEyeCoarseCenterInExtremeRegion(eyeCoarseCenter
 																					, extremeRight
@@ -3295,11 +3304,21 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	}else{
 		eyeRegionCenter_y_forEyelidDetection = (iris_y_regionUp+iris_y_regionDown)/2.f;
 	}
+	time_stamp5 = getTickCount();
 	
+	//EyelidFeatureDetection(Gray_openingGaussian , feature_point_upperEyelid ,feature_point_lowerEyelid
+	//									, eyeRegionCenter_y_forEyelidDetection , ValleyPeakField);	
+
+	ParalleEyelidFeatureDetection(Gray_openingGaussian, feature_point_upperEyelid, feature_point_lowerEyelid
+		, eyeRegionCenter_y_forEyelidDetection, ValleyPeakField, thread_num
+		, time_eye_position_detection_eyelid_feature_detection_district5_core
+		, time_eye_position_detection_eyelid_feature_detection_district5_merge);
 	
-	EyelidFeatureDetection(Gray_openingGaussian , feature_point_upperEyelid ,feature_point_lowerEyelid
-										, frame_number , eyeRegionCenter_y_forEyelidDetection , ValleyPeakField);	
-	
+
+	//ParalleEyelidFeatureDetectionLock(Gray_openingGaussian, feature_point_upperEyelid, feature_point_lowerEyelid
+	//	, eyeRegionCenter_y_forEyelidDetection, ValleyPeakField, thread_num
+	//	, time_eye_position_detection_eyelid_feature_detection_district5_core
+	//	, time_eye_position_detection_eyelid_feature_detection_district5_merge);
 
 	time_end_in_function = getTickCount();
 	time_eye_position_detection_eyelid_feature_detection.push_back(time_end_in_function - time_start_in_function);
@@ -3309,7 +3328,7 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	time_eye_position_detection_eyelid_feature_detection_district2.push_back(time_stamp2 - time_stamp1);
 	time_eye_position_detection_eyelid_feature_detection_district3.push_back(time_stamp3 - time_stamp2);
 	time_eye_position_detection_eyelid_feature_detection_district4.push_back(time_stamp4 - time_stamp3);
-	time_eye_position_detection_eyelid_feature_detection_district5.push_back(time_end_in_function - time_stamp4);
+	time_eye_position_detection_eyelid_feature_detection_district5.push_back(time_end_in_function - time_stamp5);
 	//-------------------Parabola Model Fitting---------------------//		
 	vector<Point> upper_parabola_inlier;
 	vector<Point> upper_parabola_outlier;
@@ -3373,8 +3392,6 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	int final_irisRegion_Left;
 	int final_irisRegion_Right;
 
-	time_start_in_function = getTickCount();
-	
 	final_irisRegion_Left = iris_x_regionLeft;
 	final_irisRegion_Right = iris_x_regionRight;
 
@@ -3395,9 +3412,10 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 																, eyeCoarseCenter);		
 	
 
-		
-	LimbusFeatureDetection(Gray_openingGaussian, feature_point_Limbus , frame_number,number_feature_line
-										, limbusDetection_startPoint, start_point_use_coarse_pupil_detection , Iris_Mask_forLimbus);	
+	time_start_in_function = getTickCount();
+	LimbusFeatureDetection(Gray_openingGaussian, feature_point_Limbus , frame_number, number_feature_line
+										, limbusDetection_startPoint, start_point_use_coarse_pupil_detection , Iris_Mask_forLimbus
+										, time_eye_position_detection_limbus_feature_detection_serial);	
 
 	
 	
@@ -3445,6 +3463,7 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	//std::cout << "-------------------Start------------------------" << std::endl;
 	//CenterCalculatUsingMoment(MomentCenterByGrayLevel , eyeRefinedIrisCenter.x , eyeRefinedIrisCenter.y);
 	//std::cout << "OpenCV memoent = (" << eyeRefinedIrisCenter.x << ", " << eyeRefinedIrisCenter.y << ")" << std::endl;
+
 	CenterCalculatUsingMomentParallel(MomentCenterByGrayLevel, eyeRefinedIrisCenter.x, eyeRefinedIrisCenter.y, thread_num);
 	//std::cout << "CenterCalculatUsingMomentParallel memoent = (" << eyeRefinedIrisCenter.x << ", " << eyeRefinedIrisCenter.y << ")" << std::endl;
 	//std::cout << "-------------------End-----------------------" << std::endl;
@@ -3513,7 +3532,6 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 			if(!bigmotionIrisCenter && getEyelidRegion){			
 				if(EyelidRegion.at<uchar>(eyeRefinedIrisCenter.y , eyeRefinedIrisCenter.x)==255){				
 					//Get Rotated Rect of minArea of Object(Convex Hill of Iris)		
-					
 					time_start_in_function = getTickCount();
 
 					Mat testROI = Frame_wh.clone();
@@ -3533,8 +3551,7 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 						
 					//Mat Refined_LimnusFtPtsConvexHull_find = Refined_LimnusFtPtsConvexHull_Processed.clone();					
 					findContours( Refined_LimnusFtPtsConvexHull_Processed, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, Point(0, 0) );
-													
-
+					
 					if(contours.size()!=0){
 						for(int i=0;i<contours.size();++i){		
 							if(contours[i].size()>max_contourSize){
@@ -3566,15 +3583,18 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 						rotatedMatrix = getRotationMatrix2D(minRect.center, angle, 1.0);
 						// perform the affine transformation						
 						warpAffine(Frame_wh, rotated, rotatedMatrix ,  Frame_wh.size(), INTER_CUBIC);
-						// crop the resulting image													
+						// crop the resulting image	
+
+						double time_start1 = getTickCount();
 						Iris_ROI_forModel = Mat::zeros(rect_size , CV_8U);
 						getRectSubPix(rotated, rect_size, minRect.center, Iris_ROI_forModel);
+						time_eye_position_detection_refresh_iris_ROI_region.push_back(getTickCount() - time_start1);
 											
 						gotIrisROI = true;						
 					}
 
 					time_end_in_function = getTickCount();
-					time_eye_position_detection_refresh_iris_ROI_region.push_back(time_end_in_function - time_start_in_function);
+					time_eye_position_detection_refresh_min_area_region.push_back(time_end_in_function - time_start_in_function);
 
 					//std::cout << "getIrisROI = " << gotIrisROI << std::endl;
 					if (!(contours.size() == 0 || max_contourSize < 50)) {
@@ -3649,8 +3669,8 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	feature_point_upperEyelid.clear();
 	feature_point_lowerEyelid.clear();		
 
-	delete lower_parabola_param;	
-	delete upper_parabola_param;	
+	delete [] lower_parabola_param;	
+	delete [] upper_parabola_param;	
 	//if(printDebug){
 	//	printf("\n 11\n");
 	//}
@@ -3691,12 +3711,15 @@ inline void ScleraModelGeneration(const Mat &ScleraROI , Mat &Sclera_hist, int c
 inline void IrisModelGeneration(const Mat &IrisROI , Mat &Iris_hist , int channels[] , int histSize[] , const float *ranges[]){    
 	Mat IrisROI_HSV;
 
+	double time_start = getTickCount();
+
 	cvtColor(IrisROI, IrisROI_HSV, COLOR_BGR2HSV);
 	calcHist( &IrisROI_HSV, 1, channels, Mat(), // do not use mask
 				 Iris_hist, 2, histSize, ranges,
 				 true, // the histogram is uniform
 				 false );
 
+	time_iris_model_calculate_h_s_histogram.push_back(getTickCount() - time_start);
 
 	//-------------------Show Histogram Info------------------------//
 	//std::cout << "IrisROI.rows = " << IrisROI.rows << std::endl;
@@ -3863,7 +3886,7 @@ inline bool HistoModelValidTesting(const Mat &EyeImageForTestingIrisHistModel , 
 	int pixel_in_others = 1;
 	const int size_gaussian = 61;
 
-
+	double time_start = getTickCount();
 	//Use the Iris_hist Model to Cauclate Iris Mask for Testing
 	CalcBackProjSelfDefined(EyeImageForTestingIrisHistModel , Iris_hist , Iris_Mask , histSize , Iris_PerBin);	
 	//GaussianBlur( Iris_Mask, Iris_Mask_Gau, Size(size_gaussian,size_gaussian) , 0);			
@@ -3872,40 +3895,48 @@ inline bool HistoModelValidTesting(const Mat &EyeImageForTestingIrisHistModel , 
 	ParallelOtsu(Iris_Mask_Gau, Iris_Mask_Otsu, cv::THRESH_BINARY, thread_num);
 
 	//Caculate the Iris rate = pixel_in_iris/pixil_int_others
-	for(int i=0;i<Iris_Mask_Otsu.rows;++i){
-		for(int j=0;j<Iris_Mask_Otsu.cols;++j){
-			if(Iris_Mask_Otsu.at<uchar>(i , j)==255){
-				if(IrisRegionValidTesting.at<uchar>(i , j) == 255){
-					++pixel_in_iris;
-				}else{
-					++pixel_in_others;
-				}
-			}
-		}
-	}
-	irisRate = pixel_in_iris/(float)pixel_in_others;
-	
+	//for(int i=0;i<Iris_Mask_Otsu.rows;++i){
+	//	for(int j=0;j<Iris_Mask_Otsu.cols;++j){
+	//		if(Iris_Mask_Otsu.at<uchar>(i , j)==255){
+	//			if(IrisRegionValidTesting.at<uchar>(i , j) == 255){
+	//				++pixel_in_iris;
+	//			}else{
+	//				++pixel_in_others;
+	//			}
+	//		}
+	//	}
+	//}
+	//irisRate = pixel_in_iris/(float)pixel_in_others;
 
+	//std::cout << std::endl << "serial, pixel_in_iris = " << pixel_in_iris << std::endl;
+	//std::cout << std::endl << "serial, pixel_in_others = " << pixel_in_others << std::endl;
+	//std::cout << std::endl << "serial, irisRate = " << irisRate << std::endl;
+
+	ParallelCalcIrisRate(Iris_Mask_Otsu, IrisRegionValidTesting, irisRate, pixel_in_iris, pixel_in_others, thread_num);
+	//std::cout << std::endl << "parallel, irisRate = " << irisRate << std::endl;
+	//waitKey(0);
+
+	time_iris_model_valid_testing.push_back(getTickCount() - time_start);
 
 	if(irisRate>irisRate_max && irisRate>iris_colorModelValidTestingIrisRate_initial){
 		if(pixel_in_others==1){			
 			if(irisRate>iris_colorModelIrisRate_pixelInOthersOne*irisRegion_size){				
 				irisRate_max = irisRate;
 				validHistModel = true;
-				imshow("IrisRegionValidTesting" , IrisRegionValidTesting);
+/*				imshow("IrisRegionValidTesting" , IrisRegionValidTesting);
 				imshow("Iris_Mask_OtsuInValidTesting" , Iris_Mask_Otsu);
 				imshow("Iris_MaskInValidTesting" , Iris_Mask);
-				imshow("EyeImageForTestingIrisHistModel" , EyeImageForTestingIrisHistModel);						
+				imshow("EyeImageForTestingIrisHistModel" , EyeImageForTestingIrisHistModel);*/						
 			}else{
 				validHistModel = false;
 			}
 		}else{			
 			irisRate_max = irisRate;
 			validHistModel = true;
-			imshow("IrisRegionValidTesting" , IrisRegionValidTesting);
+/*			imshow("IrisRegionValidTesting" , IrisRegionValidTesting);
 			imshow("Iris_Mask_OtsuInValidTesting" , Iris_Mask_Otsu);
 			imshow("Iris_MaskInValidTesting" , Iris_Mask);
-			imshow("EyeImageForTestingIrisHistModel" , EyeImageForTestingIrisHistModel);				
+			imshow("EyeImageForTestingIrisHistModel" , EyeImageForTestingIrisHistModel);	*/			
 		}
 	}else{		
 		validHistModel = false;
@@ -5467,10 +5498,10 @@ int main(int argc , char *argv[]){
 		//===========Input/Output File Set==========/
 				
 		namedWindow("EyePosition_CenterResult" , cv::WINDOW_AUTOSIZE);		
-		namedWindow("Scene" , cv::WINDOW_FULLSCREEN);
-		resizeWindow("Scene",MonitorW,MonitorH);//col , row
-		setWindowProperty("Scene", cv::WND_PROP_OPENGL, cv::WINDOW_FULLSCREEN);
-		moveWindow("Scene" , 0 , 0);
+		//namedWindow("Scene" , cv::WINDOW_FULLSCREEN);
+		//resizeWindow("Scene",MonitorW,MonitorH);//col , row
+		//setWindowProperty("Scene", cv::WND_PROP_OPENGL, cv::WINDOW_FULLSCREEN);
+		//moveWindow("Scene" , 0 , 0);
 	
 		//===========Write Video Out File Set==========/		
 		char wirteOutCalVideoFileName[MAX_WORD_LEN];		
@@ -5641,7 +5672,7 @@ int main(int argc , char *argv[]){
 
 				//cvtColor(Frame_wh , Frame_Gray , COLOR_BGRA2GRAY);
 				//cv::parallel_for_(cv::Range(0, thread_num), Parallel_cvtColor(Frame_wh, Frame_Gray, COLOR_BGRA2GRAY, thread_num));
-				cv::parallel_for_(cv::Range(0, thread_num), Parallel_cvtColor_my_ver(Frame_wh, Frame_Gray, COLOR_BGRA2GRAY, thread_num));
+				cv::parallel_for_(cv::Range(0, thread_num), Parallel_cvtColor_my_ver(Frame_wh, Frame_Gray, thread_num));
 
 				time_end = getTickCount();
 				time_image_preprocessing_cvt_color.push_back(time_end - time_start);
@@ -5664,7 +5695,6 @@ int main(int argc , char *argv[]){
 					EyeImageForTestingIrisHistModel = Frame_wh.clone();
 				}
 
-				time_start = getTickCount();
 				IrisModelHandeling(gotIrisROI , irisDynamicMaskGeneration , readIrisModel
 											  , writeIrisModel , IrisHisto_output_fileName 
 											  , Iris_ROI_forModel  ,  Frame_wh , Iris_hist , Iris_Mask
@@ -5677,8 +5707,6 @@ int main(int argc , char *argv[]){
 					iris_maskModel_refreshFrame = iris_maskModel_refreshFrame_AfterGet;//Not to find hist model hard
 				}
 
-				time_end = getTickCount();
-				time_iris_model_handling.push_back(time_end - time_start);
 				
 				//============Eye Position Detection============/					
 				bool bigmotionIrisCenter = false;
@@ -5941,13 +5969,15 @@ int main(int argc , char *argv[]){
 				(time_image_preprocessing_cvt_color.size()    >0? time_image_preprocessing_cvt_color.back():0)                                +
 				(time_image_preprocessing_hist_equal.size()   >0? time_image_preprocessing_hist_equal.back():0)                               +
 				(time_image_preprocessing_high_freq_removal.size()>0 ? time_image_preprocessing_high_freq_removal.back() : 0)                 +
-				(time_iris_model_handling.size()   >0 ? time_iris_model_handling.back():0)                                                    +
-				(time_eye_position_detection_coarse_iris_location.size()>0?time_eye_position_detection_coarse_iris_location.back():0)         +
+				(caculateIris_Mask_done? (time_eye_position_detection_coarse_iris_location_color.size()>0? time_eye_position_detection_coarse_iris_location_color.back():0) : time_eye_position_detection_coarse_iris_location_cdf.size()>0? time_eye_position_detection_coarse_iris_location_cdf.back():0) + 
+				(time_eye_position_detection_iris_region_extraction.size()>0 ? time_eye_position_detection_iris_region_extraction.back() : 0) +
+				(time_iris_model_calculate_h_s_histogram.size()   >0 ? time_iris_model_calculate_h_s_histogram.back():0)                      +
+				(time_iris_model_valid_testing.size()   >0 ? time_iris_model_valid_testing.back() : 0)                                        +
 				(time_eye_position_detection_eyelid_feature_detection.size()>0?time_eye_position_detection_eyelid_feature_detection.back():0) +
 				(time_eye_position_detection_parabola_model_fitting.size()>0?time_eye_position_detection_parabola_model_fitting.back():0)     +
 				(time_eye_position_detection_limbus_feature_detection.size()>0?time_eye_position_detection_limbus_feature_detection.back():0) +
 				(time_eye_position_detection_center_calculation.size()>0?time_eye_position_detection_center_calculation.back():0)             +
-				(time_eye_position_detection_refresh_iris_ROI_region.size()>0?time_eye_position_detection_refresh_iris_ROI_region.back():0)
+				(time_eye_position_detection_refresh_min_area_region.size()>0? time_eye_position_detection_refresh_min_area_region.back():0)
 				) / getTickFrequency();
 			}else {
 				t = (double)(getTickCount() - t +
@@ -6004,7 +6034,7 @@ int main(int argc , char *argv[]){
 			
 			if(showDetail){
 				imshow("Origin",Frame);	
-				imshow("Scene",Scene_image);		
+				//imshow("Scene",Scene_image);		
 				imshow("White_Balence",Frame_wh);										
 			}
 			imshow("Input_Frame", Frame);
@@ -6015,7 +6045,7 @@ int main(int argc , char *argv[]){
 		/*	}else if(eyeGazeTestProcedure){
 				imshow("Scene" , Scene_gazetest);*/
 			}else{				
-				imshow("Scene" , Scene_image);
+				//imshow("Scene" , Scene_image);
 			}
 			if(setEyeCornerAndEyePosReady){
 				//imshow("Gray", Frame_Gray);
@@ -6214,35 +6244,35 @@ int main(int argc , char *argv[]){
 				avg_time = (avg_time / getTickFrequency()) / time_image_preprocessing_high_freq_removal.size();
 				file_time_fpsOut << "time_image_preprocessing_high_freq_removal  = " << avg_time << endl;
 			}
-			if (time_iris_model_handling.size() > 0) {
-				avg_time = std::accumulate(time_iris_model_handling.begin(), time_iris_model_handling.end(), 0);
-				avg_time = (avg_time / getTickFrequency()) / time_iris_model_handling.size();
-				file_time_fpsOut << ">> time_iris_model_handling                               = " << avg_time << endl;
-			}
-			//if (time_eye_position_detection.size() > 0) {
-			//	avg_time = std::accumulate(time_eye_position_detection.begin(), time_eye_position_detection.end(), 0);
-			//	avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection.size();
-			//	file_time_fpsOut << "time_eye_position_detection = " << avg_time << endl;
-			//}
-			if (time_eye_position_detection_coarse_iris_location.size() > 0) {
-				avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location.begin(), time_eye_position_detection_coarse_iris_location.end(), 0);
-				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location.size();
-				file_time_fpsOut << ">> time_eye_position_detection_coarse_iris_location       = " << avg_time << endl;
-			}
 			if (time_eye_position_detection_coarse_iris_location_cdf.size() > 0) {
 				avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_cdf.begin(), time_eye_position_detection_coarse_iris_location_cdf.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_cdf.size();
-				file_time_fpsOut << ">>>> time_eye_position_detection_coarse_iris_location_cdf       = " << avg_time << endl;
+				file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_cdf          = " << avg_time << endl;
 			}
 			if (time_eye_position_detection_coarse_iris_location_color.size() > 0) {
 				avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_color.begin(), time_eye_position_detection_coarse_iris_location_color.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_color.size();
-				file_time_fpsOut << ">>>> time_eye_position_detection_coarse_iris_location_color       = " << avg_time << endl;
+				file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_color        = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_coarse_iris_location_cdf_serial.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_cdf_serial.begin(), time_eye_position_detection_coarse_iris_location_cdf_serial.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_cdf_serial.size();
+				file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_cdf_serial   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_coarse_iris_location_color_serial.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_color_serial.begin(), time_eye_position_detection_coarse_iris_location_color_serial.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_color_serial.size();
+				file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_color_serial = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_iris_region_extraction.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_iris_region_extraction.begin(), time_eye_position_detection_iris_region_extraction.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_iris_region_extraction.size();
+				file_time_fpsOut << "time_eye_position_detection_iris_region_extraction            = " << avg_time << endl;
 			}
 			if (time_eye_position_detection_eyelid_feature_detection.size() > 0) {
 				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection.begin(), time_eye_position_detection_eyelid_feature_detection.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection.size();
-				file_time_fpsOut << ">> time_eye_position_detection_eyelid_feature_detection   = " << avg_time << endl;
+				file_time_fpsOut << "time_eye_position_detection_eyelid_feature_detection          = " << avg_time << endl;
 			}
 			if (time_eye_position_detection_eyelid_feature_detection_district1.size() > 0) {
 				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district1.begin(), time_eye_position_detection_eyelid_feature_detection_district1.end(), 0);
@@ -6364,6 +6394,16 @@ int main(int argc , char *argv[]){
 				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district5.size();
 				file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district5   = " << avg_time << endl;
 			}
+			if (time_eye_position_detection_eyelid_feature_detection_district5_core.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district5_core.begin(), time_eye_position_detection_eyelid_feature_detection_district5_core.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district5_core.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district5_core    = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district5_merge.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district5_merge.begin(), time_eye_position_detection_eyelid_feature_detection_district5_merge.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district5_merge.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district5_merge   = " << avg_time << endl;
+			}
 			if (time_eye_position_test.size() > 0) {
 				avg_time = std::accumulate(time_eye_position_test.begin(), time_eye_position_test.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_eye_position_test.size();
@@ -6372,22 +6412,42 @@ int main(int argc , char *argv[]){
 			if (time_eye_position_detection_parabola_model_fitting.size() > 0) {
 				avg_time = std::accumulate(time_eye_position_detection_parabola_model_fitting.begin(), time_eye_position_detection_parabola_model_fitting.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_parabola_model_fitting.size();
-				file_time_fpsOut << ">> time_eye_position_detection_parabola_model_fitting     = " << avg_time << endl;
+				file_time_fpsOut << "time_eye_position_detection_parabola_model_fitting     = " << avg_time << endl;
 			}
 			if (time_eye_position_detection_limbus_feature_detection.size() > 0) {
 				avg_time = std::accumulate(time_eye_position_detection_limbus_feature_detection.begin(), time_eye_position_detection_limbus_feature_detection.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_limbus_feature_detection.size();
-				file_time_fpsOut << ">> time_eye_position_detection_limbus_feature_detection   = " << avg_time << endl;
+				file_time_fpsOut << "time_eye_position_detection_limbus_feature_detection   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_limbus_feature_detection_serial.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_limbus_feature_detection_serial.begin(), time_eye_position_detection_limbus_feature_detection_serial.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_limbus_feature_detection_serial.size();
+				file_time_fpsOut << ">> time_eye_position_detection_limbus_feature_detection_serial   = " << avg_time << endl;
 			}
 			if (time_eye_position_detection_center_calculation.size() > 0) {
 				avg_time = std::accumulate(time_eye_position_detection_center_calculation.begin(), time_eye_position_detection_center_calculation.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_center_calculation.size();
-				file_time_fpsOut << ">> time_eye_position_detection_center_calculation         = " << avg_time << endl;
+				file_time_fpsOut << "time_eye_position_detection_center_calculation         = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_refresh_min_area_region.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_refresh_min_area_region.begin(), time_eye_position_detection_refresh_min_area_region.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_refresh_min_area_region.size();
+				file_time_fpsOut << "time_eye_position_detection_refresh_min_area_region    = " << avg_time << endl;
 			}
 			if (time_eye_position_detection_refresh_iris_ROI_region.size() > 0) {
 				avg_time = std::accumulate(time_eye_position_detection_refresh_iris_ROI_region.begin(), time_eye_position_detection_refresh_iris_ROI_region.end(), 0);
 				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_refresh_iris_ROI_region.size();
 				file_time_fpsOut << ">> time_eye_position_detection_refresh_iris_ROI_region    = " << avg_time << endl;
+			}
+			if (time_iris_model_calculate_h_s_histogram.size() > 0) {
+				avg_time = std::accumulate(time_iris_model_calculate_h_s_histogram.begin(), time_iris_model_calculate_h_s_histogram.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_iris_model_calculate_h_s_histogram.size();
+				file_time_fpsOut << "time_iris_model_calculate_h_s_histogram               = " << avg_time << endl;
+			}
+			if (time_iris_model_valid_testing.size() > 0) {
+				avg_time = std::accumulate(time_iris_model_valid_testing.begin(), time_iris_model_valid_testing.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_iris_model_valid_testing.size();
+				file_time_fpsOut << "time_iris_model_valid_testing                         = " << avg_time << endl;
 			}
 		}
 

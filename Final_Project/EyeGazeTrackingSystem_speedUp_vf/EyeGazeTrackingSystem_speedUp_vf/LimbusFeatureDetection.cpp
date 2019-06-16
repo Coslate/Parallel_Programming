@@ -147,7 +147,7 @@ inline void CheckError1(const int frame_num , const Mat &in , const vector<Point
 
 
 void LimbusFeatureDetection(const Mat &in , vector<Point> &feature , const int frame_number , const int num_per_line 
-	, Point & start_point , const bool setup_eye_start_point_man , const Mat &Iris_Mask)
+	, Point & start_point , const bool setup_eye_start_point_man , const Mat &Iris_Mask, vector<double> &time_eye_position_detection_limbus_feature_detection_serial)
 {		 		
 	if(!setup_eye_start_point_man){
 		start_point.x = in.cols/2;
@@ -350,10 +350,11 @@ void LimbusFeatureDetection(const Mat &in , vector<Point> &feature , const int f
 					}
 				}					
 			}//end while		
-			delete check_line_halting;		
-			delete count_line_halting;		
+			delete [] check_line_halting;		
+			delete [] count_line_halting;		
 		}//end for each feature 
 		
+		double time_start1 = getTickCount();
 	
 		for(int i=0;i<feature_pre_filter.size();++i){
 			sum_x+=feature_pre_filter.at(i).x;
@@ -378,11 +379,44 @@ void LimbusFeatureDetection(const Mat &in , vector<Point> &feature , const int f
 			break;
 		}
 
-		delete	check_line_halting_part1;
-		delete	check_line_halting_part2;
-		delete  count_line_halting_part1;
-		delete	count_line_halting_part2;	
+		delete	[] check_line_halting_part1;
+		delete	[] check_line_halting_part2;
+		delete  [] count_line_halting_part1;
+		delete	[] count_line_halting_part2;	
 
+		time_eye_position_detection_limbus_feature_detection_serial.push_back(getTickCount() - time_start1);
 	}//end while	
 }
+
+class Parallel_LimbusFeatureDetection : public cv::ParallelLoopBody
+{
+
+private:
+	const Mat &Src;
+	const Mat &Sclera_mask;
+	vector<Point> *upperEyelid_feture_arr;
+	vector<Point> *lowerEyelid_feture_arr;
+	int diff;
+	int *start_loc;
+	int *end_loc;
+	const int eyeRegionCenter_y;
+public:
+	Parallel_LimbusFeatureDetection(const Mat &Src, vector<Point> *upperEyelid_feture_arr, vector<Point> *lowerEyelid_feture_arr,
+		int *start_loc, int *end_loc, const int &eyeRegionCenter_y, const Mat &Sclera_mask, int diffVal)
+		: Src(Src), Sclera_mask(Sclera_mask), upperEyelid_feture_arr(upperEyelid_feture_arr), lowerEyelid_feture_arr(lowerEyelid_feture_arr)
+		, start_loc(start_loc), end_loc(end_loc), eyeRegionCenter_y(eyeRegionCenter_y), diff(diffVal) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+
+		//#pragma omp parallel for		
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+
+		}//end for i=range.start
+	}
+};
+
 

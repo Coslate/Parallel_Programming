@@ -1027,16 +1027,13 @@ class Parallel_cvtColor_my_ver : public cv::ParallelLoopBody
 private:
 	const cv::Mat3b &img;
 	cv::Mat &retVal;
-	int type;
 	int diff;
 public:
-	Parallel_cvtColor_my_ver(const cv::Mat3b &inputImgage, cv::Mat &retVal, int type, int diffVal)
-		: img(inputImgage), retVal(retVal), diff(diffVal), type(type) {}
+	Parallel_cvtColor_my_ver(const cv::Mat3b &inputImgage, cv::Mat &retVal, int diffVal)
+		: img(inputImgage), retVal(retVal), diff(diffVal) {}
 
 	virtual void operator()(const cv::Range& range) const
-	{
-
-		//#pragma omp parallel for		
+	{	
 		for (int i = range.start; i < range.end; ++i)
 		{
 			/* divide image in 'diff' number
@@ -1052,12 +1049,6 @@ public:
 			cv::Mat_<uchar>::iterator itout = out.begin<uchar>();
 
 			for (; it != itend; ++it, ++itout) {
-				//Vec3b vi = *it;
-
-				//double R = vi.val[2];
-				//double G = vi.val[1];
-				//double B = vi.val[0];
-
 				*itout = 0.299*(*it).val[2]+0.587*(*it).val[1]+0.114*(*it).val[0];
 			}
 		}
@@ -1085,8 +1076,8 @@ inline void ParallelOtsu(const cv::Mat &inputImgage, cv::Mat& outImage, int type
 
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_apply_threshold(inputImgage, outImage, threshold_otsu, type, thread_num));
 
-	delete var_cand;
-	delete threshold_cand;
+	delete [] var_cand;
+	delete [] threshold_cand;
 }
 
 inline void ParallelHistEqual(const cv::Mat &inputImgage, cv::Mat& outImage, int thread_num) {
@@ -1096,7 +1087,7 @@ inline void ParallelHistEqual(const cv::Mat &inputImgage, cv::Mat& outImage, int
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_hist_and_cumulative_pure(inputImgage, cu_hist, mtx, thread_num));
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_hist_equalization(inputImgage, outImage, cu_hist, inputImgage.rows*inputImgage.cols, mtx, thread_num));
 
-	delete cu_hist;
+	delete [] cu_hist;
 }
 
 void SerialHist(cv::Mat inputImgage, cv::Mat& outImage, int *hist) {
@@ -1177,5 +1168,79 @@ public:
 		}
 	}
 };
+
+class Parallel_process_calculate_iris_rate: public cv::ParallelLoopBody
+{
+
+private:
+	const Mat &model_mask;
+	const Mat &model_intensity;
+	int *pixel_in_iris;
+	int *pixel_in_others;
+	int diff;
+
+
+public:
+	Parallel_process_calculate_iris_rate(const cv::Mat &model_mask, const cv::Mat &model_intensity, int *pixel_in_iris, int *pixel_in_others, int diffVal)
+		: model_mask(model_mask), model_intensity(model_intensity), diff(diffVal), 
+		pixel_in_iris(pixel_in_iris), pixel_in_others(pixel_in_others) {}
+
+	virtual void operator()(const cv::Range& range) const
+	{
+		for (int i = range.start; i < range.end; ++i)
+		{
+			/* divide image in 'diff' number
+			of parts and process simultaneously */
+			cv::Mat model_in(model_mask, cv::Rect(0, (model_mask.rows / diff)*i,
+				model_mask.cols, model_mask.rows / diff));
+			cv::Mat module_intensity_in(model_intensity, cv::Rect(0, (model_intensity.rows / diff)*i,
+				model_intensity.cols, model_intensity.rows / diff));
+			int loc_pixel_in_iris = 0;
+			int loc_pixel_in_others = 0;
+
+			cv::Mat_<uchar>::iterator it = model_in.begin<uchar>();
+			cv::Mat_<uchar>::const_iterator itend = model_in.end<uchar>();
+			cv::Mat_<uchar>::iterator it_model_intensity = module_intensity_in.begin<uchar>();
+
+			for (; it != itend; ++it, ++it_model_intensity) {
+				if (*it == 255) {
+					if (*it_model_intensity == 255) {
+						++loc_pixel_in_iris;
+					}else {
+						++loc_pixel_in_others;
+					}
+				}
+			}
+
+			pixel_in_iris[i] = loc_pixel_in_iris;
+			pixel_in_others[i] = loc_pixel_in_others;
+		}
+	}
+};
+
+inline void ParallelCalcIrisRate(const cv::Mat &model_mask, const cv::Mat &model_intensity, float &iris_rate, int &pixel_in_iris, int &pixel_in_others, const int thread_num) {
+	int *pixel_in_iris_arr = new int[thread_num]();
+	int *pixel_in_others_arr = new int[thread_num]();
+	int global_pixel_in_iris = 0;
+	int global_pixel_in_others = 1;
+
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_calculate_iris_rate(model_mask, model_intensity, pixel_in_iris_arr, pixel_in_others_arr, thread_num));
+
+	for (int i = 0; i < thread_num; ++i) {
+		global_pixel_in_iris += pixel_in_iris_arr[i];
+		global_pixel_in_others += pixel_in_others_arr[i];
+	}
+	iris_rate = global_pixel_in_iris / (float)global_pixel_in_others;
+
+	//std::cout << std::endl << "parallel, global_pixel_in_iris = " << global_pixel_in_iris << std::endl;
+	//std::cout << std::endl << "parallel, global_pixel_in_others = " << global_pixel_in_others << std::endl;
+	//std::cout << std::endl << "parallel, iris_rate = " << iris_rate << std::endl;
+
+	pixel_in_iris = global_pixel_in_iris;
+	pixel_in_others = global_pixel_in_others;
+
+	delete [] pixel_in_iris_arr;
+	delete [] pixel_in_others_arr;
+}
 
 #endif

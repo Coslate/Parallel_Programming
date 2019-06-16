@@ -19,5 +19,7 @@ bool checkpoint(int x , int y);
 void LimbusFeatureDetection(const Mat &in , vector<Point> &feature , const int frame_number , const int num_per_line 
 	, Point & start_point , const bool setup_eye_start_point_man , const Mat &Iris_Mask);
 
+void LimbusFeatureDetection(const Mat &in, vector<Point> &feature, const int frame_number, const int num_per_line
+	, Point & start_point, const bool setup_eye_start_point_man, const Mat &Iris_Mask, vector<double> &time_eye_position_detection_limbus_feature_detection_serial);
 
 #endif
