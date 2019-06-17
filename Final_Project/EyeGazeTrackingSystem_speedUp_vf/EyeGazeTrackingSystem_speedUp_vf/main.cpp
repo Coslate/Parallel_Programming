@@ -2298,28 +2298,48 @@ inline void EyeInnerRegionGeneration(const Mat &Grad_X_Thresh_Pop , const Mat &G
 	
 
 	time_stamp_in2 = getTickCount();
-	//Determine center line
-	//bitwise_and(Gray_openingGaussian_Gau_inv , Grad_X_Y_And_Opening_Dila, FilterOutNoise_Grad_X);	
-	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_bitwiseand(Gray_openingGaussian_Gau_inv
-								, Grad_X_Y_And_Opening_Dila, FilterOutNoise_Grad_X, thread_num));
 
+//------------------------------GPU Testing-----------------------------------//
 	//cv::cuda::GpuMat dst, src1, src2;
+
+	//double time_upload_start = getTickCount();
 	//src1.upload(Gray_openingGaussian_Gau_inv);
+
+	//double time_upload_start1 = getTickCount();
 	//src2.upload(Grad_X_Y_And_Opening_Dila);
 
-	//if (do_profiling) {
-	//	time_stamp_in3_core_start = getTickCount();
-	//}
+
+	//double time_stamp_in3_core_start = getTickCount();
 
 	//cv::cuda::bitwise_and(src1, src2, dst);
 
-	//if (do_profiling) {
-	//	time_stamp_in3_core_end = getTickCount();
-	//}
+	//double time_stamp_in3_core_end = getTickCount();
 
 	//dst.download(FilterOutNoise_Grad_X);
 
+	//double time_download = getTickCount();
+
+	//std::cout << "--------------------bitwise_and begin------------------" << std::endl;
+	//std::cout << std::endl << "gpu_upload1 = " << (time_upload_start1 - time_upload_start) / getTickFrequency()<<std::endl;
+	//std::cout << std::endl << "gpu_upload2 = " << (time_stamp_in3_core_start - time_upload_start1) / getTickFrequency() << std::endl;
+	//std::cout << std::endl << "gpu_bitwise_and = " << (time_stamp_in3_core_end - time_stamp_in3_core_start) / getTickFrequency() << std::endl;
+	//std::cout << std::endl << "gpu_download = " << (time_download - time_stamp_in3_core_end) / getTickFrequency() << std::endl;
+
+
+//	double time_cpu_start = getTickCount();
+	//Determine center line
+	//bitwise_and(Gray_openingGaussian_Gau_inv , Grad_X_Y_And_Opening_Dila, FilterOutNoise_Grad_X);	
+	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_bitwiseand(Gray_openingGaussian_Gau_inv
+		, Grad_X_Y_And_Opening_Dila, FilterOutNoise_Grad_X, thread_num));
+
 	time_stamp_in3 = getTickCount();
+	//double time_cpu_end = getTickCount();
+
+	//std::cout << std::endl << "cpu_bitwise_and = " << (time_cpu_end - time_cpu_start) / getTickFrequency() << std::endl;
+	//std::cout << "--------------------bitwise_and end------------------" << std::endl;
+
+	//------------------------------GPU Testing End-----------------------------------//
+
 	//Morphology_Operations(FilterOutNoise_Grad_X, FilterOutNoise_Grad_X_Opening , MORPH_OPEN, 2,  MORPH_CROSS);		
 	//Morphology_Operations(FilterOutNoise_Grad_X_Opening, FilterOutNoise_Grad_X_Erosion , MORPH_ERODE, 2,  MORPH_CROSS);
 
@@ -2843,6 +2863,10 @@ inline bool InitialCoarseCenterCDF(const Mat &Src , Point &irisCoarseCenter){
 
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_apply_threshold(Src, Src_Binary, thresh_cdf-1, cv::THRESH_BINARY_INV, thread_num));
 
+
+	//imshow("pre", Src);
+	//imshow("aft", Src_Binary);
+	//waitKey(0);
 	//Probability Density Function (PDF)
 	//CalcHistogram(Src , Src_Hist);		
 	//reduce(Src_Hist, Hist_Sum, 0 ,  cv::REDUCE_SUM);//SUM
@@ -3220,35 +3244,43 @@ inline void EyePositionDetection(const int frame_number ,const Mat &Frame , cons
 	//double time_stamp_1_core_start = 0;
 	//double time_stamp_1_core_end = 0;
 
-	time_start_in_function = getTickCount();
 
+	//std::cout << "-----------------Gaussian begin-------------------" << std::endl;
+
+	time_start_in_function = getTickCount();
 	//cv::cuda::GpuMat dst, src1;
+
+	//double time_upload = getTickCount();
 	//src1.upload(Gray_openingGaussian);
 
-	//if (do_profiling) {
-	//	time_stamp_1_core_start = getTickCount();
-	//}
+	//double time_stamp_1_core_start = getTickCount();
 
 	//cv::Ptr<cv::cuda::Filter> filter = cv::cuda::createGaussianFilter(src1.type(), dst.type(), cv::Size(21, 21), 0);
 	//filter->apply(src1, dst);
 
-	//if (do_profiling) {
-	//	time_stamp_1_core_end = getTickCount();
-	//}
+	//double time_stamp_1_core_end = getTickCount();
 
 	//dst.download(Gray_openingGaussian_Gau);
 
-	//if (do_profiling) {
-	//	time_stamp_1_gaussian_end = getTickCount();
-	//}
+	//double time_stamp_download = getTickCount();
+	//imshow("GPU_GAU", Gray_openingGaussian_Gau);
 
+	//std::cout << std::endl << "time_gpu_gau_upload = " << (time_stamp_1_core_start - time_upload) / getTickFrequency() << std::endl;
+	//std::cout << std::endl << "time_gpu_gau_core = " << (time_stamp_1_core_end - time_stamp_1_core_start) / getTickFrequency() << std::endl;
+	//std::cout << std::endl << "time_gpu_gau_download = " << (time_stamp_download - time_stamp_1_core_end) / getTickFrequency() << std::endl;
 
-	//if (do_profiling) {
-	//	time_stamp_1_core_end = getTickCount();
-	//}
-
+	//double time_cpu_gau = getTickCount();
 	cv::parallel_for_(cv::Range(0, thread_num), Parallel_process_gau(Gray_openingGaussian, Gray_openingGaussian_Gau, 21, thread_num));
+	
+	//std::cout <<std::endl << "time_cpu_gau = " << (getTickCount() - time_cpu_gau) / getTickFrequency() << std::endl;
+	//imshow("CPU_GAU", Gray_openingGaussian_Gau);
+	//waitKey(0);
+	//std::cout << "-----------------Gaussian end-------------------" << std::endl;
 	ParallelOtsu(Gray_openingGaussian_Gau, Gray_openingGaussian_Gau_inv, cv::THRESH_BINARY_INV, thread_num);
+
+
+
+
 	/*Replaced with parallel version above*/
 	//GaussianBlur( Gray_openingGaussian, Gray_openingGaussian_Gau, Size(21 , 21) , 0);		
 	//threshold(Gray_openingGaussian_Gau, Gray_openingGaussianOtsu, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
