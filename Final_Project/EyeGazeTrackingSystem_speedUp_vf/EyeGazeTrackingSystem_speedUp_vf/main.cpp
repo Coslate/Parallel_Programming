@@ -6092,34 +6092,28 @@ int main(int argc , char *argv[]){
 						, false );
 			
 			if(showDetail){
-				imshow("Origin",Frame);	
-				//imshow("Scene",Scene_image);		
-				imshow("White_Balence",Frame_wh);										
+				imshow("Input_Frame",Frame);
+				imshow("White_Balence", Frame_wh);
+				//imshow("Scene",Scene_image);											
 			}
-			imshow("Input_Frame", Frame);
-			imshow("White_Balence",Frame_wh);		
 
 			if(calibrationProcedureBegin){
 				imshow("Scene" , Scene_calibration);
 		/*	}else if(eyeGazeTestProcedure){
 				imshow("Scene" , Scene_gazetest);*/
-			}else{				
+			}else{
 				//imshow("Scene" , Scene_image);
 			}
+
 			if(setEyeCornerAndEyePosReady){
 				//imshow("Gray", Frame_Gray);
 				//imshow("Histogram_Eq" , Histogram_Eq);								
 				//imshow("Parabola" , Parabola);	
 				imshow("EyePosition_Result" , EyePosition_Result);
-				imshow("EyePosition_CenterResult" , EyePosition_CenterResult);
-				
-			}else{
-				imshow("EyePosition_CenterResult" , Frame_wh);
-			}				
-				
+				imshow("EyePosition_CenterResult" , EyePosition_CenterResult);			
+			}
 
 			char output_img_name[MAX_WORD_LEN];
-
 			char key = (char)waitKey(1);			
 			if(key==32/*Space*/){
 				printf("Space\n");
