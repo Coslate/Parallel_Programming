@@ -6276,233 +6276,233 @@ int main(int argc , char *argv[]){
 		}
 
 		//======Profiling======/
-		//if (do_profiling) {
-		//	if (time_image_preprocessing_white_balance.size() > 0) {
-		//		avg_time = std::accumulate(time_image_preprocessing_white_balance.begin(), time_image_preprocessing_white_balance.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_image_preprocessing_white_balance.size();
-		//		file_time_fpsOut << "time_image_preprocessing_white_balance      = " << avg_time << endl;
-		//	}
-		//	if (time_image_preprocessing_cvt_color.size() > 0) {
-		//		avg_time = std::accumulate(time_image_preprocessing_cvt_color.begin(), time_image_preprocessing_cvt_color.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_image_preprocessing_cvt_color.size();
-		//		file_time_fpsOut << "time_image_preprocessing_cvt_color          = " << avg_time << endl;
-		//	}
-		//	if (time_image_preprocessing_hist_equal.size() > 0) {
-		//		avg_time = std::accumulate(time_image_preprocessing_hist_equal.begin(), time_image_preprocessing_hist_equal.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_image_preprocessing_hist_equal.size();
-		//		file_time_fpsOut << "time_image_preprocessing_hist_equal         = " << avg_time << endl;
-		//	}
-		//	if (time_image_preprocessing_high_freq_removal.size() > 0) {
-		//		avg_time = std::accumulate(time_image_preprocessing_high_freq_removal.begin(), time_image_preprocessing_high_freq_removal.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_image_preprocessing_high_freq_removal.size();
-		//		file_time_fpsOut << "time_image_preprocessing_high_freq_removal  = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_coarse_iris_location_cdf.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_cdf.begin(), time_eye_position_detection_coarse_iris_location_cdf.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_cdf.size();
-		//		file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_cdf          = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_coarse_iris_location_color.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_color.begin(), time_eye_position_detection_coarse_iris_location_color.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_color.size();
-		//		file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_color        = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_coarse_iris_location_cdf_serial.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_cdf_serial.begin(), time_eye_position_detection_coarse_iris_location_cdf_serial.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_cdf_serial.size();
-		//		file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_cdf_serial   = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_coarse_iris_location_color_serial.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_color_serial.begin(), time_eye_position_detection_coarse_iris_location_color_serial.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_color_serial.size();
-		//		file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_color_serial = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_iris_region_extraction.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_iris_region_extraction.begin(), time_eye_position_detection_iris_region_extraction.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_iris_region_extraction.size();
-		//		file_time_fpsOut << "time_eye_position_detection_iris_region_extraction            = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection.begin(), time_eye_position_detection_eyelid_feature_detection.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection.size();
-		//		file_time_fpsOut << "time_eye_position_detection_eyelid_feature_detection          = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district1.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district1.begin(), time_eye_position_detection_eyelid_feature_detection_district1.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district1.size();
-		//		file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district1   = " << avg_time << endl;
-		//	}
-		//	//if (time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.size() > 0) {
-		//	//	avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.begin(), time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.end(), 0);
-		//	//	avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.size();
-		//	//	file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur   = " << avg_time << endl;
-		//	//}
-		//	//if (time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.size() > 0) {
-		//	//	avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.begin(), time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.end(), 0);
-		//	//	avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.size();
-		//	//	file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core   = " << avg_time << endl;
-		//	//}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district2.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district2.begin(), time_eye_position_detection_eyelid_feature_detection_district2.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district2.size();
-		//		file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district2   = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district3.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district3.begin(), time_eye_position_detection_eyelid_feature_detection_district3.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district3.size();
-		//		file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district3   = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4.begin(), time_eye_position_detection_eyelid_feature_detection_district4.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4.size();
-		//		file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district4   = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_0.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_0.begin(), time_eye_position_detection_eyelid_feature_detection_district4_0.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_0.size();
-		//		file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_0           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_1.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1.size();
-		//		file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_1_1.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_1.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_1.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_1.size();
-		//		file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_1           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_1_2.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_2.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_2.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_2.size();
-		//		file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_2           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_1_3.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_3.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_3.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_3.size();
-		//		file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_3           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_1_4.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_4.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_4.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_4.size();
-		//		file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_4           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_1_5.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_5.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_5.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_5.size();
-		//		file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_5           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_2.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_2.begin(), time_eye_position_detection_eyelid_feature_detection_district4_2.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_2.size();
-		//		file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_2           = " << avg_time << endl;
-		//	}
-		//	//if (time_eye_position_detection_eyelid_feature_detection_district4_2_core.size() > 0) {
-		//	//	avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_2_core.begin(), time_eye_position_detection_eyelid_feature_detection_district4_2_core.end(), 0);
-		//	//	avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_2_core.size();
-		//	//	file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_2_core    = " << avg_time << endl;
-		//	//}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_3.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3.size();
-		//		file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_3_1.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_1.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_1.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_1.size();
-		//		file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_1           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_3_2.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_2.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_2.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_2.size();
-		//		file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_2           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_3_3.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_3.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_3.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_3.size();
-		//		file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_3           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_3_4.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_4.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_4.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_4.size();
-		//		file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_4           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_4.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_4.begin(), time_eye_position_detection_eyelid_feature_detection_district4_4.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_4.size();
-		//		file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_4           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_5.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_5.begin(), time_eye_position_detection_eyelid_feature_detection_district4_5.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_5.size();
-		//		file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_5           = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district4_local_sum.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_local_sum.begin(), time_eye_position_detection_eyelid_feature_detection_district4_local_sum.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_local_sum.size();
-		//		file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_local_sum   = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district5.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district5.begin(), time_eye_position_detection_eyelid_feature_detection_district5.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district5.size();
-		//		file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district5   = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district5_core.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district5_core.begin(), time_eye_position_detection_eyelid_feature_detection_district5_core.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district5_core.size();
-		//		file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district5_core    = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_eyelid_feature_detection_district5_merge.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district5_merge.begin(), time_eye_position_detection_eyelid_feature_detection_district5_merge.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district5_merge.size();
-		//		file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district5_merge   = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_test.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_test.begin(), time_eye_position_test.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_test.size();
-		//		file_time_fpsOut << ">>>> time_eye_position_test                               = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_parabola_model_fitting.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_parabola_model_fitting.begin(), time_eye_position_detection_parabola_model_fitting.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_parabola_model_fitting.size();
-		//		file_time_fpsOut << "time_eye_position_detection_parabola_model_fitting     = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_limbus_feature_detection.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_limbus_feature_detection.begin(), time_eye_position_detection_limbus_feature_detection.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_limbus_feature_detection.size();
-		//		file_time_fpsOut << "time_eye_position_detection_limbus_feature_detection   = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_limbus_feature_detection_serial.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_limbus_feature_detection_serial.begin(), time_eye_position_detection_limbus_feature_detection_serial.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_limbus_feature_detection_serial.size();
-		//		file_time_fpsOut << ">> time_eye_position_detection_limbus_feature_detection_serial   = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_center_calculation.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_center_calculation.begin(), time_eye_position_detection_center_calculation.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_center_calculation.size();
-		//		file_time_fpsOut << "time_eye_position_detection_center_calculation         = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_refresh_min_area_region.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_refresh_min_area_region.begin(), time_eye_position_detection_refresh_min_area_region.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_refresh_min_area_region.size();
-		//		file_time_fpsOut << "time_eye_position_detection_refresh_min_area_region    = " << avg_time << endl;
-		//	}
-		//	if (time_eye_position_detection_refresh_iris_ROI_region.size() > 0) {
-		//		avg_time = std::accumulate(time_eye_position_detection_refresh_iris_ROI_region.begin(), time_eye_position_detection_refresh_iris_ROI_region.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_refresh_iris_ROI_region.size();
-		//		file_time_fpsOut << ">> time_eye_position_detection_refresh_iris_ROI_region    = " << avg_time << endl;
-		//	}
-		//	if (time_iris_model_calculate_h_s_histogram.size() > 0) {
-		//		avg_time = std::accumulate(time_iris_model_calculate_h_s_histogram.begin(), time_iris_model_calculate_h_s_histogram.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_iris_model_calculate_h_s_histogram.size();
-		//		file_time_fpsOut << "time_iris_model_calculate_h_s_histogram               = " << avg_time << endl;
-		//	}
-		//	if (time_iris_model_valid_testing.size() > 0) {
-		//		avg_time = std::accumulate(time_iris_model_valid_testing.begin(), time_iris_model_valid_testing.end(), 0);
-		//		avg_time = (avg_time / getTickFrequency()) / time_iris_model_valid_testing.size();
-		//		file_time_fpsOut << "time_iris_model_valid_testing                         = " << avg_time << endl;
-		//	}
-		//}
+		if (do_profiling) {
+			if (time_image_preprocessing_white_balance.size() > 0) {
+				avg_time = std::accumulate(time_image_preprocessing_white_balance.begin(), time_image_preprocessing_white_balance.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_image_preprocessing_white_balance.size();
+				file_time_fpsOut << "time_image_preprocessing_white_balance      = " << avg_time << endl;
+			}
+			if (time_image_preprocessing_cvt_color.size() > 0) {
+				avg_time = std::accumulate(time_image_preprocessing_cvt_color.begin(), time_image_preprocessing_cvt_color.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_image_preprocessing_cvt_color.size();
+				file_time_fpsOut << "time_image_preprocessing_cvt_color          = " << avg_time << endl;
+			}
+			if (time_image_preprocessing_hist_equal.size() > 0) {
+				avg_time = std::accumulate(time_image_preprocessing_hist_equal.begin(), time_image_preprocessing_hist_equal.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_image_preprocessing_hist_equal.size();
+				file_time_fpsOut << "time_image_preprocessing_hist_equal         = " << avg_time << endl;
+			}
+			if (time_image_preprocessing_high_freq_removal.size() > 0) {
+				avg_time = std::accumulate(time_image_preprocessing_high_freq_removal.begin(), time_image_preprocessing_high_freq_removal.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_image_preprocessing_high_freq_removal.size();
+				file_time_fpsOut << "time_image_preprocessing_high_freq_removal  = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_coarse_iris_location_cdf.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_cdf.begin(), time_eye_position_detection_coarse_iris_location_cdf.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_cdf.size();
+				file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_cdf          = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_coarse_iris_location_color.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_color.begin(), time_eye_position_detection_coarse_iris_location_color.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_color.size();
+				file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_color        = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_coarse_iris_location_cdf_serial.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_cdf_serial.begin(), time_eye_position_detection_coarse_iris_location_cdf_serial.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_cdf_serial.size();
+				file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_cdf_serial   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_coarse_iris_location_color_serial.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_coarse_iris_location_color_serial.begin(), time_eye_position_detection_coarse_iris_location_color_serial.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_coarse_iris_location_color_serial.size();
+				file_time_fpsOut << "time_eye_position_detection_coarse_iris_location_color_serial = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_iris_region_extraction.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_iris_region_extraction.begin(), time_eye_position_detection_iris_region_extraction.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_iris_region_extraction.size();
+				file_time_fpsOut << "time_eye_position_detection_iris_region_extraction            = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection.begin(), time_eye_position_detection_eyelid_feature_detection.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection.size();
+				file_time_fpsOut << "time_eye_position_detection_eyelid_feature_detection          = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district1.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district1.begin(), time_eye_position_detection_eyelid_feature_detection_district1.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district1.size();
+				file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district1   = " << avg_time << endl;
+			}
+			//if (time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.size() > 0) {
+			//	avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.begin(), time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.end(), 0);
+			//	avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur.size();
+			//	file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur   = " << avg_time << endl;
+			//}
+			//if (time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.size() > 0) {
+			//	avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.begin(), time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.end(), 0);
+			//	avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core.size();
+			//	file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district1_gaussianblur_core   = " << avg_time << endl;
+			//}
+			if (time_eye_position_detection_eyelid_feature_detection_district2.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district2.begin(), time_eye_position_detection_eyelid_feature_detection_district2.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district2.size();
+				file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district2   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district3.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district3.begin(), time_eye_position_detection_eyelid_feature_detection_district3.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district3.size();
+				file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district3   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4.begin(), time_eye_position_detection_eyelid_feature_detection_district4.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4.size();
+				file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district4   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_0.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_0.begin(), time_eye_position_detection_eyelid_feature_detection_district4_0.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_0.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_0           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1_1.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_1.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_1.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_1.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_1           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1_2.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_2.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_2.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_2.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_2           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1_3.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_3.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_3.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_3.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_3           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1_4.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_4.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_4.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_4.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_4           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_1_5.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_1_5.begin(), time_eye_position_detection_eyelid_feature_detection_district4_1_5.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_1_5.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_1_5           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_2.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_2.begin(), time_eye_position_detection_eyelid_feature_detection_district4_2.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_2.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_2           = " << avg_time << endl;
+			}
+			//if (time_eye_position_detection_eyelid_feature_detection_district4_2_core.size() > 0) {
+			//	avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_2_core.begin(), time_eye_position_detection_eyelid_feature_detection_district4_2_core.end(), 0);
+			//	avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_2_core.size();
+			//	file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_2_core    = " << avg_time << endl;
+			//}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_3.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_3_1.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_1.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_1.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_1.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_1           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_3_2.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_2.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_2.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_2.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_2           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_3_3.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_3.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_3.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_3.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_3           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_3_4.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_3_4.begin(), time_eye_position_detection_eyelid_feature_detection_district4_3_4.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_3_4.size();
+				file_time_fpsOut << ">>>>>>>> time_eye_position_detection_eyelid_feature_detection_district4_3_4           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_4.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_4.begin(), time_eye_position_detection_eyelid_feature_detection_district4_4.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_4.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_4           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_5.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_5.begin(), time_eye_position_detection_eyelid_feature_detection_district4_5.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_5.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_5           = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district4_local_sum.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district4_local_sum.begin(), time_eye_position_detection_eyelid_feature_detection_district4_local_sum.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district4_local_sum.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district4_local_sum   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district5.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district5.begin(), time_eye_position_detection_eyelid_feature_detection_district5.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district5.size();
+				file_time_fpsOut << ">>>> time_eye_position_detection_eyelid_feature_detection_district5   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district5_core.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district5_core.begin(), time_eye_position_detection_eyelid_feature_detection_district5_core.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district5_core.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district5_core    = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_eyelid_feature_detection_district5_merge.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_eyelid_feature_detection_district5_merge.begin(), time_eye_position_detection_eyelid_feature_detection_district5_merge.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_eyelid_feature_detection_district5_merge.size();
+				file_time_fpsOut << ">>>>>> time_eye_position_detection_eyelid_feature_detection_district5_merge   = " << avg_time << endl;
+			}
+			if (time_eye_position_test.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_test.begin(), time_eye_position_test.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_test.size();
+				file_time_fpsOut << ">>>> time_eye_position_test                               = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_parabola_model_fitting.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_parabola_model_fitting.begin(), time_eye_position_detection_parabola_model_fitting.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_parabola_model_fitting.size();
+				file_time_fpsOut << "time_eye_position_detection_parabola_model_fitting     = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_limbus_feature_detection.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_limbus_feature_detection.begin(), time_eye_position_detection_limbus_feature_detection.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_limbus_feature_detection.size();
+				file_time_fpsOut << "time_eye_position_detection_limbus_feature_detection   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_limbus_feature_detection_serial.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_limbus_feature_detection_serial.begin(), time_eye_position_detection_limbus_feature_detection_serial.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_limbus_feature_detection_serial.size();
+				file_time_fpsOut << ">> time_eye_position_detection_limbus_feature_detection_serial   = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_center_calculation.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_center_calculation.begin(), time_eye_position_detection_center_calculation.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_center_calculation.size();
+				file_time_fpsOut << "time_eye_position_detection_center_calculation         = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_refresh_min_area_region.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_refresh_min_area_region.begin(), time_eye_position_detection_refresh_min_area_region.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_refresh_min_area_region.size();
+				file_time_fpsOut << "time_eye_position_detection_refresh_min_area_region    = " << avg_time << endl;
+			}
+			if (time_eye_position_detection_refresh_iris_ROI_region.size() > 0) {
+				avg_time = std::accumulate(time_eye_position_detection_refresh_iris_ROI_region.begin(), time_eye_position_detection_refresh_iris_ROI_region.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_eye_position_detection_refresh_iris_ROI_region.size();
+				file_time_fpsOut << ">> time_eye_position_detection_refresh_iris_ROI_region    = " << avg_time << endl;
+			}
+			if (time_iris_model_calculate_h_s_histogram.size() > 0) {
+				avg_time = std::accumulate(time_iris_model_calculate_h_s_histogram.begin(), time_iris_model_calculate_h_s_histogram.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_iris_model_calculate_h_s_histogram.size();
+				file_time_fpsOut << "time_iris_model_calculate_h_s_histogram               = " << avg_time << endl;
+			}
+			if (time_iris_model_valid_testing.size() > 0) {
+				avg_time = std::accumulate(time_iris_model_valid_testing.begin(), time_iris_model_valid_testing.end(), 0);
+				avg_time = (avg_time / getTickFrequency()) / time_iris_model_valid_testing.size();
+				file_time_fpsOut << "time_iris_model_valid_testing                         = " << avg_time << endl;
+			}
+		}
 
 		//if (printDebug) {
 		//	printf("\n 21\n");
