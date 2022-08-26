@@ -5549,9 +5549,10 @@ int main(int argc , char *argv[]){
 		std::cout << "video_input_file = " << video_input_file << std::endl;
 		//VideoCapture cap(3);
 		//VideoCapture cap(0);
-		VideoCapture cap_scene(1);
+		//VideoCapture cap_scene(1);
 		//VideoCapture cap("C:\\Users\\Coslate\\Parallel_Programming\\Final_Project\\EyeGazeTrackingSystem_speedUp_vf\\EyeGazeTrackingSystem_speedUp_vf\\Test_Mean_Variance_Data\\med_down_15\\med_down_15.avi");
 		VideoCapture cap(video_input_file);
+		VideoCapture cap_scene(video_input_file);//This is temp setting for focusing only on eye image only. If one wants to do gaze estimation, this should set to scene video frame.
 
 
 		//===========Input/Output File Set==========/
@@ -6525,5 +6526,6 @@ int main(int argc , char *argv[]){
 		//if (printDebug) {
 		//	printf("\n 22\n");
 		//}
+		//getchar();
 		return 0;
 }
